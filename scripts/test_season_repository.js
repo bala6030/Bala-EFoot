@@ -24,6 +24,12 @@ import {
   calculatePlayerStatDeltas,
   confirmProgressSnapshot,
   discardProgressDraft,
+  REWARD_RANK_THRESHOLD,
+  isValidRankValue,
+  computeRewardEligibility,
+  setSeasonRank,
+  recordSeasonReward,
+  getSeasonReward,
 } from '../src/data/seasonRepository.ts';
 
 // In-memory localStorage mock for Node.js test environment
@@ -331,6 +337,188 @@ assert.strictEqual(mockStorage.get('bala_efoot_pinned_attrs_P001'), JSON.stringi
 assert.strictEqual(mockStorage.get('bala_efoot_squad_state_v1'), JSON.stringify({ activeLayout: 'defence' }));
 console.log('   ✓ Squad and player catalogue storage keys completely untouched.');
 
-console.log('\n=============================================================');
-console.log('🎉 All Season Workflow (Milestone 4A & 4B) tests passed!');
-console.log('=============================================================');
+// =============================================================
+// MILESTONE 4C1: REWARD ELIGIBILITY & ACQUISITION TESTS
+// =============================================================
+
+// -------------------------------------------------------------
+// Test 13: Rank 1 Qualifies
+// -------------------------------------------------------------
+console.log('\n13. Verifying Rank 1 Qualifies for Reward Eligibility...');
+assert.strictEqual(computeRewardEligibility(1), 'Eligible', 'Rank 1 must be Eligible');
+const rank1Res = setSeasonRank('Phase 1 - Season 2024', 1);
+assert.strictEqual(rank1Res.success, true);
+assert.strictEqual(rank1Res.season.rewardEligibility, 'Eligible');
+assert.strictEqual(rank1Res.season.finalRank, 1);
+console.log('   ✓ Rank 1 correctly qualifies as Eligible.');
+
+// -------------------------------------------------------------
+// Test 14: Rank 100,000 Qualifies
+// -------------------------------------------------------------
+console.log('\n14. Verifying Rank 100,000 (Boundary) Qualifies...');
+assert.strictEqual(REWARD_RANK_THRESHOLD, 100000, 'Threshold must be 100,000');
+assert.strictEqual(computeRewardEligibility(100000), 'Eligible', 'Rank 100,000 must be Eligible');
+const rank100kRes = setSeasonRank('Phase 1 - Season 2024', 100000);
+assert.strictEqual(rank100kRes.success, true);
+assert.strictEqual(rank100kRes.season.rewardEligibility, 'Eligible');
+console.log('   ✓ Rank 100,000 correctly qualifies as Eligible at the boundary.');
+
+// -------------------------------------------------------------
+// Test 15: Rank 100,001 Does Not Qualify
+// -------------------------------------------------------------
+console.log('\n15. Verifying Rank 100,001 (Boundary + 1) Does Not Qualify...');
+assert.strictEqual(computeRewardEligibility(100001), 'Not Eligible', 'Rank 100,001 must be Not Eligible');
+const rank100k1Res = setSeasonRank('Phase 1 - Season 2024', 100001);
+assert.strictEqual(rank100k1Res.success, true);
+assert.strictEqual(rank100k1Res.season.rewardEligibility, 'Not Eligible');
+console.log('   ✓ Rank 100,001 correctly marked as Not Eligible.');
+
+// -------------------------------------------------------------
+// Test 16: Missing Rank Gives Eligibility Unknown
+// -------------------------------------------------------------
+console.log('\n16. Verifying Missing Rank Gives Eligibility Unknown...');
+assert.strictEqual(computeRewardEligibility(null), 'Eligibility Unknown');
+assert.strictEqual(computeRewardEligibility(undefined), 'Eligibility Unknown');
+const resetRankRes = setSeasonRank('Phase 1 - Season 2024', null);
+assert.strictEqual(resetRankRes.success, true);
+assert.strictEqual(resetRankRes.season.finalRank, null);
+assert.strictEqual(resetRankRes.season.rewardEligibility, 'Eligibility Unknown');
+console.log('   ✓ Null or undefined rank yields Eligibility Unknown.');
+
+// -------------------------------------------------------------
+// Test 17: Invalid, Negative, Zero, and Fractional Rank Rejected
+// -------------------------------------------------------------
+console.log('\n17. Verifying Rejection of Zero, Negative, and Fractional Ranks...');
+assert.strictEqual(isValidRankValue(0), false, 'Rank 0 must be invalid');
+assert.strictEqual(isValidRankValue(-5), false, 'Negative rank must be invalid');
+assert.strictEqual(isValidRankValue(45.5), false, 'Fractional rank must be invalid');
+assert.strictEqual(isValidRankValue('100'), false, 'String rank must be invalid');
+
+assert.throws(() => computeRewardEligibility(0), /Rank must be a positive integer/);
+assert.throws(() => computeRewardEligibility(-1), /Rank must be a positive integer/);
+assert.throws(() => computeRewardEligibility(12.34), /Rank must be a positive integer/);
+
+const invalidRankZero = setSeasonRank('Phase 1 - Season 2024', 0);
+assert.strictEqual(invalidRankZero.success, false);
+assert.ok(invalidRankZero.error.includes('positive whole number'));
+
+const invalidRankNeg = setSeasonRank('Phase 1 - Season 2024', -10);
+assert.strictEqual(invalidRankNeg.success, false);
+console.log('   ✓ Rank 0, negative, fractional, and non-integer inputs strictly rejected.');
+
+// -------------------------------------------------------------
+// Test 18: Correcting Rank Recomputes Eligibility Immediately
+// -------------------------------------------------------------
+console.log('\n18. Verifying Rank Correction Recomputes Eligibility...');
+// Set to Not Eligible first
+setSeasonRank('Phase 1 - Season 2024', 150000);
+let currentSeason = getSeasonById('Phase 1 - Season 2024');
+assert.strictEqual(currentSeason.rewardEligibility, 'Not Eligible');
+
+// Correct rank to 45,000 (Eligible)
+const correctedRes = setSeasonRank('Phase 1 - Season 2024', 45000);
+assert.strictEqual(correctedRes.success, true);
+currentSeason = getSeasonById('Phase 1 - Season 2024');
+assert.strictEqual(currentSeason.finalRank, 45000);
+assert.strictEqual(currentSeason.rewardEligibility, 'Eligible');
+console.log('   ✓ Rank correction immediately updates finalRank and recomputes eligibility.');
+
+// -------------------------------------------------------------
+// Test 19: Eligibility Does NOT Automatically Mark Acquisition
+// -------------------------------------------------------------
+console.log('\n19. Verifying Eligibility Does NOT Automatically Mark Acquisition...');
+assert.strictEqual(currentSeason.rewardEligibility, 'Eligible');
+assert.strictEqual(currentSeason.rewardAcquisition, null, 'Reward must NOT be acquired automatically');
+assert.strictEqual(getSeasonReward('Phase 1 - Season 2024'), null);
+console.log('   ✓ Eligible rank does not automatically grant or mark reward as Acquired.');
+
+// -------------------------------------------------------------
+// Test 20: Explicit Eligible Reward Acquisition
+// -------------------------------------------------------------
+console.log('\n20. Verifying Explicit Reward Acquisition for Eligible Season...');
+// Attempting acquisition on ineligible season fails
+saveSeasonDraft({ id: 'Ineligible Season', startDate: '2024-10-01', startingDivision: 5 });
+activateSeason('Ineligible Season');
+setSeasonRank('Ineligible Season', 120000); // Not eligible
+const failAcquire = recordSeasonReward('Ineligible Season', {
+  cardName: 'Test Card',
+  acquiredDate: '2024-10-20',
+});
+assert.strictEqual(failAcquire.success, false, 'Must reject reward acquisition on ineligible season');
+assert.ok(failAcquire.error.includes('not eligible'));
+
+// Missing required fields rejected
+const missingName = recordSeasonReward('Phase 1 - Season 2024', {
+  cardName: '',
+  acquiredDate: '2024-10-20',
+});
+assert.strictEqual(missingName.success, false);
+assert.ok(missingName.error.includes('name is required'));
+
+// Successful explicit acquisition
+const successfulAcquire = recordSeasonReward('Phase 1 - Season 2024', {
+  cardName: 'Alessandro Costacurta',
+  cardDescription: 'Epic Booster (National Teams)',
+  acquiredDate: '2024-10-20',
+  notes: 'Earned for rank 45,000 division finish',
+});
+assert.strictEqual(successfulAcquire.success, true);
+assert.ok(successfulAcquire.acquisition);
+assert.strictEqual(successfulAcquire.acquisition.cardName, 'Alessandro Costacurta');
+assert.strictEqual(successfulAcquire.acquisition.seasonId, 'Phase 1 - Season 2024');
+assert.ok(successfulAcquire.acquisition.id);
+assert.ok(successfulAcquire.acquisition.confirmedAt);
+console.log('   ✓ Explicit reward acquisition succeeded with required details and stable ID.');
+
+// -------------------------------------------------------------
+// Test 21: Second Acquisition in Same Season Rejected (Max 1 per season)
+// -------------------------------------------------------------
+console.log('\n21. Verifying Enforce One Reward Per Season...');
+const secondAcquireAttempt = recordSeasonReward('Phase 1 - Season 2024', {
+  cardName: 'Franck Ribéry',
+  acquiredDate: '2024-10-21',
+});
+assert.strictEqual(secondAcquireAttempt.success, false, 'Second acquisition must be rejected');
+assert.ok(secondAcquireAttempt.error.includes('already been acquired'));
+
+// Verify original acquisition is preserved intact
+const preservedSeason = getSeasonById('Phase 1 - Season 2024');
+assert.strictEqual(preservedSeason.rewardAcquisition.cardName, 'Alessandro Costacurta');
+console.log('   ✓ Second reward acquisition strictly rejected; original acquisition preserved.');
+
+// -------------------------------------------------------------
+// Test 22: Duplicate Submission Prevention
+// -------------------------------------------------------------
+console.log('\n22. Verifying Duplicate Submission Prevention...');
+const repeatCall = recordSeasonReward('Phase 1 - Season 2024', {
+  cardName: 'Alessandro Costacurta',
+  acquiredDate: '2024-10-20',
+});
+assert.strictEqual(repeatCall.success, false, 'Repeat submission must be safely rejected');
+console.log('   ✓ Repeated click or duplicate submission prevented.');
+
+// -------------------------------------------------------------
+// Test 23: Acquisition Persistence Across Page Refreshes
+// -------------------------------------------------------------
+console.log('\n23. Verifying Reward Persistence Across Storage Reloads...');
+const stateAfterReload = loadSeasonsState();
+const reloadedRewardSeason = stateAfterReload.seasons.find((s) => s.id === 'Phase 1 - Season 2024');
+assert.ok(reloadedRewardSeason.rewardAcquisition, 'Reward acquisition must survive storage reload');
+assert.strictEqual(reloadedRewardSeason.rewardAcquisition.cardName, 'Alessandro Costacurta');
+assert.strictEqual(reloadedRewardSeason.finalRank, 45000);
+assert.strictEqual(reloadedRewardSeason.rewardEligibility, 'Eligible');
+console.log('   ✓ Reward acquisition and rank eligibility survive full localStorage reload.');
+
+// -------------------------------------------------------------
+// Test 24: Baselines and Progress Snapshots Remain 100% Intact
+// -------------------------------------------------------------
+console.log('\n24. Verifying Baselines & Progress Snapshots Intact After Reward...');
+assert.ok(reloadedRewardSeason.baseline, 'Baseline must remain intact');
+assert.strictEqual(reloadedRewardSeason.baseline.players[0].matches, 10, 'Baseline stats unmodified');
+assert.strictEqual(reloadedRewardSeason.progressSnapshots.length, 2, 'All progress snapshots unmodified');
+console.log('   ✓ Baseline snapshots and progress history completely untouched.');
+
+console.log('\n========================================================================');
+console.log('🎉 All Season Workflow (Milestone 4A, 4B & 4C1) tests passed!');
+console.log('========================================================================');
+

@@ -16,6 +16,11 @@ import {
   TrendingUp,
   History,
   AlertTriangle,
+  Trophy,
+  Award,
+  HelpCircle,
+  X,
+  Edit2,
 } from 'lucide-react';
 import {
   Season,
@@ -48,6 +53,9 @@ import {
   calculatePlayerStatDeltas,
   confirmProgressSnapshot,
   isValidStatValue,
+  setSeasonRank,
+  recordSeasonReward,
+  REWARD_RANK_THRESHOLD,
 } from '../../data/seasonRepository';
 import { getAllPlayers } from '../../data/playerRepository';
 import { Button } from '../common/Button';
@@ -102,6 +110,30 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
 
   // Selected snapshot for detail view
   const [selectedSnapshot, setSelectedSnapshot] = useState<SeasonProgressSnapshot | null>(null);
+
+  // Milestone 4C1: Rank & Reward State
+  const [rankModalSeason, setRankModalSeason] = useState<Season | null>(null);
+  const [rankInputValue, setRankInputValue] = useState<string>('');
+  const [rankModalError, setRankModalError] = useState<string | null>(null);
+
+  const [rewardModalSeason, setRewardModalSeason] = useState<Season | null>(null);
+  const [rewardCardName, setRewardCardName] = useState<string>('');
+  const [rewardCardDescription, setRewardCardDescription] = useState<string>('');
+  const [rewardAcquiredDate, setRewardAcquiredDate] = useState<string>(
+    () => new Date().toISOString().split('T')[0]
+  );
+  const [rewardNotes, setRewardNotes] = useState<string>('');
+  const [rewardConfirmedCheckbox, setRewardConfirmedCheckbox] = useState<boolean>(false);
+  const [rewardModalError, setRewardModalError] = useState<string | null>(null);
+
+  // Computed live rank preview for rank modal
+  const liveRankParsed = useMemo(() => {
+    const trimmed = rankInputValue.trim();
+    if (trimmed === '') return null;
+    const num = Number(trimmed);
+    if (isNaN(num) || !Number.isInteger(num) || num < 1) return 'invalid';
+    return num;
+  }, [rankInputValue]);
 
   // Validation & Feedback state
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -602,6 +634,138 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
     setSelectedSnapshot(snapshot);
     setCalculatedDeltas(deltaResult.deltas);
     setViewMode('snapshot-detail');
+  };
+
+  // ==========================================================================
+  // MILESTONE 4C1: RANK & REWARD WORKFLOW HANDLERS
+  // ==========================================================================
+
+  const handleOpenRankModal = (season: Season) => {
+    setRankModalSeason(season);
+    setRankInputValue(season.finalRank != null ? String(season.finalRank) : '');
+    setRankModalError(null);
+  };
+
+  const handleCloseRankModal = () => {
+    setRankModalSeason(null);
+    setRankInputValue('');
+    setRankModalError(null);
+  };
+
+  const handleSaveRank = () => {
+    if (!rankModalSeason) return;
+
+    const trimmed = rankInputValue.trim();
+    if (trimmed === '') {
+      // Clear final rank
+      const res = setSeasonRank(rankModalSeason.id, null);
+      if (res.success && res.season) {
+        setStatusMessage({
+          type: 'info',
+          text: `Final rank cleared for season "${rankModalSeason.id}". Eligibility reset to Eligibility Unknown.`,
+        });
+        refreshData();
+        handleCloseRankModal();
+      } else {
+        setRankModalError(res.error || 'Failed to update rank.');
+      }
+      return;
+    }
+
+    const rankNum = Number(trimmed);
+    if (isNaN(rankNum) || !Number.isInteger(rankNum) || rankNum < 1) {
+      setRankModalError(
+        'Rank must be a positive whole number (1 or greater). Zero, negative, and fractional values are invalid.'
+      );
+      return;
+    }
+
+    const res = setSeasonRank(rankModalSeason.id, rankNum);
+    if (res.success && res.season) {
+      const eligibilityStatus = res.season.rewardEligibility;
+      setStatusMessage({
+        type: 'success',
+        text: `Final rank for "${rankModalSeason.id}" updated to #${rankNum.toLocaleString()} (${eligibilityStatus}).`,
+      });
+      refreshData();
+      handleCloseRankModal();
+    } else {
+      setRankModalError(res.error || 'Failed to update rank.');
+    }
+  };
+
+  const handleOpenRewardModal = (season: Season) => {
+    if (season.rewardEligibility !== 'Eligible') {
+      setStatusMessage({
+        type: 'danger',
+        text: 'Reward claim unavailable: season final rank does not qualify (must be rank 1–100,000).',
+      });
+      return;
+    }
+
+    if (season.rewardAcquisition) {
+      setStatusMessage({
+        type: 'warning',
+        text: 'A reward card has already been acquired for this season (limit 1).',
+      });
+      return;
+    }
+
+    setRewardModalSeason(season);
+    setRewardCardName('');
+    setRewardCardDescription('');
+    setRewardAcquiredDate(new Date().toISOString().split('T')[0]);
+    setRewardNotes('');
+    setRewardConfirmedCheckbox(false);
+    setRewardModalError(null);
+  };
+
+  const handleCloseRewardModal = () => {
+    setRewardModalSeason(null);
+    setRewardCardName('');
+    setRewardCardDescription('');
+    setRewardNotes('');
+    setRewardConfirmedCheckbox(false);
+    setRewardModalError(null);
+  };
+
+  const handleSaveReward = () => {
+    if (!rewardModalSeason) return;
+
+    const trimmedCardName = rewardCardName.trim();
+    if (!trimmedCardName) {
+      setRewardModalError('Reward card name is required.');
+      return;
+    }
+
+    const trimmedDate = rewardAcquiredDate.trim();
+    if (!trimmedDate || isNaN(new Date(trimmedDate).getTime())) {
+      setRewardModalError('A valid acquisition date (YYYY-MM-DD) is required.');
+      return;
+    }
+
+    if (!rewardConfirmedCheckbox) {
+      setRewardModalError('Please check the confirmation box to verify this reward acquisition.');
+      return;
+    }
+
+    const res = recordSeasonReward(rewardModalSeason.id, {
+      cardName: trimmedCardName,
+      cardDescription: rewardCardDescription.trim() || undefined,
+      acquiredDate: trimmedDate,
+      notes: rewardNotes.trim() || undefined,
+    });
+
+    if (res.success && res.acquisition) {
+      setStatusMessage({
+        type: 'success',
+        text: `Reward card "${res.acquisition.cardName}" recorded successfully for season "${rewardModalSeason.id}"!`,
+      });
+      refreshData();
+      handleCloseRewardModal();
+    } else {
+      setRewardModalError(res.error || 'Failed to record reward.');
+    }
   };
 
   // Counters
@@ -1921,6 +2085,125 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                         )}
                       </div>
 
+                      {/* Milestone 4C1: Rank & Division Phase Reward Section */}
+                      <div className={styles.rewardSection}>
+                        <div className={styles.rewardHeader}>
+                          <div className={styles.rewardTitleRow}>
+                            <Trophy size={16} className={styles.rewardIcon} />
+                            <span className={styles.rewardTitleText}>Phase Rank & Reward</span>
+                          </div>
+                          <div className={styles.rewardBadges}>
+                            {/* Eligibility Badge */}
+                            {season.rewardEligibility === 'Eligible' ? (
+                              <Badge variant="lime" size="sm" icon={<Award size={12} />}>
+                                Eligible
+                              </Badge>
+                            ) : season.rewardEligibility === 'Not Eligible' ? (
+                              <Badge variant="danger" size="sm" icon={<AlertCircle size={12} />}>
+                                Not Eligible
+                              </Badge>
+                            ) : (
+                              <Badge variant="default" size="sm" icon={<HelpCircle size={12} />}>
+                                Eligibility Unknown
+                              </Badge>
+                            )}
+
+                            {/* Acquisition Badge */}
+                            {season.rewardAcquisition ? (
+                              <Badge variant="purple" size="sm" icon={<CheckCircle2 size={12} />}>
+                                Reward Acquired
+                              </Badge>
+                            ) : (
+                              <Badge variant="default" size="sm">
+                                Not Acquired
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className={styles.rewardBody}>
+                          <div className={styles.rewardRankRow}>
+                            <span className={styles.rewardRankLabel}>Final Rank:</span>
+                            <span className={styles.rewardRankValue}>
+                              {season.finalRank != null ? `#${season.finalRank.toLocaleString()}` : 'Not Recorded'}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              icon={<Edit2 size={12} />}
+                              onClick={() => handleOpenRankModal(season)}
+                              title="Set or update season rank"
+                            >
+                              {season.finalRank != null ? 'Update' : 'Set Rank'}
+                            </Button>
+                          </div>
+
+                          {/* Inline Explanation */}
+                          <div className={styles.rewardExplainText}>
+                            {season.rewardEligibility === 'Eligible' ? (
+                              <span className={styles.textSuccess}>
+                                Rank qualifies for phase reward (≤ {REWARD_RANK_THRESHOLD.toLocaleString()}).
+                              </span>
+                            ) : season.rewardEligibility === 'Not Eligible' ? (
+                              <span className={styles.textDanger}>
+                                Rank exceeds {REWARD_RANK_THRESHOLD.toLocaleString()} threshold (Not eligible for reward card).
+                              </span>
+                            ) : (
+                              <span className={styles.textMuted}>
+                                Final rank not entered yet. Record rank to determine reward eligibility.
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Acquired Card Detail or Claim Action */}
+                          {season.rewardAcquisition ? (
+                            <div className={styles.rewardAcquiredCard}>
+                              <div className={styles.rewardAcquiredHeader}>
+                                <Sparkles size={14} className={styles.sparkleIcon} />
+                                <span className={styles.rewardAcquiredName}>
+                                  {season.rewardAcquisition.cardName}
+                                </span>
+                                {season.rewardAcquisition.cardDescription && (
+                                  <span className={styles.rewardAcquiredDesc}>
+                                    ({season.rewardAcquisition.cardDescription})
+                                  </span>
+                                )}
+                              </div>
+                              <div className={styles.rewardAcquiredDetails}>
+                                <span>Acquired: {season.rewardAcquisition.acquiredDate}</span>
+                                {season.rewardAcquisition.notes && (
+                                  <span className={styles.rewardAcquiredNotes}>
+                                    • "{season.rewardAcquisition.notes}"
+                                  </span>
+                                )}
+                              </div>
+                              <div className={styles.rewardAcquiredLimitBadge}>
+                                1 of 1 reward card claimed for this season
+                              </div>
+                            </div>
+                          ) : (
+                            <div className={styles.rewardActionRow}>
+                              {season.rewardEligibility === 'Eligible' ? (
+                                <Button
+                                  variant="primary"
+                                  size="sm"
+                                  icon={<Trophy size={14} />}
+                                  onClick={() => handleOpenRewardModal(season)}
+                                >
+                                  Claim / Record Reward
+                                </Button>
+                              ) : (
+                                <span className={styles.rewardDisabledNotice}>
+                                  {season.rewardEligibility === 'Not Eligible'
+                                    ? 'Reward claim unavailable (Rank does not qualify).'
+                                    : 'Reward claim unavailable (Enter qualifying final rank first).'}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                       {/* Snapshots History Accordion (if any recorded) */}
                       {snapshotCount > 0 && (
                         <div className={styles.snapshotsSection}>
@@ -2006,6 +2289,227 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
             </div>
           )}
         </>
+      )}
+
+      {/* =====================================================================
+          MILESTONE 4C1: RANK ENTRY MODAL
+          ===================================================================== */}
+      {rankModalSeason && (
+        <div className={styles.modalOverlay} onClick={handleCloseRankModal}>
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitleArea}>
+                <h3 className={styles.modalTitle}>Set Season Final Rank</h3>
+                <p className={styles.modalSubtitle}>
+                  {rankModalSeason.id} • Reward Threshold: Rank ≤ {REWARD_RANK_THRESHOLD.toLocaleString()}
+                </p>
+              </div>
+              <button
+                type="button"
+                className={styles.modalCloseBtn}
+                onClick={handleCloseRankModal}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {rankModalError && (
+                <div className={styles.modalError}>
+                  <AlertCircle size={16} />
+                  <span>{rankModalError}</span>
+                </div>
+              )}
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Final Rank Number
+                  <span className={styles.helperText}>(e.g. 45000 or 105200)</span>
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  className={styles.input}
+                  placeholder="Enter rank (leave blank to clear)"
+                  value={rankInputValue}
+                  onChange={(e) => {
+                    setRankInputValue(e.target.value);
+                    if (rankModalError) setRankModalError(null);
+                  }}
+                  autoFocus
+                />
+                <span className={styles.helperText}>
+                  Rule: Rank 1 through 100,000 qualifies as Eligible. Rank 100,001 or greater is Not Eligible.
+                </span>
+              </div>
+
+              {/* Live Preview */}
+              {liveRankParsed === 'invalid' ? (
+                <div className={`${styles.livePreviewCard} ${styles.previewNotEligible}`}>
+                  <AlertCircle size={16} />
+                  <span>Rank must be a positive whole number (≥ 1). Non-integers, zeros, and negative values are invalid.</span>
+                </div>
+              ) : typeof liveRankParsed === 'number' ? (
+                liveRankParsed <= REWARD_RANK_THRESHOLD ? (
+                  <div className={`${styles.livePreviewCard} ${styles.previewEligible}`}>
+                    <CheckCircle2 size={16} />
+                    <span>
+                      Rank #{liveRankParsed.toLocaleString()} is <strong>Eligible</strong> for phase rewards (≤ {REWARD_RANK_THRESHOLD.toLocaleString()}).
+                    </span>
+                  </div>
+                ) : (
+                  <div className={`${styles.livePreviewCard} ${styles.previewNotEligible}`}>
+                    <AlertCircle size={16} />
+                    <span>
+                      Rank #{liveRankParsed.toLocaleString()} is <strong>Not Eligible</strong> for phase rewards (&gt; {REWARD_RANK_THRESHOLD.toLocaleString()}).
+                    </span>
+                  </div>
+                )
+              ) : (
+                <div className={`${styles.livePreviewCard} ${styles.previewNeutral}`}>
+                  <HelpCircle size={16} />
+                  <span>Leaving rank empty will set eligibility to <strong>Eligibility Unknown</strong>.</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.modalFooter}>
+              <Button variant="secondary" onClick={handleCloseRankModal}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                icon={<Save size={16} />}
+                disabled={liveRankParsed === 'invalid'}
+                onClick={handleSaveRank}
+              >
+                Save Rank
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          MILESTONE 4C1: REWARD ACQUISITION MODAL
+          ===================================================================== */}
+      {rewardModalSeason && (
+        <div className={styles.modalOverlay} onClick={handleCloseRewardModal}>
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitleArea}>
+                <h3 className={styles.modalTitle}>Record Acquired Phase Reward</h3>
+                <p className={styles.modalSubtitle}>
+                  {rewardModalSeason.id} • Rank: #{rewardModalSeason.finalRank?.toLocaleString()} (Eligible)
+                </p>
+              </div>
+              <button
+                type="button"
+                className={styles.modalCloseBtn}
+                onClick={handleCloseRewardModal}
+                aria-label="Close"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {rewardModalError && (
+                <div className={styles.modalError}>
+                  <AlertCircle size={16} />
+                  <span>{rewardModalError}</span>
+                </div>
+              )}
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Reward Card Name <span className={styles.requiredMark}>*</span>
+                </label>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder="e.g. Epic Lionel Messi, Highlight L. Modric"
+                  value={rewardCardName}
+                  onChange={(e) => {
+                    setRewardCardName(e.target.value);
+                    if (rewardModalError) setRewardModalError(null);
+                  }}
+                  autoFocus
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Card Details / Version
+                  <span className={styles.helperText}>(Optional)</span>
+                </label>
+                <input
+                  type="text"
+                  className={styles.input}
+                  placeholder="e.g. Booster Edition, Phase 1 Reward"
+                  value={rewardCardDescription}
+                  onChange={(e) => setRewardCardDescription(e.target.value)}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Acquisition Date <span className={styles.requiredMark}>*</span>
+                </label>
+                <input
+                  type="date"
+                  className={styles.input}
+                  value={rewardAcquiredDate}
+                  onChange={(e) => setRewardAcquiredDate(e.target.value)}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Notes
+                  <span className={styles.helperText}>(Optional)</span>
+                </label>
+                <textarea
+                  className={styles.textarea}
+                  rows={2}
+                  placeholder="e.g. Claimed from Division 1 Top 100k rewards box"
+                  value={rewardNotes}
+                  onChange={(e) => setRewardNotes(e.target.value)}
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.decreaseCheckboxLabel}>
+                  <input
+                    type="checkbox"
+                    className={styles.decreaseCheckbox}
+                    checked={rewardConfirmedCheckbox}
+                    onChange={(e) => setRewardConfirmedCheckbox(e.target.checked)}
+                  />
+                  <span>
+                    I confirm this reward card was acquired for this season. (Limit of 1 reward card per season; cannot be duplicated).
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <Button variant="secondary" onClick={handleCloseRewardModal}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                icon={<Trophy size={16} />}
+                disabled={!rewardCardName.trim() || !rewardConfirmedCheckbox}
+                onClick={handleSaveReward}
+              >
+                Confirm & Record Reward
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -301,6 +301,29 @@ export interface SquadValidationResult {
 export type SeasonStatus = 'Draft' | 'Active' | 'Closed';
 
 /**
+ * Reward eligibility status based on final rank threshold (<= 100,000)
+ */
+export type RewardEligibilityStatus = 'Eligible' | 'Not Eligible' | 'Eligibility Unknown';
+
+/**
+ * Reward acquisition status
+ */
+export type RewardAcquisitionStatus = 'Acquired' | 'Not Acquired';
+
+/**
+ * Season reward player/card acquisition record (at most one per season)
+ */
+export interface SeasonRewardAcquisition {
+  id: string; // e.g. "rew-Phase-1-1729420000000"
+  seasonId: string;
+  cardName: string; // Reward player/card name (e.g. "Alessandro Costacurta")
+  cardDescription?: string; // Card or version description if known
+  acquiredDate: string; // YYYY-MM-DD
+  notes?: string;
+  confirmedAt: string; // ISO 8601 timestamp
+}
+
+/**
  * Core Season entity
  */
 export interface Season {
@@ -321,8 +344,12 @@ export interface Season {
   // Backward compatibility alias:
   baselineSnapshot?: unknown;
 
-  // Extensibility hooks for future milestones (Milestones 4C, 5):
-  rewardEligibility?: unknown;
+  // Milestone 4C1: Reward Eligibility & Acquisition
+  finalRank?: number | null; // Entered final rank (1 to 100,000 qualifies)
+  rewardEligibility?: RewardEligibilityStatus;
+  rewardAcquisition?: SeasonRewardAcquisition | null;
+
+  // Extensibility hooks for future milestones (Milestones 4C2, 5):
   rewardAcquired?: unknown;
   closedAt?: string;
   closureNotes?: string;

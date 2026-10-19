@@ -111,17 +111,43 @@
 - **Automated Verification**:
   - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 12 comprehensive test suites covering 23-card creation, null vs 0 distinction, negative/fractional stat rejection, duplicate prevention, baseline immutability, exact delta calculation (positive/zero/negative), decrease warnings, append-only history, reload persistence, and backward compatibility.
 
+### Milestone 4C1 — Reward Eligibility & Acquisition (Completed)
+- **Rank-Based Eligibility**:
+  - Implemented explicit threshold logic (`REWARD_RANK_THRESHOLD = 100000`).
+  - Final rank 1 through 100,000 inclusive: `Eligible`.
+  - Final rank 100,001 or greater: `Not Eligible`.
+  - Missing rank (null/undefined): `Eligibility Unknown`.
+  - Zero, negative numbers, fractional values, and invalid rank inputs are strictly rejected.
+  - Immediate recomputation of eligibility upon rank entry or correction.
+- **Strict Decoupling of Eligibility and Acquisition**:
+  - Eligibility status (`Eligible` | `Not Eligible` | `Eligibility Unknown`) is maintained independently from acquisition state.
+  - Being `Eligible` never automatically implies a reward has been acquired.
+  - Recording a reward card is strictly prohibited when the season status is `Not Eligible` or `Eligibility Unknown`.
+- **Enforce Limit of At Most One Reward Card Per Season**:
+  - Exactly at most one reward card can be acquired and recorded per season.
+  - Once a reward card has been acquired, recording a second reward card is rejected.
+  - Duplicate or repeated submissions are prevented; existing acquisition and season records are preserved intact upon rejection.
+- **Manual Acquisition Recording & Modal Interface**:
+  - Explicit modal workflow for claiming/recording reward card with required card name, valid acquisition date (`YYYY-MM-DD`), optional card version/details, optional notes, and mandatory confirmation checkbox.
+  - Clear rank modal with live eligibility preview (`Rank ≤ 100,000: Eligible` in neon lime, `Rank > 100,000: Not Eligible` in danger, blank: `Eligibility Unknown`).
+  - Dedicated Phase Rank & Rewards section on each season card displaying rank, eligibility badge, acquisition badge, acquired card details, and contextual actions.
+- **Persistence & Regression Safety**:
+  - Rank, eligibility, and acquisition data persist cleanly in `localStorage` under `bala_efoot_seasons_v1` and survive browser refresh.
+  - Baseline records, progress snapshots, player catalogue, and squad builder data are fully preserved without mutation.
+- **Automated Verification**:
+  - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 12 new test suites (Tests 13–24, 24 total) covering boundary conditions (100,000 vs 100,001), missing rank, invalid rank rejection, rank corrections, acquisition decoupling, 1-card limit enforcement, duplicate prevention, and reload persistence.
+
 ## Known Limitations
-- Milestone 4B implements statistics baselines and progress snapshots; season reward qualification (rank 100,000 threshold), reward card acquisition tracking, and final immutable season closure will be added in Milestone 4C.
+- Milestone 4C1 implements rank-based reward eligibility and reward acquisition tracking. Season closure, final closure review, and immutable closed season snapshots will be implemented in Milestone 4C2.
 - Position familiarity is intentionally not tracked (per specification).
 - Tactician/manager auto-arrange and tactical instruction controls are excluded (per milestone scope).
 - Card artwork currently displays clean initials and rating badges until official image assets are added to the repository.
 
 ## Commands Executed & Results
 - `npm run lint`: ESLint check passed with 0 errors and 0 warnings (Exit 0).
-- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 981ms (Exit 0).
+- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.11s (Exit 0).
 - `npm run test:squad`: Node.js unit test suite for formations, independence, and validation passed (Exit 0).
-- `npm run test:season`: Node.js unit test suite for season baseline creation, validation, immutability, deltas, decreases, drafts, and persistence passed (Exit 0).
+- `npm run test:season`: Node.js unit test suite for season baseline creation, validation, immutability, deltas, decreases, drafts, rank eligibility (100k boundary), and 1-card reward acquisition passed (24 tests, Exit 0).
 
 ## Next Action
-Review Milestone 4B and prepare for **Milestone 4C: Season Closure & Reward Qualification** (rank 100,000 reward eligibility, reward card acquisition state, season closure review, and historical closed season snapshots).
+Review Milestone 4C1 and prepare for **Milestone 4C2: Season Closure Workflow** (final season closure review, confirmation step, immutable closed snapshots, closed season browsing, and reopening prevention).

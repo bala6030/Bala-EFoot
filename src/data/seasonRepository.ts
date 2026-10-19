@@ -14,6 +14,8 @@ import type {
   ProgressDraftPlayerEntry,
   SeasonProgressDraft,
   PlayerStatDelta,
+  RewardEligibilityStatus,
+  SeasonRewardAcquisition,
 } from '../types';
 
 export const SEASONS_STORAGE_KEY = 'bala_efoot_seasons_v1';
@@ -55,6 +57,35 @@ export const CANONICAL_STARTING_XI_IDS: ReadonlySet<string> = new Set([
  */
 export function isValidStatValue(val: unknown): val is number {
   return typeof val === 'number' && Number.isInteger(val) && val >= 0;
+}
+
+/**
+ * Reward rank threshold: Rank 1 through 100,000 inclusive qualifies for reward eligibility.
+ */
+export const REWARD_RANK_THRESHOLD = 100000;
+
+/**
+ * Validates whether a value is a valid positive integer rank (1 or greater)
+ */
+export function isValidRankValue(val: unknown): val is number {
+  return typeof val === 'number' && Number.isInteger(val) && val >= 1;
+}
+
+/**
+ * Computes reward eligibility status based on final rank.
+ * - 1 to 100,000 inclusive: 'Eligible'
+ * - 100,001 or greater: 'Not Eligible'
+ * - null or undefined: 'Eligibility Unknown'
+ * - 0, negative, fractional, or non-number: throws Error
+ */
+export function computeRewardEligibility(rank: number | null | undefined): RewardEligibilityStatus {
+  if (rank === null || rank === undefined) {
+    return 'Eligibility Unknown';
+  }
+  if (!isValidRankValue(rank)) {
+    throw new Error('Rank must be a positive integer (1 or greater). Zero, negative, and fractional values are invalid.');
+  }
+  return rank <= REWARD_RANK_THRESHOLD ? 'Eligible' : 'Not Eligible';
 }
 
 /**
@@ -231,6 +262,27 @@ function sanitizeProgressDraft(raw: unknown): SeasonProgressDraft | null {
 }
 
 /**
+ * Sanitizes a reward acquisition record from raw storage
+ */
+function sanitizeRewardAcquisition(raw: unknown): SeasonRewardAcquisition | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const r = raw as Record<string, unknown>;
+  if (typeof r.id !== 'string' || typeof r.seasonId !== 'string' || typeof r.cardName !== 'string') return null;
+  const cardName = r.cardName.trim();
+  if (!cardName) return null;
+
+  return {
+    id: r.id,
+    seasonId: r.seasonId,
+    cardName,
+    cardDescription: typeof r.cardDescription === 'string' ? r.cardDescription.trim() || undefined : undefined,
+    acquiredDate: typeof r.acquiredDate === 'string' ? r.acquiredDate : new Date().toISOString().split('T')[0],
+    notes: typeof r.notes === 'string' ? r.notes.trim() || undefined : undefined,
+    confirmedAt: typeof r.confirmedAt === 'string' ? r.confirmedAt : new Date().toISOString(),
+  };
+}
+
+/**
  * Validates and sanitizes a raw season object loaded from storage
  */
 function sanitizeSeason(raw: unknown): Season | null {
@@ -263,6 +315,20 @@ function sanitizeSeason(raw: unknown): Season | null {
   const progressSnapshots = sanitizeProgressSnapshots(candidate.progressSnapshots);
   const progressDraft = sanitizeProgressDraft(candidate.progressDraft);
 
+  // Milestone 4C1: Reward Eligibility & Acquisition sanitization
+  const finalRank = isValidRankValue(candidate.finalRank) ? candidate.finalRank : null;
+  let rewardEligibility: RewardEligibilityStatus = 'Eligibility Unknown';
+  if (finalRank !== null) {
+    rewardEligibility = computeRewardEligibility(finalRank);
+  } else if (
+    candidate.rewardEligibility === 'Eligible' ||
+    candidate.rewardEligibility === 'Not Eligible' ||
+    candidate.rewardEligibility === 'Eligibility Unknown'
+  ) {
+    rewardEligibility = candidate.rewardEligibility;
+  }
+  const rewardAcquisition = sanitizeRewardAcquisition(candidate.rewardAcquisition);
+
   return {
     id,
     startDate,
@@ -276,8 +342,10 @@ function sanitizeSeason(raw: unknown): Season | null {
     progressSnapshots,
     progressDraft,
     baselineSnapshot: baseline, // compatibility alias
-    rewardEligibility: candidate.rewardEligibility,
-    rewardAcquired: candidate.rewardAcquired,
+    finalRank,
+    rewardEligibility,
+    rewardAcquisition,
+    rewardAcquired: Boolean(rewardAcquisition), // legacy compatibility
     closedAt: typeof candidate.closedAt === 'string' ? candidate.closedAt : undefined,
     closureNotes: typeof candidate.closureNotes === 'string' ? candidate.closureNotes : undefined,
   };
@@ -1135,3 +1203,151 @@ export function confirmProgressSnapshot(
     snapshot: newSnapshot,
   };
 }
+
+// ============================================================================
+// MILESTONE 4C1: REWARD ELIGIBILITY & ACQUISITION BUSINESS LOGIC
+// ============================================================================
+
+/**
+ * Sets or updates the final rank for a season and recomputes reward eligibility.
+ * - Rank must be a positive integer (>= 1) or null to reset.
+ * - Rejects 0, negative numbers, decimals, non-numbers.
+ * - Recomputes eligibility immediately (Rank <= 100,000: 'Eligible', > 100,000: 'Not Eligible').
+ * - Preserves existing baseline, progress snapshots, and reward records.
+ */
+export function setSeasonRank(
+  seasonId: string,
+  rank: number | null
+): {
+  success: boolean;
+  season?: Season;
+  error?: string;
+} {
+  const state = loadSeasonsState();
+  const seasonIndex = state.seasons.findIndex((s) => s.id === seasonId);
+
+  if (seasonIndex < 0) {
+    return { success: false, error: `Season "${seasonId}" was not found.` };
+  }
+
+  const season = state.seasons[seasonIndex];
+
+  if (rank !== null && !isValidRankValue(rank)) {
+    return {
+      success: false,
+      error: 'Rank must be a positive whole number (1 or greater). Zero, negative, and fractional values are invalid.',
+    };
+  }
+
+  const eligibility = computeRewardEligibility(rank);
+  const now = new Date().toISOString();
+
+  const updatedSeason: Season = {
+    ...season,
+    finalRank: rank,
+    rewardEligibility: eligibility,
+    updatedAt: now,
+  };
+
+  state.seasons[seasonIndex] = updatedSeason;
+  saveSeasonsState(state);
+
+  return {
+    success: true,
+    season: updatedSeason,
+  };
+}
+
+/**
+ * Records an acquired reward card for a season.
+ * - Requires season to be in 'Eligible' status (Rank 1 - 100,000).
+ * - Enforces exactly at most ONE reward acquisition per season.
+ * - Validates required cardName and valid acquiredDate.
+ * - Rejects second acquisitions, preserving existing records.
+ */
+export function recordSeasonReward(
+  seasonId: string,
+  acquisitionData: {
+    cardName: string;
+    cardDescription?: string;
+    acquiredDate: string;
+    notes?: string;
+  }
+): {
+  success: boolean;
+  acquisition?: SeasonRewardAcquisition;
+  error?: string;
+} {
+  const state = loadSeasonsState();
+  const seasonIndex = state.seasons.findIndex((s) => s.id === seasonId);
+
+  if (seasonIndex < 0) {
+    return { success: false, error: `Season "${seasonId}" was not found.` };
+  }
+
+  const season = state.seasons[seasonIndex];
+
+  // 1. Enforce eligibility rule: rank must be Eligible
+  if (season.rewardEligibility !== 'Eligible') {
+    return {
+      success: false,
+      error: 'Cannot record reward acquisition: season is not eligible. A verified final rank of 100,000 or better is required.',
+    };
+  }
+
+  // 2. Enforce one reward per season: reject second acquisition
+  if (season.rewardAcquisition) {
+    return {
+      success: false,
+      error: `A reward card ("${season.rewardAcquisition.cardName}") has already been acquired for this season. At most one reward card acquisition is permitted per season.`,
+    };
+  }
+
+  // 3. Validate required fields
+  const cardName = acquisitionData.cardName?.trim();
+  if (!cardName) {
+    return {
+      success: false,
+      error: 'Reward player/card name is required.',
+    };
+  }
+
+  const acquiredDate = acquisitionData.acquiredDate?.trim();
+  if (!acquiredDate || isNaN(new Date(acquiredDate).getTime())) {
+    return {
+      success: false,
+      error: 'A valid acquisition date (YYYY-MM-DD) is required.',
+    };
+  }
+
+  const now = new Date().toISOString();
+  const newAcquisition: SeasonRewardAcquisition = {
+    id: `rew-${season.id}-${Date.now()}`,
+    seasonId: season.id,
+    cardName,
+    cardDescription: acquisitionData.cardDescription?.trim() || undefined,
+    acquiredDate,
+    notes: acquisitionData.notes?.trim() || undefined,
+    confirmedAt: now,
+  };
+
+  season.rewardAcquisition = newAcquisition;
+  season.rewardAcquired = true;
+  season.updatedAt = now;
+
+  saveSeasonsState(state);
+
+  return {
+    success: true,
+    acquisition: newAcquisition,
+  };
+}
+
+/**
+ * Retrieves the reward acquisition record for a season, if any
+ */
+export function getSeasonReward(seasonId: string): SeasonRewardAcquisition | null {
+  const season = getSeasonById(seasonId);
+  return season?.rewardAcquisition || null;
+}
+

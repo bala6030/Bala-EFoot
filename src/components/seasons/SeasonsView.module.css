@@ -733,3 +733,285 @@
   color: var(--text-muted);
 }
 
+/* Milestone 4C1: Rank & Division Phase Rewards */
+.rewardSection {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.rewardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.rewardTitleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rewardIcon {
+  color: var(--accent-lime);
+}
+
+.rewardTitleText {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rewardBadges {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.rewardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.rewardRankRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.rewardRankLabel {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.rewardRankValue {
+  font-family: var(--font-family-mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rewardExplainText {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.textSuccess {
+  color: var(--accent-lime);
+}
+
+.textDanger {
+  color: var(--danger);
+}
+
+.textMuted {
+  color: var(--text-muted);
+}
+
+.rewardAcquiredCard {
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rewardAcquiredHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.sparkleIcon {
+  color: #c084fc;
+}
+
+.rewardAcquiredName {
+  font-weight: 700;
+  color: #f3e8ff;
+  font-size: 0.95rem;
+}
+
+.rewardAcquiredDesc {
+  font-size: 0.8rem;
+  color: #d8b4fe;
+}
+
+.rewardAcquiredDetails {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.rewardAcquiredNotes {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.rewardAcquiredLimitBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #c084fc;
+  margin-top: 2px;
+}
+
+.rewardActionRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+
+.rewardDisabledNotice {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Modals for Rank & Reward */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 12, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.modalBox {
+  position: relative;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modalTitleArea {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modalTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modalSubtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.modalCloseBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.modalCloseBtn:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.modalBody {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.modalFooter {
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.modalError {
+  background: var(--danger-muted);
+  border: 1px solid var(--danger);
+  color: #fee2e2;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.livePreviewCard {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.previewEligible {
+  background: var(--accent-lime-muted);
+  border: 1px solid var(--accent-lime);
+  color: #d1fae5;
+}
+
+.previewNotEligible {
+  background: var(--danger-muted);
+  border: 1px solid var(--danger);
+  color: #fee2e2;
+}
+
+.previewNeutral {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
