@@ -1,0 +1,66 @@
+.card {
+  position: relative;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+.elevated {
+  background: var(--bg-surface-elevated);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-default);
+}
+
+.glass {
+  background: var(--bg-surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: var(--border-default);
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+.interactive:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Border Glow Accents */
+.accentLime {
+  border-top: 2px solid var(--accent-lime);
+}
+
+.accentBlue {
+  border-top: 2px solid var(--accent-blue);
+}
+
+.accentPurple {
+  border-top: 2px solid var(--accent-purple);
+}
+
+.accentGold {
+  border-top: 2px solid var(--accent-gold);
+}
+
+.paddingSm {
+  padding: var(--space-3);
+}
+
+.paddingMd {
+  padding: var(--space-5);
+}
+
+.paddingLg {
+  padding: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .paddingLg {
+    padding: var(--space-8);
+  }
+}

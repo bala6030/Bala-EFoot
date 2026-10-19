@@ -1,0 +1,198 @@
+/* Desktop / Tablet Top Navigation Bar */
+.desktopNav {
+  display: none;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+@media (min-width: 1024px) {
+  .desktopNav {
+    display: block;
+  }
+}
+
+.navInner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.navInner::-webkit-scrollbar {
+  display: none;
+}
+
+.navTab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.navTab:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-elevated);
+}
+
+.navTabActive {
+  color: var(--accent-lime);
+  background: var(--accent-lime-muted);
+  border-color: var(--border-lime);
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.15);
+}
+
+/* Mobile Bottom Navigation Bar (iPhone / small screens) */
+.mobileBottomNav {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: var(--mobile-nav-height);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(16, 21, 34, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-subtle);
+  align-items: center;
+  justify-content: space-around;
+}
+
+@media (min-width: 1024px) {
+  .mobileBottomNav {
+    display: none;
+  }
+}
+
+.bottomNavItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px;
+  transition: all var(--transition-fast);
+}
+
+.bottomNavItemActive {
+  color: var(--accent-lime);
+}
+
+.bottomNavIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.bottomNavItemActive .bottomNavIconWrapper {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 0 6px var(--accent-lime-glow));
+}
+
+/* Mobile Drawer Overlay */
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 45;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.drawerOverlayOpen {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: var(--header-height);
+  right: 0;
+  bottom: 0;
+  width: min(320px, 85vw);
+  background: var(--bg-surface-elevated);
+  border-left: 1px solid var(--border-default);
+  z-index: 46;
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  transform: translateX(100%);
+  transition: transform var(--transition-normal);
+  overflow-y: auto;
+}
+
+.drawerOpen {
+  transform: translateX(0);
+}
+
+.drawerTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.drawerList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.drawerItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  text-align: left;
+  width: 100%;
+}
+
+.drawerItem:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.drawerItemActive {
+  background: var(--accent-lime-muted);
+  color: var(--accent-lime);
+  border-color: var(--border-lime);
+}
+
+.drawerItemLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.drawerItemLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
