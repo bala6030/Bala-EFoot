@@ -227,3 +227,69 @@ export interface WishlistEntry {
   notes?: string;
   isAcquired: boolean;
 }
+
+/**
+ * Supported tactical formation IDs
+ */
+export type FormationId = '4-2-1-3' | '4-3-3' | '4-2-2-2';
+
+/**
+ * Role category for formation slots
+ */
+export type RoleCategory = 'GK' | 'DEF' | 'MID' | 'FWD';
+
+/**
+ * Single position slot within a formation
+ */
+export interface FormationSlot {
+  id: string; // e.g. 'gk', 'lb', 'lcb', 'rcb', 'rb', 'ldmf', 'rdmf', 'amf', 'lwf', 'cf', 'rwf'
+  name: string; // Display label: 'GK', 'LB', 'CB', 'DMF', 'AMF', 'CF', etc.
+  roleCategory: RoleCategory;
+  x: number; // Percentage from left of pitch (0 - 100)
+  y: number; // Percentage from top of pitch (0 - 100)
+}
+
+/**
+ * Complete formation structure definition
+ */
+export interface FormationDefinition {
+  id: FormationId;
+  label: string;
+  description: string;
+  slots: FormationSlot[];
+}
+
+/**
+ * Tactical layout mode: Attack or Defence
+ */
+export type TacticalLayout = 'attack' | 'defence';
+
+/**
+ * State of a single tactical layout
+ */
+export interface LayoutState {
+  formationId: FormationId;
+  assignments: Record<string, string>; // slotId -> playerId
+}
+
+/**
+ * Complete persisted squad builder state
+ */
+export interface SquadBuilderState {
+  activeLayout: TacticalLayout;
+  attack: LayoutState;
+  defence: LayoutState;
+}
+
+/**
+ * Validation summary for a squad layout
+ */
+export interface SquadValidationResult {
+  isValid: boolean;
+  filledCount: number;
+  totalSlots: number;
+  hasGK: boolean;
+  duplicatePlayerIds: string[];
+  missingPlayerIds: string[];
+  unfilledSlotNames: string[];
+}

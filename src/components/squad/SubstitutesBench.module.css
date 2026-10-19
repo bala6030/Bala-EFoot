@@ -1,0 +1,192 @@
+.benchContainer {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.benchContainerDragOver {
+  border-color: var(--accent-blue) !important;
+  box-shadow: 0 0 24px var(--accent-blue-glow) !important;
+  background: var(--bg-surface-elevated) !important;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.benchInstruction {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filterPill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.filterPill:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.filterPillActive {
+  background: var(--accent-lime-muted);
+  color: var(--accent-lime);
+  border-color: var(--border-lime);
+}
+
+/* Bench Grid */
+.benchGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+@media (min-width: 640px) {
+  .benchGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .benchGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .benchGrid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Bench Card Tile */
+.benchCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: grab;
+  transition: all var(--transition-fast);
+  text-align: left;
+  user-select: none;
+}
+
+.benchCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-default);
+  background: var(--bg-surface-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.benchCard:active {
+  cursor: grabbing;
+}
+
+.benchCardSelected {
+  border-color: var(--accent-lime) !important;
+  box-shadow: 0 0 16px var(--accent-lime-glow), inset 0 0 8px rgba(57, 255, 20, 0.2) !important;
+  transform: translateY(-2px) scale(1.02);
+  background: var(--bg-surface-active) !important;
+}
+
+.benchCardDragging {
+  opacity: 0.35;
+}
+
+.benchCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.benchCardPos {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  letter-spacing: 0.04em;
+}
+
+.benchCardOvr {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  font-feature-settings: 'tnum' on;
+}
+
+.benchCardName {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.benchCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.benchDropPrompt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+  background: rgba(16, 21, 34, 0.4);
+}

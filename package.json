@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "import-data": "python3 scripts/import_player_data.py"
+    "import-data": "python3 scripts/import_player_data.py",
+    "test:squad": "node scripts/test_squad_builder.js"
   },
   "dependencies": {
     "lucide-react": "^1.16.0",

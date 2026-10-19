@@ -1,0 +1,228 @@
+.squadContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6) 0 var(--space-12) 0;
+}
+
+@media (min-width: 768px) {
+  .squadContainer {
+    padding: var(--space-8) 0 var(--space-12) 0;
+  }
+}
+
+/* Header & Controls Bar */
+.topBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .topBar {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.headingArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 2.25rem;
+  }
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* Tactical Layout Toggle (Attack vs Defence) */
+.layoutToggleGroup {
+  display: inline-flex;
+  background: var(--bg-surface-elevated);
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  gap: 4px;
+}
+
+.layoutToggleButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.layoutToggleButton:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-hover);
+}
+
+.layoutToggleAttackActive {
+  background: var(--accent-lime-muted);
+  color: var(--accent-lime);
+  border-color: var(--border-lime);
+  box-shadow: 0 0 14px rgba(57, 255, 20, 0.25);
+}
+
+.layoutToggleDefenceActive {
+  background: var(--accent-blue-muted);
+  color: var(--accent-blue);
+  border-color: var(--border-blue);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
+}
+
+/* Secondary Controls Row: Formations & Status */
+.controlsCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .controlsCard {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.formationSelectorArea {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.selectorLabel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.formationButtons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.formationBtn {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.formationBtn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.formationBtnActive {
+  background: var(--bg-surface-active);
+  color: var(--text-primary);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.validationStatusArea {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Feedback / Notification Toast Banner */
+.feedbackBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid var(--border-blue);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Active Selection Action Bar */
+.selectionBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-5);
+  background: rgba(57, 255, 20, 0.12);
+  border: 1px solid var(--border-lime);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  box-shadow: 0 0 14px rgba(57, 255, 20, 0.2);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.selectionText {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.selectionActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Main Pitch Section */
+.pitchSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Sparkles, BarChart3, Bookmark } from 'lucide-react';
+import { Sparkles, BarChart3, Bookmark } from 'lucide-react';
 import { NavigationView, PlayerCard } from './types';
 import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
@@ -8,6 +8,7 @@ import { DashboardView } from './components/dashboard/DashboardView';
 import { ViewPlaceholder } from './components/common/ViewPlaceholder';
 import { PlayerCatalogue } from './components/players/PlayerCatalogue';
 import { PlayerProfile } from './components/players/PlayerProfile';
+import { SquadBuilderView } from './components/squad/SquadBuilderView';
 import { getPlayerById } from './data/playerRepository';
 import styles from './App.module.css';
 
@@ -31,20 +32,7 @@ export function App() {
       case 'dashboard':
         return <DashboardView />;
       case 'squad':
-        return (
-          <ViewPlaceholder
-            title="My Squad"
-            milestoneNumber={3}
-            description="Pitch formation builder with independent Attack and Defence layouts, starting XI and substitutes bench."
-            features={[
-              'Pitch visualization with player card slots',
-              'Independent Attack and Defence layouts',
-              'Substitutes bench management',
-              'Duplicate player assignment prevention',
-            ]}
-            icon={<Users size={28} />}
-          />
-        );
+        return <SquadBuilderView />;
       case 'players':
         if (selectedPlayer) {
           return (
