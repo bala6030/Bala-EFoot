@@ -1,0 +1,84 @@
+:root {
+  /* Color Palette - Dark Surfaces */
+  --bg-base: #0a0d14;
+  --bg-surface: #101522;
+  --bg-surface-elevated: #161e30;
+  --bg-surface-glass: rgba(16, 21, 34, 0.85);
+  --bg-surface-hover: #1d273f;
+  --bg-surface-active: #23304d;
+
+  /* Accent Colors */
+  --accent-lime: #39ff14;
+  --accent-lime-rgb: 57, 255, 20;
+  --accent-lime-muted: rgba(57, 255, 20, 0.12);
+  --accent-lime-glow: rgba(57, 255, 20, 0.3);
+
+  --accent-blue: #00e5ff;
+  --accent-blue-rgb: 0, 229, 255;
+  --accent-blue-muted: rgba(0, 229, 255, 0.12);
+  --accent-blue-glow: rgba(0, 229, 255, 0.3);
+
+  --accent-purple: #a855f7;
+  --accent-purple-rgb: 168, 85, 247;
+  --accent-purple-muted: rgba(168, 85, 247, 0.12);
+  --accent-purple-glow: rgba(168, 85, 247, 0.3);
+
+  --accent-gold: #fbbf24;
+  --accent-gold-glow: rgba(251, 191, 36, 0.35);
+
+  --danger: #ef4444;
+  --danger-muted: rgba(239, 68, 68, 0.15);
+
+  /* Text & Border Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0a0d14;
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.14);
+  --border-hover: rgba(255, 255, 255, 0.25);
+  --border-lime: rgba(57, 255, 20, 0.4);
+  --border-blue: rgba(0, 229, 255, 0.4);
+  --border-purple: rgba(168, 85, 247, 0.4);
+
+  /* Typography */
+  --font-family-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-family-mono: 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows & Glows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --glow-lime: 0 0 18px var(--accent-lime-glow);
+  --glow-blue: 0 0 18px var(--accent-blue-glow);
+  --glow-purple: 0 0 18px var(--accent-purple-glow);
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --header-height: 68px;
+  --nav-sidebar-width: 250px;
+  --mobile-nav-height: 64px;
+}

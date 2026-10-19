@@ -1,0 +1,87 @@
+.statCard {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: all var(--transition-normal);
+  overflow: hidden;
+}
+
+.statCard:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-surface-elevated);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-elevated);
+  color: var(--text-muted);
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.value {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-feature-settings: 'tnum' on, 'lnum' on;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+.valueLime {
+  color: var(--accent-lime);
+  text-shadow: 0 0 16px var(--accent-lime-glow);
+}
+
+.valueBlue {
+  color: var(--accent-blue);
+  text-shadow: 0 0 16px var(--accent-blue-glow);
+}
+
+.valuePurple {
+  color: var(--accent-purple);
+  text-shadow: 0 0 16px var(--accent-purple-glow);
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.accessory {
+  display: inline-flex;
+  align-items: center;
+}
