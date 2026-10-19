@@ -1,7 +1,11 @@
 import type { PlayerCard, AttributeDefinition } from '../types';
 import rawPlayersData from './players.json';
+import { getPlayerImageUrl } from './playerImageMap';
 
-const players: PlayerCard[] = rawPlayersData as unknown as PlayerCard[];
+const players: PlayerCard[] = (rawPlayersData as unknown as PlayerCard[]).map((p) => ({
+  ...p,
+  imageUrl: p.imageUrl || getPlayerImageUrl(p.id),
+}));
 
 /**
  * All available attribute definitions for pinning and grouping

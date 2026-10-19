@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { FormationDefinition, FormationSlot, PlayerCard } from '../../types';
 import styles from './FootballPitch.module.css';
@@ -25,6 +25,25 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
   onDragStartSlot,
 }) => {
   const [dragOverSlotId, setDragOverSlotId] = useState<string | null>(null);
+  // Track image errors per player so broken images fall back gracefully
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+
+  const handleImgError = useCallback((playerId: string) => {
+    setImgErrors((prev) => ({ ...prev, [playerId]: true }));
+  }, []);
+
+  const getInitials = (name: string): string => {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const getDisplayName = (fullName: string): string => {
+    if (fullName === 'Ronaldinho Gaúcho') return 'Ronaldinho';
+    if (fullName === 'Kevin De Bruyne') return 'De Bruyne';
+    const parts = fullName.trim().split(/\s+/);
+    return parts.slice(-1)[0] || fullName;
+  };
 
   const getRoleClass = (roleCategory: FormationSlot['roleCategory']) => {
     switch (roleCategory) {
@@ -227,15 +246,37 @@ export const FootballPitch: React.FC<FootballPitchProps> = ({
                   <X size={12} />
                 </button>
 
-                <div className={styles.cardHeader}>
+                {/* Rectangular Artwork Container with Overlaid Badges */}
+                <div className={styles.pitchArtworkWrapper}>
+                  {/* Position Badge overlaid top-left */}
                   <span className={`${styles.posTag} ${getRoleClass(slot.roleCategory)}`}>
                     {slot.name}
                   </span>
+
+                  {/* Overall Rating Badge overlaid top-right */}
                   <span className={styles.ovrTag}>{player.overallRating ?? '—'}</span>
+
+                  {/* Card Artwork Image or Fallback */}
+                  {player.imageUrl && !imgErrors[player.id] ? (
+                    <img
+                      src={player.imageUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className={styles.pitchArtworkImg}
+                      onError={() => handleImgError(player.id)}
+                      loading="lazy"
+                      draggable={false}
+                    />
+                  ) : (
+                    <div className={styles.pitchArtworkFallback} aria-hidden="true">
+                      <span className={styles.pitchArtworkInitials}>{getInitials(player.name)}</span>
+                    </div>
+                  )}
                 </div>
 
+                {/* Readable Player Name Label */}
                 <span className={styles.cardName} title={player.name}>
-                  {player.name.split(' ').slice(-1)[0] || player.name}
+                  {getDisplayName(player.name)}
                 </span>
               </div>
             ) : (

@@ -14,6 +14,64 @@ export interface SubstitutesBenchProps {
 
 type BenchFilterCategory = 'ALL' | 'FWD' | 'MID' | 'DEF' | 'GK';
 
+// -------------------------------------------------------------
+// Small inner component: compact bench card content with artwork
+// -------------------------------------------------------------
+interface BenchCardContentProps {
+  player: PlayerCard;
+  badgeVariant: 'lime' | 'blue' | 'purple' | 'gold' | 'default';
+}
+
+const BenchCardContent: React.FC<BenchCardContentProps> = ({ player, badgeVariant }) => {
+  const [imgError, setImgError] = useState(false);
+
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const showImage = Boolean(player.imageUrl) && !imgError;
+
+  return (
+    <>
+      {/* Compact artwork thumbnail */}
+      <div className={styles.benchThumbWrapper}>
+        {showImage ? (
+          <img
+            src={player.imageUrl!}
+            alt={player.name}
+            className={styles.benchThumbImage}
+            onError={() => setImgError(true)}
+            loading="lazy"
+            draggable={false}
+          />
+        ) : (
+          <div className={styles.benchThumbFallback}>
+            <span className={styles.benchThumbInitials}>{getInitials(player.name)}</span>
+          </div>
+        )}
+      </div>
+
+      <div className={styles.benchCardHeader}>
+        <Badge variant={badgeVariant} size="sm">
+          {player.primaryPosition}
+        </Badge>
+        <span className={styles.benchCardOvr}>{player.overallRating ?? '—'}</span>
+      </div>
+
+      <span className={styles.benchCardName} title={player.name}>
+        {player.name}
+      </span>
+
+      <div className={styles.benchCardFooter}>
+        <span>{player.playingStyle !== 'None' ? player.playingStyle : 'Standard'}</span>
+        <span>{player.id}</span>
+      </div>
+    </>
+  );
+};
+
 export const SubstitutesBench: React.FC<SubstitutesBenchProps> = ({
   benchPlayers,
   selectedPlayerId,
@@ -74,7 +132,7 @@ export const SubstitutesBench: React.FC<SubstitutesBenchProps> = ({
     onDragStartBench(player);
   };
 
-  const getPositionBadgeVariant = (pos: string) => {
+  const getPositionBadgeVariant = (pos: string): BenchCardContentProps['badgeVariant'] => {
     const cat = getPositionCategory(pos);
     switch (cat) {
       case 'FWD':
@@ -151,21 +209,7 @@ export const SubstitutesBench: React.FC<SubstitutesBenchProps> = ({
                   }
                 }}
               >
-                <div className={styles.benchCardHeader}>
-                  <Badge variant={badgeVariant} size="sm">
-                    {player.primaryPosition}
-                  </Badge>
-                  <span className={styles.benchCardOvr}>{player.overallRating ?? '—'}</span>
-                </div>
-
-                <span className={styles.benchCardName} title={player.name}>
-                  {player.name}
-                </span>
-
-                <div className={styles.benchCardFooter}>
-                  <span>{player.playingStyle !== 'None' ? player.playingStyle : 'Standard'}</span>
-                  <span>{player.id}</span>
-                </div>
+                <BenchCardContent player={player} badgeVariant={badgeVariant} />
               </div>
             );
           })}

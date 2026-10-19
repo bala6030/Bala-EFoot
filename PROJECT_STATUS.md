@@ -4,7 +4,7 @@
 - **App**: Bala EFoot
 - **Tagline**: Squad • Skills • Seasons
 - **Repository**: https://github.com/bala6030/Bala-EFoot
-- **Active Branch**: `feature/season-workflow`
+- **Active Branch**: `feature/player-card-artwork`
 - **Cost Target**: ₹0; no billing-enabled usage, paid APIs, or payment method
 
 ## Git Branch Plan
@@ -13,7 +13,8 @@
 - `feature/project-foundation`: Milestone 1 foundation implementation (merged into `develop`).
 - `feature/player-catalogue`: Milestone 2 player catalogue and player profile implementation (merged into `develop`).
 - `feature/squad-builder`: Milestone 3 squad & pitch formation builder implementation (merged into `develop`).
-- `feature/season-workflow`: Milestone 4 season workflow implementation.
+- `feature/season-workflow`: Milestone 4 season workflow implementation (merged into `develop`).
+- `feature/player-card-artwork`: Player card artwork integration and pitch marker enhancement.
 - Feature branches merge into `develop` after review.
 
 ## Milestones Status
@@ -167,19 +168,40 @@
 - **Automated Verification**:
   - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 14 new test suites (Tests 25–38, 38 total) verifying confirmed snapshot isolation, missing rank handling, rank boundary conditions, active closure, draft rejection, explicit confirmation requirement, duplicate closure rejection, closed-season mutation rejection, deep-copy immutability, reward preservation, acknowledgement requirement, concurrency mismatch rejection, storage reload persistence, and backward compatibility with new seasons.
 
+### Player Card Artwork Integration — Pitch Artwork Size Enhancement & Second Visual Refinement (Completed)
+- **Substantially Larger & Prominent Pitch Artwork**:
+  - Transformed pitch player markers into large, prominent rectangular eFootball-style cards.
+  - Desktop pitch container optimized to 540 px width × 720 px height (`max-width: 540px; aspect-ratio: 540 / 720`), providing generous vertical separation between defensive, midfield, and forward lines.
+  - Final desktop marker dimensions: 84 px wide × 124 px tall (within target range 80–95 px wide × 115–140 px tall).
+  - Visible artwork container: 76 px wide × 98 px tall, displaying a rendered card artwork of approximately 69 px wide × 98 px tall (within target range 60–75 px wide × 80–100 px tall). Full 240 × 340 vertical card composition, glowing frames, national flags, and player portraits preserved with `object-fit: contain` and zero unnecessary padding.
+- **Overlaid Position & Rating Badges**:
+  - Role-colored position badge (`tagFWD` lime, `tagMID` electric blue, `tagDEF` purple, `tagGK` gold) overlaid at top-left corner.
+  - Overall rating (OVR) badge overlaid at top-right corner with high-contrast translucent dark backdrop (`rgba(10, 14, 23, 0.88)`).
+  - Badges positioned precisely to avoid obscuring centered player faces while remaining legible.
+- **Formation Slot Layout Optimization & Zero Collisions**:
+  - Refined slot percentage coordinates in `src/data/formationData.ts` across all three supported formations (`4-2-1-3`, `4-3-3`, and `4-2-2-2`) to eliminate congestion between goalkeeper, centre-backs, and midfield pivots.
+  - Verified 0 collisions across all 11 starting slots in all 3 formations across every desktop, tablet, and mobile viewport.
+- **Readable Player Name Label**:
+  - Player surname / display name centered below artwork with subtle typography and ellipsis overflow.
+- **Responsive Scaling & Drag-and-Drop Preservation**:
+  - Smooth multi-tier responsive scaling:
+    - Tablet (≤ 560px): 70 × 104 px marker, 64 × 82 px artwork wrapper.
+    - Mobile (≤ 440px): 56 × 82 px marker, 50 × 64 px artwork wrapper.
+    - Small Mobile (≤ 360px): 46 × 68 px marker, 42 × 52 px artwork wrapper.
+  - Sub-elements use `pointer-events: none` and `draggable={false}` ensuring unhindered drag-and-drop, tap-to-select, and tap-to-swap on the marker.
+  - Retained move-to-bench button (`X`), Attack and Defence layout independence, and image fallback initials.
+
 ## Known Limitations
-- Milestone 4 (Season Workflow: 4A Foundation, 4B Baselines & Progress, 4C1 Reward Eligibility & Acquisition, and 4C2 Final Review & Closure) is now fully completed.
-- Reopening closed seasons and silent historical edits are intentionally prohibited; if corrections are required in future milestones, they must be recorded as explicit correction records rather than in-place mutations.
 - Position familiarity is intentionally not tracked (per specification).
 - Tactician/manager auto-arrange and tactical instruction controls are excluded (per milestone scope).
-- Card artwork currently displays clean initials and rating badges until official image assets are added to the repository.
 - Cross-season broad analytics dashboards, cloud sync, authentication, and automatic/date-based season closure are excluded (per ₹0 budget and milestone scope).
 
 ## Commands Executed & Results
 - `npm run lint`: ESLint check passed with 0 errors and 0 warnings (Exit 0).
-- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.01s (Exit 0).
+- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.05s (Exit 0).
 - `npm run test:squad`: Node.js unit test suite for formations, independence, and validation passed (Exit 0).
 - `npm run test:season`: Node.js unit test suite for season workflows passed (38 tests covering Milestones 4A, 4B, 4C1, and 4C2, Exit 0).
+- `node scripts/test_pitch_artwork.js`: Pitch artwork suite verifying 23 image files, CSS classes, contain sizing, pointer event safety, and zero collisions across formations passed (Exit 0).
 
 ## Next Action
-Milestone 4C2 is complete and verified on branch `feature/season-workflow`. Awaiting user review before any commit, merge, or subsequent milestone execution.
+Pitch artwork second visual refinement is complete and verified on branch `feature/player-card-artwork`. Awaiting user review before any commit, merge, or push.

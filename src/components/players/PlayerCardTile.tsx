@@ -8,6 +8,8 @@ export interface PlayerCardTileProps {
 }
 
 export const PlayerCardTile: React.FC<PlayerCardTileProps> = ({ player, onClick }) => {
+  const [imageError, setImageError] = React.useState(false);
+
   // Helper for position color coding
   const getPositionClass = (pos: string) => {
     const p = pos.toUpperCase();
@@ -25,7 +27,7 @@ export const PlayerCardTile: React.FC<PlayerCardTileProps> = ({ player, onClick 
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
-  const hasImage = Boolean(player.imageUrl);
+  const hasImage = Boolean(player.imageUrl) && !imageError;
 
   return (
     <div
@@ -41,25 +43,15 @@ export const PlayerCardTile: React.FC<PlayerCardTileProps> = ({ player, onClick 
       }}
       aria-label={`View profile for ${player.name}, rating ${player.overallRating || 'unrated'}, position ${player.primaryPosition}`}
     >
-      {/* Top Header Row: Rating + Position */}
-      <div className={styles.topRow}>
-        <div className={styles.ratingBadge}>
-          <span className={styles.ratingLabel}>OVR</span>
-          <span className={styles.ratingValue}>{player.overallRating ?? '—'}</span>
-        </div>
-
-        <span className={`${styles.positionBadge} ${getPositionClass(player.primaryPosition)}`}>
-          {player.primaryPosition}
-        </span>
-      </div>
-
-      {/* Portrait Artwork / Fallback Area */}
+      {/* Portrait Artwork / Fallback Area with Overlays */}
       <div className={styles.portraitWrapper}>
         {hasImage ? (
           <img
             src={player.imageUrl!}
             alt={player.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            className={styles.cardArtworkImage}
+            onError={() => setImageError(true)}
+            loading="lazy"
           />
         ) : (
           <div className={styles.portraitGraphic}>
@@ -67,6 +59,21 @@ export const PlayerCardTile: React.FC<PlayerCardTileProps> = ({ player, onClick 
             <span className={styles.artworkStatus}>Artwork Pending</span>
           </div>
         )}
+
+        {/* Position & Overall Rating Overlay (Non-obscuring top-left placement above national flag) */}
+        <div className={styles.cardArtworkOverlay}>
+          {player.primaryPosition && (
+            <span className={`${styles.overlayPositionBadge} ${getPositionClass(player.primaryPosition)}`}>
+              {player.primaryPosition}
+            </span>
+          )}
+          {player.overallRating != null && (
+            <div className={styles.overlayRatingBadge}>
+              <span className={styles.overlayRatingLabel}>OVR</span>
+              <span className={styles.overlayRatingValue}>{player.overallRating}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Identity */}

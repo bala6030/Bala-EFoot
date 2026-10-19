@@ -37,6 +37,7 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack }) 
   );
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabCategory>('attacking');
+  const [profileImageError, setProfileImageError] = useState(false);
 
   const handleSavePinned = (newKeys: string[]) => {
     setPinnedKeys(newKeys);
@@ -142,6 +143,19 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack }) 
       {/* Main Identity Header Card */}
       <Card variant="glass" padding="lg">
         <div className={styles.headerCard}>
+          {/* Artwork Panel */}
+          {player.imageUrl && !profileImageError && (
+            <div className={styles.profileArtworkPanel}>
+              <img
+                src={player.imageUrl}
+                alt={player.name}
+                className={styles.profileArtworkImage}
+                onError={() => setProfileImageError(true)}
+                loading="lazy"
+              />
+            </div>
+          )}
+
           <div className={styles.ratingBlock}>
             <span className={styles.ratingBig}>{player.overallRating ?? '—'}</span>
             <span className={styles.ratingSub}>Overall Rating</span>
