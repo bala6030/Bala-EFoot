@@ -1,16 +1,30 @@
 import { useState } from 'react';
-import { Users, Shield, Sparkles, BarChart3, Bookmark } from 'lucide-react';
-import { NavigationView } from './types';
+import { Users, Sparkles, BarChart3, Bookmark } from 'lucide-react';
+import { NavigationView, PlayerCard } from './types';
 import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
 import { Footer } from './components/layout/Footer';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { ViewPlaceholder } from './components/common/ViewPlaceholder';
+import { PlayerCatalogue } from './components/players/PlayerCatalogue';
+import { PlayerProfile } from './components/players/PlayerProfile';
+import { getPlayerById } from './data/playerRepository';
 import styles from './App.module.css';
 
 export function App() {
   const [currentView, setCurrentView] = useState<NavigationView>('dashboard');
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const selectedPlayer = selectedPlayerId ? getPlayerById(selectedPlayerId) : undefined;
+
+  const handleSelectView = (view: NavigationView) => {
+    setCurrentView(view);
+    // Reset player selection when changing main tabs unless staying in players
+    if (view !== 'players') {
+      setSelectedPlayerId(null);
+    }
+  };
 
   const renderContent = () => {
     switch (currentView) {
@@ -32,18 +46,17 @@ export function App() {
           />
         );
       case 'players':
+        if (selectedPlayer) {
+          return (
+            <PlayerProfile
+              player={selectedPlayer}
+              onBack={() => setSelectedPlayerId(null)}
+            />
+          );
+        }
         return (
-          <ViewPlaceholder
-            title="Players Catalogue"
-            milestoneNumber={2}
-            description="Searchable player-card grid, attribute categories, and custom pinned key attributes."
-            features={[
-              'Stable unique card IDs for all versions',
-              'Attacking, Defending, Athleticism groups',
-              'Six key pinned attributes at top of profile',
-              'Search and role/position filtering',
-            ]}
-            icon={<Shield size={28} />}
+          <PlayerCatalogue
+            onSelectPlayer={(p: PlayerCard) => setSelectedPlayerId(p.id)}
           />
         );
       case 'skills':
@@ -101,12 +114,15 @@ export function App() {
       <Header
         onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
         isMobileMenuOpen={isMobileMenuOpen}
-        onBrandClick={() => setCurrentView('dashboard')}
+        onBrandClick={() => {
+          setSelectedPlayerId(null);
+          setCurrentView('dashboard');
+        }}
       />
 
       <Navigation
         currentView={currentView}
-        onSelectView={setCurrentView}
+        onSelectView={handleSelectView}
         isMobileMenuOpen={isMobileMenuOpen}
         onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
       />

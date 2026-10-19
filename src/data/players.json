@@ -1,0 +1,4051 @@
+[
+  {
+    "id": "P001",
+    "name": "Zlatan Ibrahimović",
+    "cardName": "109 CF · Fox in the Box",
+    "overallRating": 109,
+    "cardType": null,
+    "primaryPosition": "CF",
+    "secondaryPositions": [],
+    "squadPosition": "CF",
+    "playingStyle": "Fox in the Box",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 195,
+    "weightKg": 95,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/89136140651034?sho=11&dri=4&dex=12&lbs=8&aes=4&gk1=1&b2=61&pos=CF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 82,
+        "ballControl": 78,
+        "dribbling": 78,
+        "tightPossession": 76,
+        "lowPass": 69,
+        "loftedPass": 63,
+        "finishing": 84,
+        "heading": 78,
+        "setPieceTaking": 69,
+        "curl": 70,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 42,
+        "ballWinning": 42,
+        "aggression": 48,
+        "defensiveEngagement": 45
+      },
+      "athleticism": {
+        "speed": 78,
+        "acceleration": 77,
+        "kickingPower": 84,
+        "jump": 82,
+        "physicalContact": 88,
+        "balance": 68,
+        "stamina": 72,
+        "form": "Unwavering",
+        "injuryResistance": "Medium"
+      },
+      "playerModel": {
+        "heightCm": 195,
+        "weightKg": 95,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Approximate accepted by user; existing Zlatan validation values retained. Exact configured build may differ slightly."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Heading",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acrobatic Finishing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Phenomenal Finishing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Willpower",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Double Touch",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Flip Flap",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sole Control",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 449,
+      "goals": 320,
+      "assists": 145,
+      "cleanSheets": null,
+      "goalContributions": 465,
+      "goalsPerMatch": 0.71,
+      "assistsPerMatch": 0.32,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P002",
+    "name": "Cristiano Ronaldo",
+    "cardName": "107 CF · Goal Poacher",
+    "overallRating": 107,
+    "cardType": null,
+    "primaryPosition": "CF",
+    "secondaryPositions": [],
+    "squadPosition": "CF",
+    "playingStyle": "Goal Poacher",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 187,
+    "weightKg": 85,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/89138556572074?sho=10&dri=4&dex=12&lbs=8&aes=4&b2=1416&pos=CF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 90,
+        "ballControl": 82,
+        "dribbling": 84,
+        "tightPossession": 80,
+        "lowPass": 75,
+        "loftedPass": 72,
+        "finishing": 93,
+        "heading": 85,
+        "setPieceTaking": 82,
+        "curl": 85,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 45,
+        "ballWinning": 40,
+        "aggression": 55,
+        "defensiveEngagement": 48
+      },
+      "athleticism": {
+        "speed": 89,
+        "acceleration": 87,
+        "kickingPower": 92,
+        "jump": 90,
+        "physicalContact": 83,
+        "balance": 81,
+        "stamina": 84,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 187,
+        "weightKg": 85,
+        "armLength": 1,
+        "shoulderWidth": 9,
+        "neckLength": 7,
+        "chestMeasurement": 6,
+        "neckSize": 8,
+        "shoulderHeight": 2,
+        "legLength": 9,
+        "thighSize": 7,
+        "waistSize": 4,
+        "armSize": 5,
+        "calfSize": 6,
+        "sourceValidation": "Public eFHUB indexed configured build; close to user card but confirm minor build differences."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Heading",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Bullet Header",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Low Screamer",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Phenomenal Finishing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Captaincy",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Scissors Feint",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Chop Turn",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Cut Behind & Turn",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 472,
+      "goals": 266,
+      "assists": 145,
+      "cleanSheets": null,
+      "goalContributions": 411,
+      "goalsPerMatch": 0.56,
+      "assistsPerMatch": 0.31,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P003",
+    "name": "Lionel Messi",
+    "cardName": "109 RMF · Deep-lying Forward",
+    "overallRating": 109,
+    "cardType": null,
+    "primaryPosition": "RMF",
+    "secondaryPositions": [],
+    "squadPosition": "RMF",
+    "playingStyle": "Deep-lying Forward",
+    "preferredFoot": "Left",
+    "club": null,
+    "nationality": null,
+    "heightCm": 170,
+    "weightKg": 72,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/89138556575063?sho=8&pas=4&dri=12&dex=8&lbs=7&b2=1410&pos=SS&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 94,
+        "ballControl": 97,
+        "dribbling": 98,
+        "tightPossession": 99,
+        "lowPass": 90,
+        "loftedPass": 88,
+        "finishing": 95,
+        "heading": 68,
+        "setPieceTaking": 92,
+        "curl": 93,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 35,
+        "ballWinning": 32,
+        "aggression": 40,
+        "defensiveEngagement": 38
+      },
+      "athleticism": {
+        "speed": 85,
+        "acceleration": 91,
+        "kickingPower": 86,
+        "jump": 62,
+        "physicalContact": 65,
+        "balance": 99,
+        "stamina": 83,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 170,
+        "weightKg": 72,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "No verified Player Model values captured from the public reference yet."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Momentum Dribbling",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Magnetic Feet",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Edged Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Captaincy",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Marseille Turn",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Penalty Specialist",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 575,
+      "goals": 165,
+      "assists": 116,
+      "cleanSheets": null,
+      "goalContributions": 281,
+      "goalsPerMatch": 0.29,
+      "assistsPerMatch": 0.2,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P004",
+    "name": "Ronaldinho Gaúcho",
+    "cardName": "106 LMF · Creative Playmaker",
+    "overallRating": 106,
+    "cardType": null,
+    "primaryPosition": "LMF",
+    "secondaryPositions": [],
+    "squadPosition": "LMF",
+    "playingStyle": "Creative Playmaker",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 182,
+    "weightKg": 80,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/89138288266704?sho=4&pas=8&dri=12&dex=8&lbs=8&b2=61&pos=AMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 88,
+        "ballControl": 96,
+        "dribbling": 99,
+        "tightPossession": 97,
+        "lowPass": 92,
+        "loftedPass": 89,
+        "finishing": 89,
+        "heading": 72,
+        "setPieceTaking": 88,
+        "curl": 94,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 40,
+        "ballWinning": 38,
+        "aggression": 50,
+        "defensiveEngagement": 44
+      },
+      "athleticism": {
+        "speed": 88,
+        "acceleration": 90,
+        "kickingPower": 88,
+        "jump": 70,
+        "physicalContact": 74,
+        "balance": 95,
+        "stamina": 86,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 182,
+        "weightKg": 80,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB indexed card reference; exact URL ID/build not confirmed."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Scissors Feint",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Flip Flap",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sole Control",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Momentum Dribbling",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blitz Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "No Look Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Marseille Turn",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 719,
+      "goals": 261,
+      "assists": 148,
+      "cleanSheets": null,
+      "goalContributions": 409,
+      "goalsPerMatch": 0.36,
+      "assistsPerMatch": 0.21,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P005",
+    "name": "Ruud Gullit",
+    "cardName": "106 CMF · Hole Player",
+    "overallRating": 106,
+    "cardType": null,
+    "primaryPosition": "CMF",
+    "secondaryPositions": [],
+    "squadPosition": "CMF",
+    "playingStyle": "Hole Player",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 191,
+    "weightKg": 88,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88039045074410?sho=4&pas=9&dri=12&dex=8&lbs=8&def=1&b2=61&pos=AMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 85,
+        "ballControl": 89,
+        "dribbling": 87,
+        "tightPossession": 85,
+        "lowPass": 86,
+        "loftedPass": 85,
+        "finishing": 86,
+        "heading": 90,
+        "setPieceTaking": 80,
+        "curl": 82,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 74,
+        "ballWinning": 75,
+        "aggression": 85,
+        "defensiveEngagement": 78
+      },
+      "athleticism": {
+        "speed": 86,
+        "acceleration": 85,
+        "kickingPower": 89,
+        "jump": 91,
+        "physicalContact": 89,
+        "balance": 81,
+        "stamina": 92,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 191,
+        "weightKg": 88,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB indexed card reference; exact URL ID/build not confirmed."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Heading",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Bullet Header",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Low Screamer",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sole Control",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acrobatic Finishing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 489,
+      "goals": 91,
+      "assists": 152,
+      "cleanSheets": null,
+      "goalContributions": 243,
+      "goalsPerMatch": 0.19,
+      "assistsPerMatch": 0.31,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P006",
+    "name": "Luis Suárez",
+    "cardName": "108 CF · Goal Poacher",
+    "overallRating": 108,
+    "cardType": null,
+    "primaryPosition": "CF",
+    "secondaryPositions": [],
+    "squadPosition": "CF",
+    "playingStyle": "Goal Poacher",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 182,
+    "weightKg": 85,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88044145248321?sho=11&dri=4&dex=12&lbs=8&aes=4&gk1=1&b2=61&pos=CF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 91,
+        "ballControl": 85,
+        "dribbling": 86,
+        "tightPossession": 84,
+        "lowPass": 82,
+        "loftedPass": 78,
+        "finishing": 94,
+        "heading": 82,
+        "setPieceTaking": 80,
+        "curl": 83,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 48,
+        "ballWinning": 45,
+        "aggression": 88,
+        "defensiveEngagement": 52
+      },
+      "athleticism": {
+        "speed": 82,
+        "acceleration": 83,
+        "kickingPower": 90,
+        "jump": 80,
+        "physicalContact": 87,
+        "balance": 83,
+        "stamina": 88,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 182,
+        "weightKg": 85,
+        "armLength": 4,
+        "shoulderWidth": 12,
+        "neckLength": 4,
+        "chestMeasurement": 10,
+        "neckSize": 8,
+        "shoulderHeight": 4,
+        "legLength": 6,
+        "thighSize": 9,
+        "waistSize": 5,
+        "armSize": 7,
+        "calfSize": 8,
+        "sourceValidation": "Public eFHUB indexed card reference; URL build/booster may differ slightly."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Heading",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Phenomenal Finishing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Attacking Surge",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Super-sub",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 382,
+      "goals": 143,
+      "assists": 89,
+      "cleanSheets": null,
+      "goalContributions": 232,
+      "goalsPerMatch": 0.37,
+      "assistsPerMatch": 0.23,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P007",
+    "name": "Jude Bellingham",
+    "cardName": "107 AMF · Hole Player",
+    "overallRating": 107,
+    "cardType": null,
+    "primaryPosition": "AMF",
+    "secondaryPositions": [],
+    "squadPosition": "AMF",
+    "playingStyle": "Hole Player",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 186,
+    "weightKg": 75,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/89138556700485?sho=4&pas=8&dri=12&dex=8&lbs=7&b2=1369&pos=AMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 86,
+        "ballControl": 88,
+        "dribbling": 87,
+        "tightPossession": 86,
+        "lowPass": 88,
+        "loftedPass": 85,
+        "finishing": 84,
+        "heading": 79,
+        "setPieceTaking": 78,
+        "curl": 81,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 75,
+        "ballWinning": 78,
+        "aggression": 89,
+        "defensiveEngagement": 80
+      },
+      "athleticism": {
+        "speed": 84,
+        "acceleration": 85,
+        "kickingPower": 83,
+        "jump": 82,
+        "physicalContact": 84,
+        "balance": 83,
+        "stamina": 95,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 186,
+        "weightKg": 75,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB reference for a different Bellingham card ID; use as provisional only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Magnetic Feet",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Attacking Surge",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Weighted Pass",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 496,
+      "goals": 59,
+      "assists": 104,
+      "cleanSheets": null,
+      "goalContributions": 163,
+      "goalsPerMatch": 0.12,
+      "assistsPerMatch": 0.21,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P008",
+    "name": "Kylian Mbappé",
+    "cardName": "106 CF · Goal Poacher",
+    "overallRating": 106,
+    "cardType": null,
+    "primaryPosition": "CF",
+    "secondaryPositions": [],
+    "squadPosition": "CF",
+    "playingStyle": "Goal Poacher",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 178,
+    "weightKg": 73,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/89138556678270?sho=10&dri=4&dex=12&lbs=8&aes=4&b2=1242&pos=CF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 92,
+        "ballControl": 88,
+        "dribbling": 93,
+        "tightPossession": 91,
+        "lowPass": 80,
+        "loftedPass": 75,
+        "finishing": 93,
+        "heading": 76,
+        "setPieceTaking": 76,
+        "curl": 82,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 40,
+        "ballWinning": 38,
+        "aggression": 50,
+        "defensiveEngagement": 42
+      },
+      "athleticism": {
+        "speed": 99,
+        "acceleration": 98,
+        "kickingPower": 91,
+        "jump": 78,
+        "physicalContact": 77,
+        "balance": 88,
+        "stamina": 90,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 178,
+        "weightKg": 73,
+        "armLength": 12,
+        "shoulderWidth": 5,
+        "neckLength": 4,
+        "chestMeasurement": 6,
+        "neckSize": 7,
+        "shoulderHeight": 11,
+        "legLength": 14,
+        "thighSize": 5,
+        "waistSize": 9,
+        "armSize": 5,
+        "calfSize": 3,
+        "sourceValidation": "Public eFHUB indexed configured build; card ID matches user's URL."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Scissors Feint",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Tap Trick",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acceleration Burst",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blitz Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Rising Shot",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acrobatic Finishing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Super-sub",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 445,
+      "goals": 89,
+      "assists": 56,
+      "cleanSheets": null,
+      "goalContributions": 145,
+      "goalsPerMatch": 0.2,
+      "assistsPerMatch": 0.13,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P009",
+    "name": "Kaká",
+    "cardName": "107 AMF · Dummy Runner",
+    "overallRating": 107,
+    "cardType": null,
+    "primaryPosition": "AMF",
+    "secondaryPositions": [],
+    "squadPosition": "AMF",
+    "playingStyle": "Dummy Runner",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 186,
+    "weightKg": 83,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88044145217198?sho=4&pas=9&dri=11&dex=8&lbs=8&b2=61&pos=AMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 89,
+        "ballControl": 91,
+        "dribbling": 93,
+        "tightPossession": 90,
+        "lowPass": 88,
+        "loftedPass": 85,
+        "finishing": 88,
+        "heading": 70,
+        "setPieceTaking": 82,
+        "curl": 86,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 42,
+        "ballWinning": 40,
+        "aggression": 52,
+        "defensiveEngagement": 45
+      },
+      "athleticism": {
+        "speed": 92,
+        "acceleration": 94,
+        "kickingPower": 85,
+        "jump": 72,
+        "physicalContact": 76,
+        "balance": 91,
+        "stamina": 89,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 186,
+        "weightKg": 83,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB reference for a different Kaka card ID; use as provisional only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Marseille Turn",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Momentum Dribbling",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acceleration Burst",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Super-sub",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 446,
+      "goals": 67,
+      "assists": 67,
+      "cleanSheets": null,
+      "goalContributions": 134,
+      "goalsPerMatch": 0.15,
+      "assistsPerMatch": 0.15,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P010",
+    "name": "Harry Kane",
+    "cardName": "107 CF · Deep-lying Forward",
+    "overallRating": 107,
+    "cardType": null,
+    "primaryPosition": "CF",
+    "secondaryPositions": [],
+    "squadPosition": "CF",
+    "playingStyle": "Deep-lying Forward",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 188,
+    "weightKg": 89,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/106787919411383?sho=10&dri=5&dex=12&lbs=8&aes=4&b2=1402&pos=CF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 93,
+        "ballControl": 86,
+        "dribbling": 82,
+        "tightPossession": 83,
+        "lowPass": 86,
+        "loftedPass": 84,
+        "finishing": 94,
+        "heading": 88,
+        "setPieceTaking": 85,
+        "curl": 85,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 48,
+        "ballWinning": 45,
+        "aggression": 75,
+        "defensiveEngagement": 50
+      },
+      "athleticism": {
+        "speed": 79,
+        "acceleration": 80,
+        "kickingPower": 94,
+        "jump": 84,
+        "physicalContact": 89,
+        "balance": 78,
+        "stamina": 89,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 188,
+        "weightKg": 89,
+        "armLength": 6,
+        "shoulderWidth": 9,
+        "neckLength": 6,
+        "chestMeasurement": 5,
+        "neckSize": 9,
+        "shoulderHeight": 10,
+        "legLength": 7,
+        "thighSize": 10,
+        "waistSize": 5,
+        "armSize": 7,
+        "calfSize": 9,
+        "sourceValidation": "Public eFHUB indexed base card reference; exact configured build/booster not confirmed."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Magnetic Feet",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Heading",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Low Screamer",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Captaincy",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 226,
+      "goals": 54,
+      "assists": 34,
+      "cleanSheets": null,
+      "goalContributions": 88,
+      "goalsPerMatch": 0.24,
+      "assistsPerMatch": 0.15,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P011",
+    "name": "Patrick Vieira",
+    "cardName": "106 CMF · Anchor Man",
+    "overallRating": 106,
+    "cardType": null,
+    "primaryPosition": "CMF",
+    "secondaryPositions": [],
+    "squadPosition": "CMF",
+    "playingStyle": "Anchor Man",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 192,
+    "weightKg": 82,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88044145348029?pas=8&dri=4&dex=4&lbs=8&aes=4&def=13&b2=57&pos=DMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 75,
+        "ballControl": 82,
+        "dribbling": 79,
+        "tightPossession": 78,
+        "lowPass": 86,
+        "loftedPass": 85,
+        "finishing": 68,
+        "heading": 88,
+        "setPieceTaking": 70,
+        "curl": 72,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 92,
+        "ballWinning": 94,
+        "aggression": 96,
+        "defensiveEngagement": 93
+      },
+      "athleticism": {
+        "speed": 83,
+        "acceleration": 82,
+        "kickingPower": 85,
+        "jump": 90,
+        "physicalContact": 94,
+        "balance": 76,
+        "stamina": 96,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 192,
+        "weightKg": 82,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB reference for a different Vieira card ID; use as provisional only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Visionary Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Man Marking",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blocker",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sliding Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-reach Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Flip Flap",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Weighted Pass",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Track Back",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 734,
+      "goals": 13,
+      "assists": 73,
+      "cleanSheets": null,
+      "goalContributions": 86,
+      "goalsPerMatch": 0.02,
+      "assistsPerMatch": 0.1,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P012",
+    "name": "Jordi Alba",
+    "cardName": "105 LB · Attacking Full-back",
+    "overallRating": 105,
+    "cardType": null,
+    "primaryPosition": "LB",
+    "secondaryPositions": [],
+    "squadPosition": "LB",
+    "playingStyle": "Attacking Full-back",
+    "preferredFoot": "Left",
+    "club": null,
+    "nationality": null,
+    "heightCm": 170,
+    "weightKg": 68,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88044145253865?pas=4&dri=4&dex=8&lbs=14&aes=4&def=8&b2=106&pos=LB&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 80,
+        "ballControl": 84,
+        "dribbling": 86,
+        "tightPossession": 85,
+        "lowPass": 84,
+        "loftedPass": 83,
+        "finishing": 65,
+        "heading": 62,
+        "setPieceTaking": 75,
+        "curl": 80,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 82,
+        "ballWinning": 84,
+        "aggression": 85,
+        "defensiveEngagement": 83
+      },
+      "athleticism": {
+        "speed": 94,
+        "acceleration": 95,
+        "kickingPower": 78,
+        "jump": 65,
+        "physicalContact": 68,
+        "balance": 90,
+        "stamina": 96,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 170,
+        "weightKg": 68,
+        "armLength": 7,
+        "shoulderWidth": 9,
+        "neckLength": 4,
+        "chestMeasurement": 7,
+        "neckSize": 8,
+        "shoulderHeight": 10,
+        "legLength": 9,
+        "thighSize": 6,
+        "waistSize": 6,
+        "armSize": 6,
+        "calfSize": 4,
+        "sourceValidation": "Public eFHUB indexed card reference; exact configured build not confirmed."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Edged Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blocker",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Attacking Surge",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Low Lofted Pass",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Super-sub",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 564,
+      "goals": 3,
+      "assists": 55,
+      "cleanSheets": null,
+      "goalContributions": 58,
+      "goalsPerMatch": 0.01,
+      "assistsPerMatch": 0.1,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P013",
+    "name": "Kevin De Bruyne",
+    "cardName": "105 AMF · Creative Playmaker",
+    "overallRating": 105,
+    "cardType": null,
+    "primaryPosition": "AMF",
+    "secondaryPositions": [],
+    "squadPosition": "AMF",
+    "playingStyle": "Creative Playmaker",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 181,
+    "weightKg": 70,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/106788187843931?sho=4&pas=8&dri=12&dex=8&lbs=6&b2=1409&pos=AMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 88,
+        "ballControl": 89,
+        "dribbling": 87,
+        "tightPossession": 86,
+        "lowPass": 97,
+        "loftedPass": 98,
+        "finishing": 82,
+        "heading": 65,
+        "setPieceTaking": 89,
+        "curl": 92,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 60,
+        "ballWinning": 58,
+        "aggression": 72,
+        "defensiveEngagement": 65
+      },
+      "athleticism": {
+        "speed": 78,
+        "acceleration": 77,
+        "kickingPower": 95,
+        "jump": 68,
+        "physicalContact": 75,
+        "balance": 80,
+        "stamina": 91,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 181,
+        "weightKg": 70,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB reference for a different De Bruyne card; provisional values only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Sole Control",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Low Screamer",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Weighted Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Visionary Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Super-sub",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 199,
+      "goals": 15,
+      "assists": 24,
+      "cleanSheets": null,
+      "goalContributions": 39,
+      "goalsPerMatch": 0.08,
+      "assistsPerMatch": 0.12,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P014",
+    "name": "Michael Olise",
+    "cardName": "101 AMF · Creative Playmaker",
+    "overallRating": 101,
+    "cardType": null,
+    "primaryPosition": "AMF",
+    "secondaryPositions": [],
+    "squadPosition": "AMF",
+    "playingStyle": "Creative Playmaker",
+    "preferredFoot": "Left",
+    "club": null,
+    "nationality": null,
+    "heightCm": 184,
+    "weightKg": 77,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/56162066233689?pos=AMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 84,
+        "ballControl": 90,
+        "dribbling": 91,
+        "tightPossession": 89,
+        "lowPass": 86,
+        "loftedPass": 84,
+        "finishing": 82,
+        "heading": 60,
+        "setPieceTaking": 82,
+        "curl": 88,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 45,
+        "ballWinning": 42,
+        "aggression": 55,
+        "defensiveEngagement": 48
+      },
+      "athleticism": {
+        "speed": 82,
+        "acceleration": 84,
+        "kickingPower": 82,
+        "jump": 65,
+        "physicalContact": 70,
+        "balance": 88,
+        "stamina": 87,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 184,
+        "weightKg": 77,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB reference for a different Olise card ID; provisional values only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Cut Behind & Turn",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Heel Trick",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Trending Card",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 108,
+      "goals": 17,
+      "assists": 21,
+      "cleanSheets": null,
+      "goalContributions": 38,
+      "goalsPerMatch": 0.16,
+      "assistsPerMatch": 0.19,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P015",
+    "name": "Paolo Maldini",
+    "cardName": "109 LB · Build Up",
+    "overallRating": 109,
+    "cardType": null,
+    "primaryPosition": "LB",
+    "secondaryPositions": [],
+    "squadPosition": "LB",
+    "playingStyle": "Build Up",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 186,
+    "weightKg": 85,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88045755960770?dex=4&lbs=4&aes=8&def=14&b2=56&pos=CB&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 65,
+        "ballControl": 78,
+        "dribbling": 75,
+        "tightPossession": 74,
+        "lowPass": 82,
+        "loftedPass": 85,
+        "finishing": 60,
+        "heading": 90,
+        "setPieceTaking": 68,
+        "curl": 70,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 98,
+        "ballWinning": 97,
+        "aggression": 92,
+        "defensiveEngagement": 96
+      },
+      "athleticism": {
+        "speed": 85,
+        "acceleration": 84,
+        "kickingPower": 80,
+        "jump": 92,
+        "physicalContact": 88,
+        "balance": 80,
+        "stamina": 93,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 186,
+        "weightKg": 85,
+        "armLength": 4,
+        "shoulderWidth": 5,
+        "neckLength": 6,
+        "chestMeasurement": 6,
+        "neckSize": 8,
+        "shoulderHeight": 6,
+        "legLength": 10,
+        "thighSize": 9,
+        "waistSize": 6,
+        "armSize": 6,
+        "calfSize": 8,
+        "sourceValidation": "Public eFHUB reference for a different Maldini card ID; provisional values only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Man Marking",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blocker",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sliding Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-reach Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Fort",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Captaincy",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Heading",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Low Lofted Pass",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Track Back",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acrobatic Clearance",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 365,
+      "goals": 4,
+      "assists": 11,
+      "cleanSheets": null,
+      "goalContributions": 15,
+      "goalsPerMatch": 0.01,
+      "assistsPerMatch": 0.03,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P016",
+    "name": "Lilian Thuram",
+    "cardName": "105 RB · Defensive Full-back",
+    "overallRating": 105,
+    "cardType": null,
+    "primaryPosition": "RB",
+    "secondaryPositions": [],
+    "squadPosition": "RB",
+    "playingStyle": "Defensive Full-back",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 182,
+    "weightKg": 78,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88044145351392?pas=4&dri=4&dex=8&lbs=13&aes=4&def=8&b2=106&pos=RB&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 68,
+        "ballControl": 76,
+        "dribbling": 74,
+        "tightPossession": 73,
+        "lowPass": 80,
+        "loftedPass": 82,
+        "finishing": 62,
+        "heading": 92,
+        "setPieceTaking": 65,
+        "curl": 68,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 95,
+        "ballWinning": 96,
+        "aggression": 95,
+        "defensiveEngagement": 94
+      },
+      "athleticism": {
+        "speed": 87,
+        "acceleration": 86,
+        "kickingPower": 84,
+        "jump": 94,
+        "physicalContact": 91,
+        "balance": 78,
+        "stamina": 95,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 182,
+        "weightKg": 78,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "No verified Player Model values captured from the public reference yet."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Heading",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Man Marking",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blocker",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sliding Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-reach Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fortress",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Track Back",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acrobatic Clearance",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 713,
+      "goals": 2,
+      "assists": 10,
+      "cleanSheets": null,
+      "goalContributions": 12,
+      "goalsPerMatch": 0.0,
+      "assistsPerMatch": 0.01,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P017",
+    "name": "Frank Rijkaard",
+    "cardName": "103 DMF · The Destroyer",
+    "overallRating": 103,
+    "cardType": null,
+    "primaryPosition": "DMF",
+    "secondaryPositions": [],
+    "squadPosition": "DMF",
+    "playingStyle": "The Destroyer",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 190,
+    "weightKg": 85,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88041460993512?pas=8&dri=4&dex=4&lbs=8&aes=4&def=13&b2=57&pos=DMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 72,
+        "ballControl": 84,
+        "dribbling": 82,
+        "tightPossession": 80,
+        "lowPass": 88,
+        "loftedPass": 87,
+        "finishing": 70,
+        "heading": 89,
+        "setPieceTaking": 72,
+        "curl": 75,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 94,
+        "ballWinning": 95,
+        "aggression": 93,
+        "defensiveEngagement": 94
+      },
+      "athleticism": {
+        "speed": 80,
+        "acceleration": 79,
+        "kickingPower": 86,
+        "jump": 89,
+        "physicalContact": 93,
+        "balance": 76,
+        "stamina": 94,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 190,
+        "weightKg": 85,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB reference for a different Rijkaard card ID; provisional values only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Weighted Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Low Lofted Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Man Marking",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blocker",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fortress",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Super-sub",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 49,
+      "goals": 5,
+      "assists": 5,
+      "cleanSheets": null,
+      "goalContributions": 10,
+      "goalsPerMatch": 0.1,
+      "assistsPerMatch": 0.1,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P018",
+    "name": "Tomáš Rosický",
+    "cardName": "106 AMF · Classic No. 10",
+    "overallRating": 106,
+    "cardType": null,
+    "primaryPosition": "AMF",
+    "secondaryPositions": [],
+    "squadPosition": "AMF",
+    "playingStyle": "Classic No. 10",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 179,
+    "weightKg": 67,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88045755960774?sho=4&pas=8&dri=12&dex=8&lbs=7&b2=61&pos=AMF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 85,
+        "ballControl": 92,
+        "dribbling": 93,
+        "tightPossession": 91,
+        "lowPass": 91,
+        "loftedPass": 89,
+        "finishing": 82,
+        "heading": 60,
+        "setPieceTaking": 84,
+        "curl": 89,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 50,
+        "ballWinning": 48,
+        "aggression": 60,
+        "defensiveEngagement": 52
+      },
+      "athleticism": {
+        "speed": 86,
+        "acceleration": 88,
+        "kickingPower": 83,
+        "jump": 62,
+        "physicalContact": 68,
+        "balance": 92,
+        "stamina": 89,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 179,
+        "weightKg": 67,
+        "armLength": 2,
+        "shoulderWidth": 6,
+        "neckLength": 4,
+        "chestMeasurement": 5,
+        "neckSize": 7,
+        "shoulderHeight": 5,
+        "legLength": 8,
+        "thighSize": 6,
+        "waistSize": 4,
+        "armSize": 5,
+        "calfSize": 6,
+        "sourceValidation": "Public eFHUB indexed Rosicky card; URL card ID mismatch, provisional values only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sole Control",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Shooting",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Phenomenal Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Attack Trigger",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Super-sub",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 25,
+      "goals": 1,
+      "assists": 6,
+      "cleanSheets": null,
+      "goalContributions": 7,
+      "goalsPerMatch": 0.04,
+      "assistsPerMatch": 0.24,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P019",
+    "name": "Cafu",
+    "cardName": "105 RB · Attacking Full-back",
+    "overallRating": 105,
+    "cardType": null,
+    "primaryPosition": "RB",
+    "secondaryPositions": [],
+    "squadPosition": "RB",
+    "playingStyle": "Attacking Full-back",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 176,
+    "weightKg": 76,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88044145348045?pas=4&dri=4&dex=8&lbs=13&aes=4&def=8&b2=106&pos=RB&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 75,
+        "ballControl": 82,
+        "dribbling": 84,
+        "tightPossession": 82,
+        "lowPass": 85,
+        "loftedPass": 86,
+        "finishing": 68,
+        "heading": 70,
+        "setPieceTaking": 80,
+        "curl": 82,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 88,
+        "ballWinning": 90,
+        "aggression": 91,
+        "defensiveEngagement": 89
+      },
+      "athleticism": {
+        "speed": 92,
+        "acceleration": 93,
+        "kickingPower": 82,
+        "jump": 75,
+        "physicalContact": 78,
+        "balance": 88,
+        "stamina": 96,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 176,
+        "weightKg": 76,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB reference for a different Cafu card ID; provisional values only."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Scissors Feint",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Edged Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Man Marking",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sliding Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-reach Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 148,
+      "goals": 0,
+      "assists": 7,
+      "cleanSheets": null,
+      "goalContributions": 7,
+      "goalsPerMatch": 0.0,
+      "assistsPerMatch": 0.05,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P020",
+    "name": "Luis Díaz",
+    "cardName": "103 LWF · Prolific Winger",
+    "overallRating": 103,
+    "cardType": null,
+    "primaryPosition": "LWF",
+    "secondaryPositions": [],
+    "squadPosition": "LWF",
+    "playingStyle": "Prolific Winger",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 178,
+    "weightKg": 72,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/106780671726691?sho=4&pas=4&dri=12&dex=9&lbs=8&aes=1&b2=61&pos=LWF&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 86,
+        "ballControl": 89,
+        "dribbling": 92,
+        "tightPossession": 90,
+        "lowPass": 79,
+        "loftedPass": 76,
+        "finishing": 84,
+        "heading": 68,
+        "setPieceTaking": 75,
+        "curl": 80,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 42,
+        "ballWinning": 40,
+        "aggression": 55,
+        "defensiveEngagement": 45
+      },
+      "athleticism": {
+        "speed": 94,
+        "acceleration": 95,
+        "kickingPower": 84,
+        "jump": 70,
+        "physicalContact": 72,
+        "balance": 91,
+        "stamina": 88,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 178,
+        "weightKg": 72,
+        "armLength": 8,
+        "shoulderWidth": 8,
+        "neckLength": 4,
+        "chestMeasurement": 7,
+        "neckSize": 10,
+        "shoulderHeight": 9,
+        "legLength": 11,
+        "thighSize": 7,
+        "waistSize": 5,
+        "armSize": 2,
+        "calfSize": 7,
+        "sourceValidation": "Public eFHUB indexed card ID matches user's Luis Diaz URL; indexed build may differ."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Double Touch",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Marseille Turn",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sole Control",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acceleration Burst",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-range Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acrobatic Finishing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "First-time Shot",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Through Passing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Outside Curler",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 50,
+      "goals": 1,
+      "assists": 4,
+      "cleanSheets": null,
+      "goalContributions": 5,
+      "goalsPerMatch": 0.02,
+      "assistsPerMatch": 0.08,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P021",
+    "name": "Alessandro Nesta",
+    "cardName": "108 CB · Basic",
+    "overallRating": 108,
+    "cardType": null,
+    "primaryPosition": "CB",
+    "secondaryPositions": [],
+    "squadPosition": "CB",
+    "playingStyle": "Basic",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 187,
+    "weightKg": 79,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": false,
+    "inSubstitutes": true,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/88045755942057?dex=4&lbs=4&aes=8&def=15&b2=56&pos=CB&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 55,
+        "ballControl": 75,
+        "dribbling": 72,
+        "tightPossession": 70,
+        "lowPass": 78,
+        "loftedPass": 80,
+        "finishing": 50,
+        "heading": 91,
+        "setPieceTaking": 60,
+        "curl": 62,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 99,
+        "ballWinning": 98,
+        "aggression": 90,
+        "defensiveEngagement": 97
+      },
+      "athleticism": {
+        "speed": 82,
+        "acceleration": 81,
+        "kickingPower": 78,
+        "jump": 93,
+        "physicalContact": 92,
+        "balance": 75,
+        "stamina": 92,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 187,
+        "weightKg": 79,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB indexed card ID matches user's Nesta URL; locale page used."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "Heading",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Man Marking",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blocker",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sliding Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Long-reach Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fortress",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Fort",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 350,
+      "goals": 0,
+      "assists": 3,
+      "cleanSheets": null,
+      "goalContributions": 3,
+      "goalsPerMatch": 0.0,
+      "assistsPerMatch": 0.01,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P022",
+    "name": "Marcel Desailly",
+    "cardName": "107 CB · Basic",
+    "overallRating": 107,
+    "cardType": null,
+    "primaryPosition": "CB",
+    "secondaryPositions": [],
+    "squadPosition": "CB",
+    "playingStyle": "Basic",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 185,
+    "weightKg": 81,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/89138288270047?dex=4&lbs=4&aes=8&def=14&b2=56&pos=CB&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 60,
+        "ballControl": 78,
+        "dribbling": 74,
+        "tightPossession": 72,
+        "lowPass": 80,
+        "loftedPass": 82,
+        "finishing": 55,
+        "heading": 93,
+        "setPieceTaking": 62,
+        "curl": 65,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": null,
+      "defending": {
+        "defensiveAwareness": 96,
+        "ballWinning": 97,
+        "aggression": 98,
+        "defensiveEngagement": 96
+      },
+      "athleticism": {
+        "speed": 84,
+        "acceleration": 83,
+        "kickingPower": 88,
+        "jump": 95,
+        "physicalContact": 95,
+        "balance": 76,
+        "stamina": 95,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 185,
+        "weightKg": 81,
+        "armLength": null,
+        "shoulderWidth": null,
+        "neckLength": null,
+        "chestMeasurement": null,
+        "neckSize": null,
+        "shoulderHeight": null,
+        "legLength": null,
+        "thighSize": null,
+        "waistSize": null,
+        "armSize": null,
+        "calfSize": null,
+        "sourceValidation": "Public eFHUB indexed card ID matches user's Desailly URL; German locale page used."
+      }
+    },
+    "skills": [
+      {
+        "skillName": "One-touch Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Low Lofted Pass",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Man Marking",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Interception",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Blocker",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Superiority",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Sliding Tackle",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Aerial Fort",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Shadow Hunt",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Fighting Spirit",
+        "skillType": "Default",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Pinpoint Crossing",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Track Back",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      },
+      {
+        "skillName": "Acrobatic Clearance",
+        "skillType": "Additional",
+        "isHighlightGold": false,
+        "isVerified": false,
+        "notes": "User-provided CSV; verify against exact eFHUB card."
+      }
+    ],
+    "overallPerformance": {
+      "matchesPlayed": 728,
+      "goals": 0,
+      "assists": 1,
+      "cleanSheets": null,
+      "goalContributions": 1,
+      "goalsPerMatch": 0.0,
+      "assistsPerMatch": 0.0,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  },
+  {
+    "id": "P023",
+    "name": "Manuel Neuer",
+    "cardName": "107 GK ·",
+    "overallRating": 107,
+    "cardType": null,
+    "primaryPosition": "GK",
+    "secondaryPositions": [],
+    "squadPosition": "GK",
+    "playingStyle": "None",
+    "preferredFoot": "Right",
+    "club": null,
+    "nationality": null,
+    "heightCm": 193,
+    "weightKg": 92,
+    "age": null,
+    "imageUrl": null,
+    "inStartingXI": true,
+    "inSubstitutes": false,
+    "isAcquired": true,
+    "booster": null,
+    "managerNotes": "José Mourinho · Quick Counter 90",
+    "generalNotes": "Initial data from user-provided Player Stats Comparison.csv. Verify missing card metadata.",
+    "efhubUrl": "https://efhub.com/players/106788187832737?aes=5&gk1=12&gk2=8&gk3=8&b2=1405&pos=GK&mgr=17609097478250&msk=QuickCounter&msv=90",
+    "provenance": {
+      "source": "Bala_EFoot_Player_Data_Template_v1.xlsx",
+      "attributeNotes": "Imported from user-provided Gemini workbook: eFootball Master Squad Attributes (Individual Headers). Treat as supplied build values; verify against exact eFHUB build if discrepancies matter.",
+      "additionalBoosterNotes": null,
+      "isVerified": false
+    },
+    "attributes": {
+      "attacking": {
+        "offensiveAwareness": 40,
+        "ballControl": 65,
+        "dribbling": 60,
+        "tightPossession": 58,
+        "lowPass": 75,
+        "loftedPass": 78,
+        "finishing": 40,
+        "heading": 45,
+        "setPieceTaking": 50,
+        "curl": 52,
+        "weakFootUsage": null,
+        "weakFootAccuracy": null
+      },
+      "goalkeeping": {
+        "gkAwareness": 96,
+        "gkCatching": 95,
+        "gkParrying": 94,
+        "gkReflexes": 97,
+        "gkReach": 96,
+        "gkClearing": null
+      },
+      "defending": {
+        "defensiveAwareness": 40,
+        "ballWinning": 40,
+        "aggression": 50,
+        "defensiveEngagement": 42
+      },
+      "athleticism": {
+        "speed": 72,
+        "acceleration": 70,
+        "kickingPower": 88,
+        "jump": 80,
+        "physicalContact": 85,
+        "balance": 65,
+        "stamina": 82,
+        "form": null,
+        "injuryResistance": null
+      },
+      "playerModel": {
+        "heightCm": 193,
+        "weightKg": 92,
+        "armLength": 9,
+        "shoulderWidth": 10,
+        "neckLength": 8,
+        "chestMeasurement": 5,
+        "neckSize": 6,
+        "shoulderHeight": 5,
+        "legLength": 11,
+        "thighSize": 5,
+        "waistSize": 5,
+        "armSize": 8,
+        "calfSize": 6,
+        "sourceValidation": "Public eFHUB indexed card ID matches user's Neuer URL; configured build may differ."
+      }
+    },
+    "skills": [],
+    "overallPerformance": {
+      "matchesPlayed": null,
+      "goals": null,
+      "assists": null,
+      "cleanSheets": null,
+      "goalContributions": null,
+      "goalsPerMatch": null,
+      "assistsPerMatch": null,
+      "notes": "User-provided all-time totals; blank values remain blank."
+    }
+  }
+]
