@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Node.js
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
