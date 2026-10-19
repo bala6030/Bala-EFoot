@@ -5,6 +5,7 @@ export type NavigationView =
   | 'dashboard'
   | 'squad'
   | 'players'
+  | 'seasons'
   | 'skills'
   | 'stats'
   | 'wishlist';
@@ -293,3 +294,57 @@ export interface SquadValidationResult {
   missingPlayerIds: string[];
   unfilledSlotNames: string[];
 }
+
+/**
+ * Season lifecycle status
+ */
+export type SeasonStatus = 'Draft' | 'Active' | 'Closed';
+
+/**
+ * Core Season entity
+ */
+export interface Season {
+  id: string; // Unique season/phase identifier (e.g. "Phase 1 - Season 2024", "Season 1")
+  startDate: string; // ISO date string (YYYY-MM-DD)
+  startingDivision: number; // eFootball starting division (1-10)
+  notes?: string; // Optional user notes / objectives
+  status: SeasonStatus; // Draft | Active | Closed
+  createdAt: string; // ISO 8601 creation timestamp
+  updatedAt: string; // ISO 8601 update timestamp
+
+  // Extensibility hooks for future milestones (Milestones 4B, 4C, 5):
+  baselineSnapshot?: unknown;
+  progressSnapshots?: unknown[];
+  rewardEligibility?: unknown;
+  rewardAcquired?: unknown;
+  closedAt?: string;
+  closureNotes?: string;
+}
+
+/**
+ * Draft input model for creating or editing a season
+ */
+export interface SeasonDraftInput {
+  id?: string;
+  startDate?: string;
+  startingDivision?: number;
+  notes?: string;
+}
+
+/**
+ * Persisted seasons storage state container
+ */
+export interface SeasonsState {
+  version: number;
+  seasons: Season[];
+  activeDraftId: string | null;
+}
+
+/**
+ * Validation result for season form inputs
+ */
+export interface SeasonValidationResult {
+  isValid: boolean;
+  errors: Record<string, string>;
+}
+

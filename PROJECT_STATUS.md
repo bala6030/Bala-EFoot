@@ -4,7 +4,7 @@
 - **App**: Bala EFoot
 - **Tagline**: Squad • Skills • Seasons
 - **Repository**: https://github.com/bala6030/Bala-EFoot
-- **Active Branch**: `feature/squad-builder`
+- **Active Branch**: `feature/season-workflow`
 - **Cost Target**: ₹0; no billing-enabled usage, paid APIs, or payment method
 
 ## Git Branch Plan
@@ -12,7 +12,8 @@
 - `develop`: integration branch created from `main`.
 - `feature/project-foundation`: Milestone 1 foundation implementation (merged into `develop`).
 - `feature/player-catalogue`: Milestone 2 player catalogue and player profile implementation (merged into `develop`).
-- `feature/squad-builder`: Milestone 3 squad & pitch formation builder implementation.
+- `feature/squad-builder`: Milestone 3 squad & pitch formation builder implementation (merged into `develop`).
+- `feature/season-workflow`: Milestone 4 season workflow implementation.
 - Feature branches merge into `develop` after review.
 
 ## Milestones Status
@@ -64,16 +65,38 @@
 - **Automated Verification**:
   - Dedicated test suite in `scripts/test_squad_builder.js` (`npm run test:squad`) verifying formation structures, layout independence, transition mappings, and validation logic.
 
+### Milestone 4A — Season Foundation (Completed)
+- **Typed Season Model**:
+  - Created `Season`, `SeasonStatus` (`Draft` | `Active` | `Closed`), `SeasonDraftInput`, `SeasonsState`, and `SeasonValidationResult` models in `src/types/index.ts`.
+  - Structured with extensible fields for starting baselines, progress snapshots, reward eligibility, acquisition records, and final closure data.
+- **Season Storage & Repository Layer**:
+  - Dedicated `seasonRepository.ts` utilizing versioned `localStorage` key `bala_efoot_seasons_v1`.
+  - Comprehensive data validation and corruption recovery (recovers gracefully from malformed JSON or corrupted records without crashing or data loss).
+  - Strict duplicate season identifier prevention (case-insensitive and trimmed checking) that preserves existing data on collision.
+  - Separate draft persistence (`activeDraftId`) ensuring drafts survive page refresh without silent activation.
+  - Explicit activation requiring full validation (non-empty identifier, valid start date, starting division between 1 and 10).
+  - Completely isolated storage: preserves existing player catalogue and squad builder storage keys.
+- **Seasons Screen & Guided Workflow**:
+  - Full Seasons screen (`SeasonsView.tsx` + `SeasonsView.module.css`) integrated into desktop, mobile drawer, and mobile bottom navigation.
+  - Connected Dashboard CTA ("Add Match Stats") directly to Seasons view.
+  - Guided 2-step season creation wizard:
+    - **Step 1 (Season Setup)**: Inputs for unique identifier, start date, starting division (1-10), and optional tactical notes, with inline validation errors and explicit "Save Draft" action.
+    - **Step 2 (Review & Activation)**: Comprehensive review card with explicit "Activate Season" confirmation.
+  - Responsive saved seasons grid showing status badges (`Active` neon lime, `Draft` electric blue, `Closed` purple), metadata, and resume/discard controls.
+- **Automated Verification**:
+  - Dedicated test suite `scripts/test_season_repository.js` (`npm run test:season`) verifying creation, reload persistence, duplicate rejection, explicit activation, corrupted storage resilience, and subsystem storage isolation.
+
 ## Known Limitations
+- Milestone 4A implements the season foundation only; starting baselines, cumulative player stats entry, deltas, reward eligibility, and season closure will be added in subsequent milestones (4B/4C).
 - Position familiarity is intentionally not tracked (per specification).
 - Tactician/manager auto-arrange and tactical instruction controls are excluded (per milestone scope).
 - Card artwork currently displays clean initials and rating badges until official image assets are added to the repository.
 
 ## Commands Executed & Results
-- `npm run import-data`: Ingested 23 authentic players from Excel template (Exit 0).
-- `npm run test:squad`: Ran Node.js unit test suite for formations, independence, and validation (Exit 0).
 - `npm run lint`: ESLint check passed with 0 errors and 0 warnings (Exit 0).
-- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 966ms (Exit 0).
+- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.90s (Exit 0).
+- `npm run test:squad`: Node.js unit test suite for formations, independence, and validation passed (Exit 0).
+- `npm run test:season`: Node.js unit test suite for season repository, persistence, duplicate rejection, and activation validation passed (Exit 0).
 
 ## Next Action
-Review Milestone 3 and prepare for **Milestone 4: Season Workflow** (manual season start/closure, guided division stats entry, baseline deltas, cumulative matches/goals/assists validation, draft saving, and rank 100,000 reward qualification).
+Review Milestone 4A and prepare for **Milestone 4B: Starting Baselines & Progress Entry** (Starting XI / substitutes baseline capture, cumulative player statistics, delta calculation, decrease warnings, and progress snapshots).

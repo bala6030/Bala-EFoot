@@ -9,6 +9,7 @@ import { ViewPlaceholder } from './components/common/ViewPlaceholder';
 import { PlayerCatalogue } from './components/players/PlayerCatalogue';
 import { PlayerProfile } from './components/players/PlayerProfile';
 import { SquadBuilderView } from './components/squad/SquadBuilderView';
+import { SeasonsView } from './components/seasons/SeasonsView';
 import { getPlayerById } from './data/playerRepository';
 import styles from './App.module.css';
 
@@ -30,9 +31,11 @@ export function App() {
   const renderContent = () => {
     switch (currentView) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView onAddMatchStats={() => setCurrentView('seasons')} />;
       case 'squad':
         return <SquadBuilderView />;
+      case 'seasons':
+        return <SeasonsView />;
       case 'players':
         if (selectedPlayer) {
           return (
