@@ -30,6 +30,9 @@ import {
   setSeasonRank,
   recordSeasonReward,
   getSeasonReward,
+  getSeasonReviewSummary,
+  closeSeason,
+  getSeasonClosureSnapshot,
 } from '../src/data/seasonRepository.ts';
 
 // In-memory localStorage mock for Node.js test environment
@@ -518,7 +521,302 @@ assert.strictEqual(reloadedRewardSeason.baseline.players[0].matches, 10, 'Baseli
 assert.strictEqual(reloadedRewardSeason.progressSnapshots.length, 2, 'All progress snapshots unmodified');
 console.log('   ✓ Baseline snapshots and progress history completely untouched.');
 
+// =============================================================
+// MILESTONE 4C2: FINAL SEASON REVIEW & CLOSURE TESTS
+// =============================================================
+
+// -------------------------------------------------------------
+// Test 25: Review Data Uses Confirmed Snapshots Only
+// -------------------------------------------------------------
+console.log('\n25. Verifying Review Data Uses Confirmed Snapshots Only...');
+// Add an unconfirmed progress draft to Phase 1
+saveProgressDraft('Phase 1 - Season 2024', {
+  seasonId: 'Phase 1 - Season 2024',
+  recordingDate: '2024-10-30',
+  updatedAt: new Date().toISOString(),
+  players: AUTHENTIC_PLAYER_IDS.map((id) => ({
+    playerId: id,
+    matches: 999, // Unconfirmed draft value
+    goals: 999,
+    assists: 999,
+  })),
+});
+
+const reviewSummary1 = getSeasonReviewSummary('Phase 1 - Season 2024');
+assert.ok(reviewSummary1);
+assert.strictEqual(reviewSummary1.snapshotCount, 2, 'Must count only 2 confirmed snapshots');
+assert.strictEqual(reviewSummary1.hasUnconfirmedProgressDraft, true, 'Draft must be flagged as unconfirmed');
+// Verify latest confirmed snapshot values are used, NOT draft values
+assert.strictEqual(reviewSummary1.deltas[0].currentMatches !== 999, true, 'Draft values must not be used in review');
+assert.strictEqual(reviewSummary1.deltas[0].currentMatches, 17, 'Confirmed snapshot values used');
+console.log('   ✓ Review data exclusively uses confirmed baseline and snapshots; drafts excluded.');
+
+// -------------------------------------------------------------
+// Test 26: Missing Rank Remains Eligibility Unknown
+// -------------------------------------------------------------
+console.log('\n26. Verifying Missing Rank Remains Eligibility Unknown...');
+// Create a separate active season with baseline but NO rank
+saveSeasonDraft({ id: 'Unranked Season', startDate: '2024-10-01', startingDivision: 6 });
+activateSeason('Unranked Season');
+confirmSeasonBaseline('Unranked Season', { players: generateValidBaselinePayload(5, 1, 0) });
+
+const unrankedReview = getSeasonReviewSummary('Unranked Season');
+assert.strictEqual(unrankedReview.finalRank, null);
+assert.strictEqual(unrankedReview.rewardEligibility, 'Eligibility Unknown');
+assert.strictEqual(unrankedReview.warnings.some((w) => w.includes('Eligibility Unknown')), true);
+console.log('   ✓ Missing rank correctly evaluated as Eligibility Unknown with warning.');
+
+// -------------------------------------------------------------
+// Test 27: Rank Boundary Conditions (100,000 vs 100,001)
+// -------------------------------------------------------------
+console.log('\n27. Verifying Rank Boundary Rules for Closure Review...');
+saveSeasonDraft({ id: 'Boundary 100k Season', startDate: '2024-10-01', startingDivision: 3 });
+activateSeason('Boundary 100k Season');
+confirmSeasonBaseline('Boundary 100k Season', { players: generateValidBaselinePayload(5, 1, 0) });
+setSeasonRank('Boundary 100k Season', 100000);
+const review100k = getSeasonReviewSummary('Boundary 100k Season');
+assert.strictEqual(review100k.rewardEligibility, 'Eligible');
+
+saveSeasonDraft({ id: 'Boundary 100k1 Season', startDate: '2024-10-01', startingDivision: 3 });
+activateSeason('Boundary 100k1 Season');
+confirmSeasonBaseline('Boundary 100k1 Season', { players: generateValidBaselinePayload(5, 1, 0) });
+setSeasonRank('Boundary 100k1 Season', 100001);
+const review100k1 = getSeasonReviewSummary('Boundary 100k1 Season');
+assert.strictEqual(review100k1.rewardEligibility, 'Not Eligible');
+console.log('   ✓ Rank 100,000 qualifies as Eligible; Rank 100,001 is Not Eligible.');
+
+// -------------------------------------------------------------
+// Test 28: Active Seasons Can Be Closed With Valid Essential Data
+// -------------------------------------------------------------
+console.log('\n28. Verifying Active Season Closure With Valid Essential Data...');
+// Phase 1 - Season 2024 is Active, has baseline, 2 snapshots, rank 45,000, reward acquired
+const closeResult = closeSeason({
+  seasonId: 'Phase 1 - Season 2024',
+  acknowledgedIncompleteData: true,
+  closureNotes: 'Successfully completed division campaign with all objectives met.',
+});
+
+assert.strictEqual(closeResult.success, true);
+assert.strictEqual(closeResult.season.status, 'Closed');
+assert.ok(closeResult.season.closedAt);
+assert.ok(closeResult.closureSnapshot);
+assert.strictEqual(closeResult.closureSnapshot.seasonId, 'Phase 1 - Season 2024');
+console.log('   ✓ Active season with confirmed baseline closed successfully with frozen snapshot.');
+
+// -------------------------------------------------------------
+// Test 29: Draft or Invalid Seasons Cannot Be Closed
+// -------------------------------------------------------------
+console.log('\n29. Verifying Draft or Incomplete Seasons Cannot Be Closed...');
+// Draft season
+saveSeasonDraft({ id: 'Pending Draft Season', startDate: '2024-10-01', startingDivision: 5 });
+const closeDraftAttempt = closeSeason({ seasonId: 'Pending Draft Season' });
+assert.strictEqual(closeDraftAttempt.success, false);
+assert.ok(closeDraftAttempt.error.includes('Only Active seasons can be closed'));
+
+// Active season without confirmed baseline
+saveSeasonDraft({ id: 'Active No Baseline', startDate: '2024-10-01', startingDivision: 5 });
+activateSeason('Active No Baseline');
+const closeNoBaseAttempt = closeSeason({ seasonId: 'Active No Baseline' });
+assert.strictEqual(closeNoBaseAttempt.success, false);
+assert.ok(closeNoBaseAttempt.error.includes('confirmed baseline snapshot is required'));
+console.log('   ✓ Draft seasons and seasons lacking confirmed baseline rejected from closure.');
+
+// -------------------------------------------------------------
+// Test 30: Closure Requires Explicit Confirmation Operation
+// -------------------------------------------------------------
+console.log('\n30. Verifying Closure Requires Explicit Operation...');
+// Simply retrieving review summary does NOT close the season
+const unrankedBefore = getSeasonById('Unranked Season');
+assert.strictEqual(unrankedBefore.status, 'Active');
+getSeasonReviewSummary('Unranked Season');
+const unrankedAfter = getSeasonById('Unranked Season');
+assert.strictEqual(unrankedAfter.status, 'Active', 'Loading review must not close season');
+assert.strictEqual(unrankedAfter.closedAt, undefined);
+console.log('   ✓ Inspecting review summary or saving drafts does not trigger season closure.');
+
+// -------------------------------------------------------------
+// Test 31: Duplicate Closure Requests Rejected
+// -------------------------------------------------------------
+console.log('\n31. Verifying Duplicate Closure Requests Are Rejected...');
+const originalClosedSeason = getSeasonById('Phase 1 - Season 2024');
+const originalClosedAt = originalClosedSeason.closedAt;
+const originalSnapshotId = originalClosedSeason.closureSnapshot.id;
+
+// Attempt to close again
+const duplicateClose = closeSeason({
+  seasonId: 'Phase 1 - Season 2024',
+});
+assert.strictEqual(duplicateClose.success, false);
+assert.ok(duplicateClose.error.includes('already closed'));
+
+const checkSeasonAfterDup = getSeasonById('Phase 1 - Season 2024');
+assert.strictEqual(checkSeasonAfterDup.closedAt, originalClosedAt, 'Timestamp unchanged');
+assert.strictEqual(checkSeasonAfterDup.closureSnapshot.id, originalSnapshotId, 'Snapshot ID unchanged');
+console.log('   ✓ Duplicate closure rejected; timestamp and frozen snapshot unmodified.');
+
+// -------------------------------------------------------------
+// Test 32: Closed Seasons Reject All Mutations
+// -------------------------------------------------------------
+console.log('\n32. Verifying Closed Seasons Reject All Mutations...');
+// 1. saveBaselineDraft
+const baseDraftMut = saveBaselineDraft('Phase 1 - Season 2024', { seasonId: 'Phase 1 - Season 2024', players: [] });
+assert.strictEqual(baseDraftMut.success, false);
+assert.ok(baseDraftMut.error.includes('closed'));
+
+// 2. confirmSeasonBaseline
+const baseConfMut = confirmSeasonBaseline('Phase 1 - Season 2024', { players: generateValidBaselinePayload() });
+assert.strictEqual(baseConfMut.success, false);
+assert.ok(baseConfMut.error.includes('closed'));
+
+// 3. saveProgressDraft
+const progDraftMut = saveProgressDraft('Phase 1 - Season 2024', { seasonId: 'Phase 1 - Season 2024', recordingDate: '2024-10-31', players: [] });
+assert.strictEqual(progDraftMut.success, false);
+assert.ok(progDraftMut.error.includes('closed'));
+
+// 4. confirmProgressSnapshot
+const progConfMut = confirmProgressSnapshot('Phase 1 - Season 2024', { recordingDate: '2024-10-31', players: generateValidBaselinePayload(20, 5, 2) });
+assert.strictEqual(progConfMut.success, false);
+assert.ok(progConfMut.error.includes('closed'));
+
+// 5. setSeasonRank
+const rankMut = setSeasonRank('Phase 1 - Season 2024', 10);
+assert.strictEqual(rankMut.success, false);
+assert.ok(rankMut.error.includes('closed'));
+
+// 6. recordSeasonReward
+const rewardMut = recordSeasonReward('Phase 1 - Season 2024', { cardName: 'Duplicate Test', acquiredDate: '2024-10-31' });
+assert.strictEqual(rewardMut.success, false);
+assert.ok(rewardMut.error.includes('closed'));
+
+// 7. saveSeasonDraft
+const seasonDraftMut = saveSeasonDraft({ id: 'Phase 1 - Season 2024', startingDivision: 1 }, 'Phase 1 - Season 2024');
+assert.strictEqual(seasonDraftMut.success, false);
+assert.ok(seasonDraftMut.error.includes('Closed seasons are immutable'));
+
+// 8. activateSeason
+const activateMut = activateSeason('Phase 1 - Season 2024');
+assert.strictEqual(activateMut.success, false);
+assert.ok(activateMut.error.includes('closed'));
+
+// 9. discardDraft
+const deleteMut = discardDraft('Phase 1 - Season 2024');
+assert.strictEqual(deleteMut.success, false);
+assert.ok(deleteMut.error.includes('Closed seasons cannot be deleted'));
+
+console.log('   ✓ Baseline, progress, rank, reward, edit, activation, and delete mutations all rejected.');
+
+// -------------------------------------------------------------
+// Test 33: Final Snapshot Preserves Baseline and Every Progress Snapshot
+// -------------------------------------------------------------
+console.log('\n33. Verifying Final Snapshot Preserves Complete History...');
+const closedSnap = getSeasonClosureSnapshot('Phase 1 - Season 2024');
+assert.ok(closedSnap);
+assert.strictEqual(closedSnap.baseline.players.length, 23);
+assert.strictEqual(closedSnap.baseline.players[0].matches, 10);
+assert.strictEqual(closedSnap.progressSnapshots.length, 2);
+assert.strictEqual(closedSnap.progressSnapshots[0].recordingDate, '2024-10-15');
+assert.strictEqual(closedSnap.progressSnapshots[1].recordingDate, '2024-10-22');
+
+// Verify deep copy: mutate an in-memory object and verify closed snapshot is unmutated
+const loadedClosed = getSeasonById('Phase 1 - Season 2024');
+loadedClosed.baseline.players[0].matches = 9999;
+const freshCheck = getSeasonClosureSnapshot('Phase 1 - Season 2024');
+assert.strictEqual(freshCheck.baseline.players[0].matches, 10, 'Final snapshot must be completely decoupled from in-memory mutations');
+console.log('   ✓ Baseline and progress history fully preserved in original order and deep-copied.');
+
+// -------------------------------------------------------------
+// Test 34: Final Snapshot Preserves Reward Eligibility and Acquisition Details
+// -------------------------------------------------------------
+console.log('\n34. Verifying Reward Eligibility & Acquisition in Snapshot...');
+assert.strictEqual(closedSnap.finalRank, 45000);
+assert.strictEqual(closedSnap.rewardEligibility, 'Eligible');
+assert.strictEqual(closedSnap.rewardAcquisitionStatus, 'Acquired');
+assert.ok(closedSnap.rewardAcquisition);
+assert.strictEqual(closedSnap.rewardAcquisition.cardName, 'Alessandro Costacurta');
+assert.strictEqual(closedSnap.rewardAcquisition.seasonId, 'Phase 1 - Season 2024');
+console.log('   ✓ Reward eligibility and acquisition details cleanly preserved.');
+
+// -------------------------------------------------------------
+// Test 35: Incomplete Non-Essential Information Requires & Records Acknowledgement
+// -------------------------------------------------------------
+console.log('\n35. Verifying Incomplete Data Acknowledgement Requirement...');
+// Unranked Season has no rank and 0 snapshots (warnings exist)
+const unackClose = closeSeason({
+  seasonId: 'Unranked Season',
+  acknowledgedIncompleteData: false, // Not acknowledged
+});
+assert.strictEqual(unackClose.success, false);
+assert.ok(unackClose.error.includes('Explicit acknowledgement'));
+
+// Now close WITH acknowledgement
+const ackClose = closeSeason({
+  seasonId: 'Unranked Season',
+  acknowledgedIncompleteData: true,
+  closureNotes: 'Closed without final rank or snapshots.',
+});
+assert.strictEqual(ackClose.success, true);
+assert.strictEqual(ackClose.closureSnapshot.incompleteDataAcknowledged, true);
+assert.ok(ackClose.closureSnapshot.warnings.length > 0);
+assert.strictEqual(ackClose.closureSnapshot.rewardEligibility, 'Eligibility Unknown');
+assert.strictEqual(ackClose.closureSnapshot.rewardAcquisitionStatus, 'Not Acquired');
+console.log('   ✓ Incomplete data requires acknowledgement; recorded in closure snapshot.');
+
+// -------------------------------------------------------------
+// Test 36: Concurrency Protection (Changed Season Rejects Closure)
+// -------------------------------------------------------------
+console.log('\n36. Verifying Concurrency Protection on Season Closure...');
+saveSeasonDraft({ id: 'Concurrency Season', startDate: '2024-10-01', startingDivision: 4 });
+activateSeason('Concurrency Season');
+confirmSeasonBaseline('Concurrency Season', { players: generateValidBaselinePayload(10, 2, 1) });
+
+const concSeasonBefore = getSeasonById('Concurrency Season');
+const oldUpdatedAt = '2020-01-01T00:00:00.000Z'; // Stale timestamp
+
+const staleClose = closeSeason({
+  seasonId: 'Concurrency Season',
+  expectedUpdatedAt: oldUpdatedAt,
+  acknowledgedIncompleteData: true,
+});
+assert.strictEqual(staleClose.success, false);
+assert.ok(staleClose.error.includes('Season data has changed'));
+console.log('   ✓ Stale closure attempt rejected when season was modified concurrently.');
+
+// -------------------------------------------------------------
+// Test 37: Reload Persistence of Closed State and Historical Snapshot
+// -------------------------------------------------------------
+console.log('\n37. Verifying Reload Persistence of Closed State & Snapshot...');
+const reloadedStatePostClose = loadSeasonsState();
+const reloadedClosed = reloadedStatePostClose.seasons.find((s) => s.id === 'Phase 1 - Season 2024');
+assert.ok(reloadedClosed);
+assert.strictEqual(reloadedClosed.status, 'Closed');
+assert.ok(reloadedClosed.closedAt);
+assert.ok(reloadedClosed.closureSnapshot);
+assert.strictEqual(reloadedClosed.closureSnapshot.metadata.id, 'Phase 1 - Season 2024');
+assert.strictEqual(reloadedClosed.closureSnapshot.rewardAcquisition.cardName, 'Alessandro Costacurta');
+console.log('   ✓ Closed season and closure snapshot persist accurately across reloads.');
+
+// -------------------------------------------------------------
+// Test 38: Creating a New Season Leaves Earlier Closed Records Unchanged
+// -------------------------------------------------------------
+console.log('\n38. Verifying New Season Creation Preserves Closed Records...');
+const createNewRes = saveSeasonDraft({
+  id: 'Phase 2 - Season 2025',
+  startDate: '2025-01-01',
+  startingDivision: 2,
+  notes: 'New campaign',
+});
+assert.strictEqual(createNewRes.success, true);
+activateSeason('Phase 2 - Season 2025');
+
+// Verify Phase 1 is completely untouched
+const phase1AfterNew = getSeasonById('Phase 1 - Season 2024');
+assert.strictEqual(phase1AfterNew.status, 'Closed');
+assert.strictEqual(phase1AfterNew.closureSnapshot.rewardAcquisition.cardName, 'Alessandro Costacurta');
+assert.strictEqual(phase1AfterNew.closureSnapshot.progressSnapshots.length, 2);
+console.log('   ✓ New season creation and activation leaves earlier closed records untouched.');
+
 console.log('\n========================================================================');
-console.log('🎉 All Season Workflow (Milestone 4A, 4B & 4C1) tests passed!');
+console.log('🎉 All Season Workflow (Milestone 4A, 4B, 4C1 & 4C2) tests passed (38 tests)!');
 console.log('========================================================================');
+
 

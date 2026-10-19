@@ -137,17 +137,49 @@
 - **Automated Verification**:
   - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 12 new test suites (Tests 13–24, 24 total) covering boundary conditions (100,000 vs 100,001), missing rank, invalid rank rejection, rank corrections, acquisition decoupling, 1-card limit enforcement, duplicate prevention, and reload persistence.
 
+### Milestone 4C2 — Final Season Review & Closure (Completed)
+- **Guided Final Season Review**:
+  - Implemented `getSeasonReviewSummary` in `src/data/seasonRepository.ts` and `close-review` view mode in `SeasonsView.tsx`.
+  - Aggregates verified season metadata: season identifier, start date, starting division, tactical notes, confirmed baseline status, confirmed snapshot count, latest confirmed cumulative statistics snapshot, and deltas.
+  - Distinguishes entered zeroes from missing values; draft progress entries and unconfirmed baseline drafts are strictly excluded from confirmed review metrics.
+  - Computes and displays squad-level totals and individual player stat deltas with filter tabs (All 23, Starting XI 11, Substitutes 12).
+  - Evaluates data completeness and generates visible warnings for missing rank, zero progress snapshots, or unconfirmed progress drafts.
+  - Requires explicit user acknowledgement checkbox ("I acknowledge the incomplete or unrecorded data listed above...") before permitting closure when non-essential data is missing.
+  - Supports inline rank updates and reward claims directly within the review panel with immediate eligibility recomputation.
+- **Explicit Closure Workflow & Concurrency Protection**:
+  - Requires deliberate two-step closure: complete review followed by an explicit irreversible closure confirmation modal.
+  - Only `Active` seasons with a confirmed baseline can be closed; `Draft` seasons and unconfirmed seasons are strictly rejected.
+  - Concurrency protection via `expectedUpdatedAt`: rejects closure if the season record was modified concurrently after the review was loaded.
+  - Duplicate submission prevention: disables actions during submission and domain-level rejection for already closed seasons.
+  - Non-closure on inspection: loading review summary or saving drafts never triggers season closure.
+- **Immutable Final Snapshot Data Model**:
+  - Defined typed `SeasonClosureSnapshot` in `src/types/index.ts` with schema version `1`, unique snapshot ID (`closure-<seasonId>-<timestamp>`), closedAt, closedDate, frozen metadata, deep-copied confirmed baseline, deep-copied confirmed progress snapshots (in original chronological order), stats summary (matches, goals, assists deltas), final rank, reward eligibility, reward acquisition record, closure warnings, acknowledgement status, and closure notes.
+  - Deep-copies all confirmed arrays and nested objects (`JSON.parse(JSON.stringify(...))`) ensuring subsequent in-memory mutations cannot alter saved historical snapshots.
+  - Discards unconfirmed progress drafts upon closure so only verified data is retained.
+- **Closed-Season Mutation Protections**:
+  - Enforced comprehensive domain-level immutability guards in `seasonRepository.ts`.
+  - Normal season mutations are strictly rejected on closed seasons: `saveBaselineDraft`, `confirmSeasonBaseline`, `discardBaselineDraft`, `saveProgressDraft`, `confirmProgressSnapshot`, `discardProgressDraft`, `setSeasonRank`, `recordSeasonReward`, `saveSeasonDraft`, `activateSeason`, and `discardDraft`.
+  - Closed seasons cannot be reopened or closed again; duplicate closure attempts leave the original timestamp and snapshot untouched.
+- **Read-Only Historical Seasons Inspection**:
+  - Integrated `closed-detail` view mode in `SeasonsView.tsx`.
+  - Closed season cards feature a purple `Immutable` badge, closure date, and "View Historical Record" action. Normal edit, progress entry, rank update, and reward claim controls are hidden.
+  - Detailed historical view presents frozen closure metadata, snapshot ID, final rank, reward acquisition status (with recorded card details or explicit "Not Acquired"), cumulative statistics deltas table, preserved chronological progress snapshots ledger with individual snapshot inspection, and acknowledged warnings.
+- **Automated Verification**:
+  - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 14 new test suites (Tests 25–38, 38 total) verifying confirmed snapshot isolation, missing rank handling, rank boundary conditions, active closure, draft rejection, explicit confirmation requirement, duplicate closure rejection, closed-season mutation rejection, deep-copy immutability, reward preservation, acknowledgement requirement, concurrency mismatch rejection, storage reload persistence, and backward compatibility with new seasons.
+
 ## Known Limitations
-- Milestone 4C1 implements rank-based reward eligibility and reward acquisition tracking. Season closure, final closure review, and immutable closed season snapshots will be implemented in Milestone 4C2.
+- Milestone 4 (Season Workflow: 4A Foundation, 4B Baselines & Progress, 4C1 Reward Eligibility & Acquisition, and 4C2 Final Review & Closure) is now fully completed.
+- Reopening closed seasons and silent historical edits are intentionally prohibited; if corrections are required in future milestones, they must be recorded as explicit correction records rather than in-place mutations.
 - Position familiarity is intentionally not tracked (per specification).
 - Tactician/manager auto-arrange and tactical instruction controls are excluded (per milestone scope).
 - Card artwork currently displays clean initials and rating badges until official image assets are added to the repository.
+- Cross-season broad analytics dashboards, cloud sync, authentication, and automatic/date-based season closure are excluded (per ₹0 budget and milestone scope).
 
 ## Commands Executed & Results
 - `npm run lint`: ESLint check passed with 0 errors and 0 warnings (Exit 0).
-- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.11s (Exit 0).
+- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.01s (Exit 0).
 - `npm run test:squad`: Node.js unit test suite for formations, independence, and validation passed (Exit 0).
-- `npm run test:season`: Node.js unit test suite for season baseline creation, validation, immutability, deltas, decreases, drafts, rank eligibility (100k boundary), and 1-card reward acquisition passed (24 tests, Exit 0).
+- `npm run test:season`: Node.js unit test suite for season workflows passed (38 tests covering Milestones 4A, 4B, 4C1, and 4C2, Exit 0).
 
 ## Next Action
-Review Milestone 4C1 and prepare for **Milestone 4C2: Season Closure Workflow** (final season closure review, confirmation step, immutable closed snapshots, closed season browsing, and reopening prevention).
+Milestone 4C2 is complete and verified on branch `feature/season-workflow`. Awaiting user review before any commit, merge, or subsequent milestone execution.

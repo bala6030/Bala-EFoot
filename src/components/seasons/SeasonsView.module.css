@@ -359,6 +359,11 @@
   border-style: dashed;
 }
 
+.seasonCardClosed {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 16px var(--accent-purple-muted);
+}
+
 .seasonHeader {
   display: flex;
   justify-content: space-between;
@@ -1013,5 +1018,188 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-subtle);
   color: var(--text-muted);
+}
+
+/* ==========================================================================
+   MILESTONE 4C2: SEASON REVIEW & CLOSURE STYLES
+   ========================================================================== */
+
+.reviewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+}
+
+.summaryStatCard {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.summaryStatVal {
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-family: var(--font-family-mono);
+  color: var(--text-primary);
+}
+
+.summaryStatLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.reviewSection {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.reviewSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--space-3);
+}
+
+.reviewSectionTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.acknowledgementBox {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.acknowledgementTitle {
+  color: #fef08a;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.warningList {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.85rem;
+  color: #fef9c3;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.ackCheckboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+  line-height: 1.4;
+  margin-top: var(--space-2);
+}
+
+.ackCheckbox {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-gold);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.closureIrreversibleBox {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 0.85rem;
+  color: #fecaca;
+}
+
+.closureIrreversibleTitle {
+  font-weight: 700;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.95rem;
+}
+
+.historicalHeaderBanner {
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid var(--accent-purple);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.historicalHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.historicalSnapshotId {
+  font-family: var(--font-family-mono);
+  font-size: 0.8rem;
+  color: #d8b4fe;
+  background: rgba(168, 85, 247, 0.2);
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+}
+
+.closureRemarksBox {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-style: italic;
 }
 

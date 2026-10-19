@@ -353,6 +353,7 @@ export interface Season {
   rewardAcquired?: unknown;
   closedAt?: string;
   closureNotes?: string;
+  closureSnapshot?: SeasonClosureSnapshot | null;
 }
 
 /**
@@ -496,6 +497,100 @@ export interface SeasonsState {
 export interface SeasonValidationResult {
   isValid: boolean;
   errors: Record<string, string>;
+}
+
+/**
+ * Frozen, immutable snapshot of the season at time of closure (Milestone 4C2)
+ */
+export interface SeasonClosureSnapshot {
+  id: string; // e.g. "closure-Phase-1-1729420000000"
+  seasonId: string;
+  version: number; // Snapshot schema version (e.g. 1)
+  closedAt: string; // ISO 8601 timestamp
+  closedDate: string; // YYYY-MM-DD
+  metadata: {
+    id: string;
+    startDate: string;
+    startingDivision: number;
+    notes?: string;
+    createdAt: string;
+  };
+  baseline: SeasonBaselineSnapshot;
+  progressSnapshots: SeasonProgressSnapshot[];
+  statsSummary: {
+    totalSnapshots: number;
+    latestSnapshotDate?: string;
+    totalMatchesDelta: number;
+    totalGoalsDelta: number;
+    totalAssistsDelta: number;
+  };
+  finalRank: number | null;
+  rewardEligibility: RewardEligibilityStatus;
+  rewardAcquisitionStatus: RewardAcquisitionStatus;
+  rewardAcquisition: SeasonRewardAcquisition | null;
+  warnings: string[];
+  incompleteDataAcknowledged: boolean;
+  acknowledgedWarnings: string[];
+  closureNotes?: string;
+}
+
+/**
+ * Comprehensive review summary for an active season prior to closure
+ */
+export interface SeasonReviewSummary {
+  seasonId: string;
+  startDate: string;
+  startingDivision: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  status: SeasonStatus;
+
+  // Baseline confirmation status
+  hasBaseline: boolean;
+  baseline: SeasonBaselineSnapshot | null;
+  hasUnconfirmedBaselineDraft: boolean;
+
+  // Snapshots & Cumulative statistics
+  snapshotCount: number;
+  hasUnconfirmedProgressDraft: boolean;
+  latestSnapshot: SeasonProgressSnapshot | null;
+  deltas: PlayerStatDelta[];
+  totalMatchesDelta: number;
+  totalGoalsDelta: number;
+  totalAssistsDelta: number;
+
+  // Rank & Reward status
+  finalRank: number | null;
+  rewardEligibility: RewardEligibilityStatus;
+  isRewardAcquired: boolean;
+  rewardAcquisition: SeasonRewardAcquisition | null;
+
+  // Closure eligibility & checks
+  canClose: boolean;
+  blockingReasons: string[];
+  warnings: string[];
+}
+
+/**
+ * Input parameters for explicit season closure
+ */
+export interface CloseSeasonInput {
+  seasonId: string;
+  expectedUpdatedAt?: string;
+  acknowledgedIncompleteData?: boolean;
+  closureNotes?: string;
+}
+
+/**
+ * Result of season closure operation
+ */
+export interface CloseSeasonResult {
+  success: boolean;
+  season?: Season;
+  closureSnapshot?: SeasonClosureSnapshot;
+  error?: string;
+  warnings?: string[];
 }
 
 

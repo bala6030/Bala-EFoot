@@ -21,6 +21,8 @@ import {
   HelpCircle,
   X,
   Edit2,
+  Lock,
+  Info,
 } from 'lucide-react';
 import {
   Season,
@@ -35,6 +37,7 @@ import {
   PlayerRoleClassification,
   PlayerStatDelta,
   SeasonProgressSnapshot,
+  SeasonReviewSummary,
 } from '../../types';
 import {
   loadSeasonsState,
@@ -56,6 +59,8 @@ import {
   setSeasonRank,
   recordSeasonReward,
   REWARD_RANK_THRESHOLD,
+  getSeasonReviewSummary,
+  closeSeason,
 } from '../../data/seasonRepository';
 import { getAllPlayers } from '../../data/playerRepository';
 import { Button } from '../common/Button';
@@ -72,10 +77,24 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [activeDraftSeason, setActiveDraftSeason] = useState<Season | null>(null);
 
-  // View state: 'list' | 'create' | 'baseline' | 'progress' | 'snapshot-detail'
+  // View state: 'list' | 'create' | 'baseline' | 'progress' | 'snapshot-detail' | 'close-review' | 'closed-detail'
   const [viewMode, setViewMode] = useState<
-    'list' | 'create' | 'baseline' | 'progress' | 'snapshot-detail'
+    'list' | 'create' | 'baseline' | 'progress' | 'snapshot-detail' | 'close-review' | 'closed-detail'
   >('list');
+
+  // Milestone 4C2: Closure Review State
+  const [reviewSeasonId, setReviewSeasonId] = useState<string | null>(null);
+  const [reviewSummary, setReviewSummary] = useState<SeasonReviewSummary | null>(null);
+  const [reviewTab, setReviewTab] = useState<'all' | 'starters' | 'subs'>('all');
+  const [acknowledgedIncompleteChecked, setAcknowledgedIncompleteChecked] = useState<boolean>(false);
+  const [closureNotesInput, setClosureNotesInput] = useState<string>('');
+  const [isConfirmCloseModalOpen, setIsConfirmCloseModalOpen] = useState<boolean>(false);
+  const [isClosing, setIsClosing] = useState<boolean>(false);
+  const [closureError, setClosureError] = useState<string | null>(null);
+
+  // Milestone 4C2: Historical Closed Season Detail State
+  const [closedDetailSeasonId, setClosedDetailSeasonId] = useState<string | null>(null);
+  const [closedDetailTab, setClosedDetailTab] = useState<'all' | 'starters' | 'subs'>('all');
 
   // Currently selected season for baseline or progress
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null);
@@ -166,6 +185,11 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
     setSeasons(state.seasons);
     const draft = getActiveDraft();
     setActiveDraftSeason(draft || null);
+
+    if (reviewSeasonId) {
+      const updatedSummary = getSeasonReviewSummary(reviewSeasonId, playerMetaMap);
+      setReviewSummary(updatedSummary);
+    }
   };
 
   useEffect(() => {
@@ -176,6 +200,77 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
     if (!selectedSeasonId) return null;
     return seasons.find((s) => s.id === selectedSeasonId) || null;
   }, [seasons, selectedSeasonId]);
+
+  const currentClosedSeason = useMemo(() => {
+    if (!closedDetailSeasonId) return null;
+    return seasons.find((s) => s.id === closedDetailSeasonId) || null;
+  }, [seasons, closedDetailSeasonId]);
+
+  const filteredReviewDeltas = useMemo(() => {
+    if (!reviewSummary) return [];
+    if (reviewTab === 'starters') {
+      return reviewSummary.deltas.filter((d) => d.roleClassification === 'Starting XI');
+    }
+    if (reviewTab === 'subs') {
+      return reviewSummary.deltas.filter((d) => d.roleClassification === 'Substitute');
+    }
+    return reviewSummary.deltas;
+  }, [reviewSummary, reviewTab]);
+
+  const closedSeasonDeltas = useMemo(() => {
+    if (!currentClosedSeason) return [];
+    const snap = currentClosedSeason.closureSnapshot;
+    const baseline = snap ? snap.baseline : currentClosedSeason.baseline;
+    if (!baseline) return [];
+    const progressSnaps = snap
+      ? snap.progressSnapshots
+      : currentClosedSeason.progressSnapshots || [];
+    const latest = progressSnaps.length > 0 ? progressSnaps[progressSnaps.length - 1] : null;
+
+    if (latest) {
+      const fakeSeason: Season = {
+        ...currentClosedSeason,
+        baseline,
+        progressSnapshots: progressSnaps,
+      };
+      return calculatePlayerStatDeltas(fakeSeason, latest.players, playerMetaMap).deltas;
+    }
+
+    return baseline.players.map((p) => {
+      const meta = playerMetaMap[p.playerId] || { name: p.playerId, position: 'N/A' };
+      return {
+        playerId: p.playerId,
+        playerName: meta.name,
+        position: meta.position,
+        roleClassification: p.roleClassification,
+        baselineMatches: p.matches,
+        baselineGoals: p.goals,
+        baselineAssists: p.assists,
+        currentMatches: p.matches,
+        currentGoals: p.goals,
+        currentAssists: p.assists,
+        matchesDelta: 0,
+        goalsDelta: 0,
+        assistsDelta: 0,
+        matchesDecreased: false,
+        goalsDecreased: false,
+        assistsDecreased: false,
+        referenceMatches: p.matches,
+        referenceGoals: p.goals,
+        referenceAssists: p.assists,
+      };
+    });
+  }, [currentClosedSeason, playerMetaMap]);
+
+  const filteredClosedDeltas = useMemo(() => {
+    if (closedDetailTab === 'starters') {
+      return closedSeasonDeltas.filter((d) => d.roleClassification === 'Starting XI');
+    }
+    if (closedDetailTab === 'subs') {
+      return closedSeasonDeltas.filter((d) => d.roleClassification === 'Substitute');
+    }
+    return closedSeasonDeltas;
+  }, [closedSeasonDeltas, closedDetailTab]);
 
   // Helper to pre-populate form with existing draft data
   const populateFormWithDraft = (draft: Season) => {
@@ -768,6 +863,59 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
     }
   };
 
+  // ==========================================================================
+  // MILESTONE 4C2: FINAL SEASON REVIEW & CLOSURE WORKFLOW HANDLERS
+  // ==========================================================================
+
+  const handleOpenClosureReview = (season: Season) => {
+    setSelectedSeasonId(season.id);
+    setReviewSeasonId(season.id);
+    const summary = getSeasonReviewSummary(season.id, playerMetaMap);
+    setReviewSummary(summary);
+    setReviewTab('all');
+    setAcknowledgedIncompleteChecked(false);
+    setClosureNotesInput('');
+    setClosureError(null);
+    setViewMode('close-review');
+  };
+
+  const handleOpenClosedDetail = (season: Season) => {
+    setSelectedSeasonId(season.id);
+    setClosedDetailSeasonId(season.id);
+    setClosedDetailTab('all');
+    setViewMode('closed-detail');
+  };
+
+  const handleConfirmClosure = () => {
+    if (!reviewSeasonId || !reviewSummary) return;
+
+    setIsClosing(true);
+    setClosureError(null);
+
+    const currentSeason = seasons.find((s) => s.id === reviewSeasonId);
+    const result = closeSeason({
+      seasonId: reviewSeasonId,
+      expectedUpdatedAt: currentSeason?.updatedAt,
+      acknowledgedIncompleteData: acknowledgedIncompleteChecked,
+      closureNotes: closureNotesInput.trim() || undefined,
+    });
+
+    setIsClosing(false);
+
+    if (result.success && result.season) {
+      setIsConfirmCloseModalOpen(false);
+      setStatusMessage({
+        type: 'success',
+        text: `Season "${result.season.id}" has been successfully closed and frozen into an immutable historical record.`,
+      });
+      refreshData();
+      setClosedDetailSeasonId(result.season.id);
+      setViewMode('closed-detail');
+    } else {
+      setClosureError(result.error || 'Failed to close season.');
+    }
+  };
+
   // Counters
   const activeSeasonCount = seasons.filter((s) => s.status === 'Active').length;
   const baselineCompletedCount = baselinePlayers.filter(
@@ -783,15 +931,30 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
       <div className={styles.topBar}>
         <div className={styles.titleArea}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <h1 className={styles.heading}>Seasons & Phases</h1>
-            {activeSeasonCount > 0 && (
+            <h1 className={styles.heading}>
+              {viewMode === 'close-review'
+                ? 'Season Review & Closure'
+                : viewMode === 'closed-detail'
+                ? 'Historical Season Record'
+                : 'Seasons & Phases'}
+            </h1>
+            {viewMode === 'list' && activeSeasonCount > 0 && (
               <Badge variant="lime" size="sm">
                 {activeSeasonCount} Active
               </Badge>
             )}
+            {viewMode === 'closed-detail' && (
+              <Badge variant="purple" size="sm" icon={<Lock size={12} />}>
+                Frozen / Immutable
+              </Badge>
+            )}
           </div>
           <p className={styles.subheading}>
-            Manage eFootball competition phases, player statistics baselines, and progress deltas
+            {viewMode === 'close-review'
+              ? 'Inspect confirmed records and review closure summary before final confirmation'
+              : viewMode === 'closed-detail'
+              ? 'Read-only frozen snapshot of closed eFootball season'
+              : 'Manage eFootball competition phases, player statistics baselines, and progress deltas'}
           </p>
         </div>
 
@@ -2041,7 +2204,11 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                           >
                             {season.status}
                           </Badge>
-                          {hasBaseline ? (
+                          {isClosed ? (
+                            <Badge variant="purple" size="sm" icon={<Lock size={12} />}>
+                              Immutable
+                            </Badge>
+                          ) : hasBaseline ? (
                             <Badge variant="lime" size="sm" icon={<ShieldCheck size={12} />}>
                               Baseline Locked
                             </Badge>
@@ -2079,6 +2246,16 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                             {snapshotCount} recorded
                           </span>
                         </div>
+
+                        {isClosed && season.closedAt && (
+                          <div className={styles.metaItem}>
+                            <span className={styles.metaLabel}>
+                              <Lock size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                              Closed Date:
+                            </span>
+                            <span className={styles.metaVal}>{season.closedAt.split('T')[0]}</span>
+                          </div>
+                        )}
 
                         {season.notes && (
                           <div className={styles.notesSnippet}>"{season.notes}"</div>
@@ -2127,15 +2304,17 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                             <span className={styles.rewardRankValue}>
                               {season.finalRank != null ? `#${season.finalRank.toLocaleString()}` : 'Not Recorded'}
                             </span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              icon={<Edit2 size={12} />}
-                              onClick={() => handleOpenRankModal(season)}
-                              title="Set or update season rank"
-                            >
-                              {season.finalRank != null ? 'Update' : 'Set Rank'}
-                            </Button>
+                            {!isClosed && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                icon={<Edit2 size={12} />}
+                                onClick={() => handleOpenRankModal(season)}
+                                title="Set or update season rank"
+                              >
+                                {season.finalRank != null ? 'Update' : 'Set Rank'}
+                              </Button>
+                            )}
                           </div>
 
                           {/* Inline Explanation */}
@@ -2180,6 +2359,12 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                               <div className={styles.rewardAcquiredLimitBadge}>
                                 1 of 1 reward card claimed for this season
                               </div>
+                            </div>
+                          ) : isClosed ? (
+                            <div className={styles.rewardActionRow}>
+                              <span className={styles.rewardDisabledNotice}>
+                                Season closed without reward claim ({season.rewardEligibility === 'Eligible' ? 'Unclaimed' : 'Not Eligible'}).
+                              </span>
                             </div>
                           ) : (
                             <div className={styles.rewardActionRow}>
@@ -2259,6 +2444,17 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                             <Trash2 size={14} />
                           </Button>
                         </div>
+                      ) : isClosed ? (
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon={<History size={14} />}
+                            onClick={() => handleOpenClosedDetail(season)}
+                          >
+                            View Historical Record
+                          </Button>
+                        </div>
                       ) : (
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                           {!hasBaseline ? (
@@ -2271,14 +2467,24 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                               Setup Baseline
                             </Button>
                           ) : (
-                            <Button
-                              variant="primary"
-                              size="sm"
-                              icon={<TrendingUp size={14} />}
-                              onClick={() => handleOpenProgressEntry(season)}
-                            >
-                              + Record Progress
-                            </Button>
+                            <>
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                icon={<TrendingUp size={14} />}
+                                onClick={() => handleOpenProgressEntry(season)}
+                              >
+                                + Record Progress
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                icon={<Lock size={14} />}
+                                onClick={() => handleOpenClosureReview(season)}
+                              >
+                                Review & Close Season
+                              </Button>
+                            </>
                           )}
                         </div>
                       )}
@@ -2289,6 +2495,763 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
             </div>
           )}
         </>
+      )}
+
+      {/* =====================================================================
+          VIEW 6: FINAL SEASON REVIEW & CLOSURE (MILESTONE 4C2)
+          ===================================================================== */}
+      {viewMode === 'close-review' && reviewSummary && (
+        <div className={styles.reviewContainer}>
+          {/* Irreversible notice */}
+          <div className={styles.closureIrreversibleBox}>
+            <div className={styles.closureIrreversibleTitle}>
+              <AlertTriangle size={18} />
+              <span>Irreversible Season Closure Warning</span>
+            </div>
+            <div>
+              Closing a season permanently freezes all confirmed statistics, starting baseline, deltas, final rank, and reward acquisition records into an immutable historical snapshot.
+              Once closed, <strong>this season cannot be reopened or edited</strong>, and no further progress snapshots can be recorded.
+            </div>
+          </div>
+
+          {/* Season Overview Card */}
+          <Card variant="glass" padding="lg">
+            <div className={styles.reviewSectionHeader}>
+              <h2 className={styles.reviewSectionTitle}>
+                <Layers size={18} className="text-neon-lime" />
+                Season Setup & Confirmed Baseline
+              </h2>
+              <Badge variant="lime" size="sm">Active Phase</Badge>
+            </div>
+
+            <div className={styles.summaryGrid} style={{ marginTop: '1rem' }}>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Season Identifier</span>
+                <span className={styles.summaryStatVal} style={{ fontSize: '1.1rem' }}>{reviewSummary.seasonId}</span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Start Date</span>
+                <span className={styles.summaryStatVal} style={{ fontSize: '1.1rem' }}>{reviewSummary.startDate}</span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Starting Division</span>
+                <span className={styles.summaryStatVal}>Division {reviewSummary.startingDivision}</span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Baseline Status</span>
+                <span
+                  className={styles.summaryStatVal}
+                  style={{
+                    fontSize: '1rem',
+                    color: reviewSummary.hasBaseline ? 'var(--accent-lime)' : 'var(--danger)',
+                  }}
+                >
+                  {reviewSummary.hasBaseline ? 'Confirmed (23/23 Cards)' : 'Missing Baseline'}
+                </span>
+              </div>
+            </div>
+
+            {reviewSummary.notes && (
+              <div className={styles.notesSnippet} style={{ marginTop: '1rem' }}>
+                "{reviewSummary.notes}"
+              </div>
+            )}
+          </Card>
+
+          {/* Rank & Reward Section */}
+          <Card variant="glass" padding="lg">
+            <div className={styles.reviewSectionHeader}>
+              <h2 className={styles.reviewSectionTitle}>
+                <Trophy size={18} className="text-neon-lime" />
+                Phase Rank & Division Reward
+              </h2>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {reviewSummary.rewardEligibility === 'Eligible' ? (
+                  <Badge variant="lime" size="sm" icon={<Award size={12} />}>Eligible</Badge>
+                ) : reviewSummary.rewardEligibility === 'Not Eligible' ? (
+                  <Badge variant="danger" size="sm" icon={<AlertCircle size={12} />}>Not Eligible</Badge>
+                ) : (
+                  <Badge variant="default" size="sm" icon={<HelpCircle size={12} />}>Eligibility Unknown</Badge>
+                )}
+
+                {reviewSummary.isRewardAcquired ? (
+                  <Badge variant="purple" size="sm" icon={<CheckCircle2 size={12} />}>Reward Acquired</Badge>
+                ) : (
+                  <Badge variant="default" size="sm">Not Acquired</Badge>
+                )}
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className={styles.rewardRankRow}>
+                <span className={styles.rewardRankLabel}>Final Rank:</span>
+                <span className={styles.rewardRankValue}>
+                  {reviewSummary.finalRank != null ? `#${reviewSummary.finalRank.toLocaleString()}` : 'Not Recorded'}
+                </span>
+                {currentSelectedSeason && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<Edit2 size={12} />}
+                    onClick={() => handleOpenRankModal(currentSelectedSeason)}
+                  >
+                    {reviewSummary.finalRank != null ? 'Correct Rank' : 'Record Rank'}
+                  </Button>
+                )}
+              </div>
+
+              <div className={styles.rewardExplainText}>
+                {reviewSummary.rewardEligibility === 'Eligible' ? (
+                  <span className={styles.textSuccess}>
+                    Rank qualifies for phase reward (≤ {REWARD_RANK_THRESHOLD.toLocaleString()}).
+                  </span>
+                ) : reviewSummary.rewardEligibility === 'Not Eligible' ? (
+                  <span className={styles.textDanger}>
+                    Rank exceeds {REWARD_RANK_THRESHOLD.toLocaleString()} threshold (Not eligible for reward card).
+                  </span>
+                ) : (
+                  <span className={styles.textMuted}>
+                    Final rank not recorded. Reward eligibility will remain 'Eligibility Unknown' upon closure.
+                  </span>
+                )}
+              </div>
+
+              {reviewSummary.rewardAcquisition ? (
+                <div className={styles.rewardAcquiredCard}>
+                  <div className={styles.rewardAcquiredHeader}>
+                    <Sparkles size={14} className={styles.sparkleIcon} />
+                    <span className={styles.rewardAcquiredName}>{reviewSummary.rewardAcquisition.cardName}</span>
+                    {reviewSummary.rewardAcquisition.cardDescription && (
+                      <span className={styles.rewardAcquiredDesc}>({reviewSummary.rewardAcquisition.cardDescription})</span>
+                    )}
+                  </div>
+                  <div className={styles.rewardAcquiredDetails}>
+                    <span>Acquired: {reviewSummary.rewardAcquisition.acquiredDate}</span>
+                    {reviewSummary.rewardAcquisition.notes && (
+                      <span className={styles.rewardAcquiredNotes}>• "{reviewSummary.rewardAcquisition.notes}"</span>
+                    )}
+                  </div>
+                </div>
+              ) : reviewSummary.rewardEligibility === 'Eligible' && currentSelectedSeason ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.25rem' }}>
+                  <span className={styles.textMuted} style={{ fontSize: '0.85rem' }}>
+                    Eligible for division reward card:
+                  </span>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={<Trophy size={14} />}
+                    onClick={() => handleOpenRewardModal(currentSelectedSeason)}
+                  >
+                    Claim / Record Reward Before Closure
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </Card>
+
+          {/* Cumulative Stats & Deltas Section */}
+          <Card variant="glass" padding="lg">
+            <div className={styles.reviewSectionHeader}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingUp size={18} className="text-neon-lime" />
+                <h2 className={styles.reviewSectionTitle}>
+                  Confirmed Cumulative Statistics & Deltas
+                </h2>
+              </div>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                {reviewSummary.snapshotCount} Confirmed Snapshot{reviewSummary.snapshotCount !== 1 ? 's' : ''}
+              </span>
+            </div>
+
+            {/* Squad totals summary */}
+            <div className={styles.summaryGrid} style={{ marginTop: '1rem' }}>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Total Match Delta</span>
+                <span
+                  className={styles.summaryStatVal}
+                  style={{ color: reviewSummary.totalMatchesDelta > 0 ? 'var(--accent-lime)' : undefined }}
+                >
+                  {reviewSummary.totalMatchesDelta > 0 ? `+${reviewSummary.totalMatchesDelta}` : reviewSummary.totalMatchesDelta}
+                </span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Total Goals Delta</span>
+                <span
+                  className={styles.summaryStatVal}
+                  style={{ color: reviewSummary.totalGoalsDelta > 0 ? 'var(--accent-lime)' : undefined }}
+                >
+                  {reviewSummary.totalGoalsDelta > 0 ? `+${reviewSummary.totalGoalsDelta}` : reviewSummary.totalGoalsDelta}
+                </span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Total Assists Delta</span>
+                <span
+                  className={styles.summaryStatVal}
+                  style={{ color: reviewSummary.totalAssistsDelta > 0 ? 'var(--accent-lime)' : undefined }}
+                >
+                  {reviewSummary.totalAssistsDelta > 0 ? `+${reviewSummary.totalAssistsDelta}` : reviewSummary.totalAssistsDelta}
+                </span>
+              </div>
+            </div>
+
+            {reviewSummary.snapshotCount === 0 && (
+              <div className={`${styles.banner} ${styles.bannerInfo}`} style={{ marginTop: '1rem' }}>
+                <Info size={16} />
+                <span>No progress snapshots were recorded for this season. Final statistics will reflect only the starting baseline.</span>
+              </div>
+            )}
+
+            {/* Unconfirmed draft warning */}
+            {reviewSummary.hasUnconfirmedProgressDraft && (
+              <div className={`${styles.banner} ${styles.bannerWarning}`} style={{ marginTop: '0.75rem' }}>
+                <AlertTriangle size={16} />
+                <span>An unconfirmed progress draft exists. Closure freezes only confirmed data; unconfirmed drafts will be discarded.</span>
+              </div>
+            )}
+
+            {/* Player stats table */}
+            {reviewSummary.deltas.length > 0 && (
+              <div style={{ marginTop: '1rem' }}>
+                <div className={styles.sectionTabs}>
+                  <button
+                    type="button"
+                    className={`${styles.sectionTab} ${reviewTab === 'all' ? styles.sectionTabActive : ''}`}
+                    onClick={() => setReviewTab('all')}
+                  >
+                    All Players (23)
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.sectionTab} ${reviewTab === 'starters' ? styles.sectionTabActive : ''}`}
+                    onClick={() => setReviewTab('starters')}
+                  >
+                    Starting XI (11)
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.sectionTab} ${reviewTab === 'subs' ? styles.sectionTabActive : ''}`}
+                    onClick={() => setReviewTab('subs')}
+                  >
+                    Substitutes (12)
+                  </button>
+                </div>
+
+                <div className={styles.tableContainer}>
+                  <table className={styles.statsTable}>
+                    <thead>
+                      <tr>
+                        <th>Player</th>
+                        <th>Role</th>
+                        <th>Baseline (M / G / A)</th>
+                        <th>Latest Confirmed (M / G / A)</th>
+                        <th>Matches Δ</th>
+                        <th>Goals Δ</th>
+                        <th>Assists Δ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredReviewDeltas.map((d) => (
+                        <tr key={d.playerId}>
+                          <td>
+                            <div className={styles.playerInfo}>
+                              <span className={styles.posChip}>{d.position}</span>
+                              <span className={styles.playerName}>{d.playerName}</span>
+                              <span className={styles.idBadge}>{d.playerId}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <Badge variant={d.roleClassification === 'Starting XI' ? 'lime' : 'default'} size="sm">
+                              {d.roleClassification}
+                            </Badge>
+                          </td>
+                          <td>
+                            <span className={styles.statReferenceVal}>
+                              {d.baselineMatches} / {d.baselineGoals} / {d.baselineAssists}
+                            </span>
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600 }}>
+                              {d.currentMatches} / {d.currentGoals} / {d.currentAssists}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`${styles.deltaPill} ${
+                                d.matchesDelta > 0
+                                  ? styles.deltaPositive
+                                  : d.matchesDelta < 0
+                                  ? styles.deltaNegative
+                                  : styles.deltaZero
+                              }`}
+                            >
+                              {d.matchesDelta > 0 ? `+${d.matchesDelta}` : d.matchesDelta}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`${styles.deltaPill} ${
+                                d.goalsDelta > 0
+                                  ? styles.deltaPositive
+                                  : d.goalsDelta < 0
+                                  ? styles.deltaNegative
+                                  : styles.deltaZero
+                              }`}
+                            >
+                              {d.goalsDelta > 0 ? `+${d.goalsDelta}` : d.goalsDelta}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`${styles.deltaPill} ${
+                                d.assistsDelta > 0
+                                  ? styles.deltaPositive
+                                  : d.assistsDelta < 0
+                                  ? styles.deltaNegative
+                                  : styles.deltaZero
+                              }`}
+                            >
+                              {d.assistsDelta > 0 ? `+${d.assistsDelta}` : d.assistsDelta}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* Closure Validation & Acknowledgements */}
+          {reviewSummary.blockingReasons.length > 0 ? (
+            <div className={`${styles.banner} ${styles.bannerDanger}`}>
+              <AlertCircle size={20} />
+              <div className={styles.bannerContent}>
+                <strong>Closure Blocked:</strong>
+                <ul style={{ margin: '0.25rem 0 0 1rem', padding: 0 }}>
+                  {reviewSummary.blockingReasons.map((r, i) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ) : reviewSummary.warnings.length > 0 ? (
+            <div className={styles.acknowledgementBox}>
+              <div className={styles.acknowledgementTitle}>
+                <AlertTriangle size={18} />
+                <span>Incomplete Season Information Notice</span>
+              </div>
+              <ul className={styles.warningList}>
+                {reviewSummary.warnings.map((w, idx) => (
+                  <li key={idx}>{w}</li>
+                ))}
+              </ul>
+              <label className={styles.ackCheckboxLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.ackCheckbox}
+                  checked={acknowledgedIncompleteChecked}
+                  onChange={(e) => setAcknowledgedIncompleteChecked(e.target.checked)}
+                />
+                <span>
+                  I acknowledge that the non-essential information listed above is incomplete, and I understand this season cannot be reopened, updated, or modified after closure.
+                </span>
+              </label>
+            </div>
+          ) : null}
+
+          {/* Optional Closure Remarks */}
+          <Card variant="glass" padding="md">
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Final Season Remarks / Notes
+                <span className={styles.helperText}>(Optional)</span>
+              </label>
+              <textarea
+                className={styles.textarea}
+                rows={2}
+                placeholder="e.g. Completed division campaign; solid defense with Maldini and Desailly."
+                value={closureNotesInput}
+                onChange={(e) => setClosureNotesInput(e.target.value)}
+              />
+            </div>
+          </Card>
+
+          {/* Footer Actions */}
+          <div className={styles.formFooterActions}>
+            <Button
+              variant="secondary"
+              icon={<ArrowLeft size={16} />}
+              onClick={() => setViewMode('list')}
+            >
+              Cancel & Return to Seasons
+            </Button>
+
+            <Button
+              variant="primary"
+              icon={<Lock size={16} />}
+              disabled={!reviewSummary.canClose || (reviewSummary.warnings.length > 0 && !acknowledgedIncompleteChecked)}
+              onClick={() => setIsConfirmCloseModalOpen(true)}
+            >
+              Proceed to Final Closure...
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          VIEW 7: HISTORICAL CLOSED SEASON DETAIL (MILESTONE 4C2)
+          ===================================================================== */}
+      {viewMode === 'closed-detail' && currentClosedSeason && (
+        <div className={styles.reviewContainer}>
+          {/* Historical Banner */}
+          <div className={styles.historicalHeaderBanner}>
+            <div className={styles.historicalHeaderLeft}>
+              <Lock size={24} className="text-accent-purple" />
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#f3e8ff' }}>
+                  Historical Season Record • Closed & Immutable
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#d8b4fe' }}>
+                  Closed on {currentClosedSeason.closureSnapshot?.closedDate || currentClosedSeason.closedAt?.split('T')[0] || 'N/A'} • This record is permanently locked and cannot be edited.
+                </div>
+              </div>
+            </div>
+            {currentClosedSeason.closureSnapshot?.id && (
+              <span className={styles.historicalSnapshotId}>
+                Snapshot ID: {currentClosedSeason.closureSnapshot.id}
+              </span>
+            )}
+          </div>
+
+          {/* Metadata Card */}
+          <Card variant="glass" padding="lg">
+            <div className={styles.reviewSectionHeader}>
+              <h2 className={styles.reviewSectionTitle}>
+                <Layers size={18} className="text-accent-purple" />
+                Season Identity & Parameters
+              </h2>
+              <Badge variant="purple" size="sm" icon={<Lock size={12} />}>
+                Closed
+              </Badge>
+            </div>
+
+            <div className={styles.summaryGrid} style={{ marginTop: '1rem' }}>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Season Identifier</span>
+                <span className={styles.summaryStatVal} style={{ fontSize: '1.1rem' }}>{currentClosedSeason.id}</span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Start Date</span>
+                <span className={styles.summaryStatVal} style={{ fontSize: '1.1rem' }}>{currentClosedSeason.startDate}</span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Starting Division</span>
+                <span className={styles.summaryStatVal}>Division {currentClosedSeason.startingDivision}</span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Closed Timestamp</span>
+                <span className={styles.summaryStatVal} style={{ fontSize: '0.85rem' }}>
+                  {currentClosedSeason.closedAt ? new Date(currentClosedSeason.closedAt).toLocaleString() : 'N/A'}
+                </span>
+              </div>
+            </div>
+
+            {currentClosedSeason.notes && (
+              <div className={styles.notesSnippet} style={{ marginTop: '1rem' }}>
+                <strong>Original Notes:</strong> "{currentClosedSeason.notes}"
+              </div>
+            )}
+
+            {currentClosedSeason.closureNotes && (
+              <div className={styles.closureRemarksBox} style={{ marginTop: '0.75rem' }}>
+                <strong>Final Closure Remarks:</strong> "{currentClosedSeason.closureNotes}"
+              </div>
+            )}
+          </Card>
+
+          {/* Final Rank & Reward Status Card */}
+          <Card variant="glass" padding="lg">
+            <div className={styles.reviewSectionHeader}>
+              <h2 className={styles.reviewSectionTitle}>
+                <Trophy size={18} className="text-accent-purple" />
+                Final Rank & Reward Result
+              </h2>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {currentClosedSeason.rewardEligibility === 'Eligible' ? (
+                  <Badge variant="lime" size="sm" icon={<Award size={12} />}>Eligible</Badge>
+                ) : currentClosedSeason.rewardEligibility === 'Not Eligible' ? (
+                  <Badge variant="danger" size="sm" icon={<AlertCircle size={12} />}>Not Eligible</Badge>
+                ) : (
+                  <Badge variant="default" size="sm" icon={<HelpCircle size={12} />}>Eligibility Unknown</Badge>
+                )}
+
+                {currentClosedSeason.rewardAcquisition ? (
+                  <Badge variant="purple" size="sm" icon={<CheckCircle2 size={12} />}>Reward Acquired</Badge>
+                ) : (
+                  <Badge variant="default" size="sm">Not Acquired</Badge>
+                )}
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div className={styles.rewardRankRow}>
+                <span className={styles.rewardRankLabel}>Final Rank:</span>
+                <span className={styles.rewardRankValue}>
+                  {currentClosedSeason.finalRank != null ? `#${currentClosedSeason.finalRank.toLocaleString()}` : 'Not Recorded (Eligibility Unknown)'}
+                </span>
+              </div>
+
+              {currentClosedSeason.rewardAcquisition ? (
+                <div className={styles.rewardAcquiredCard}>
+                  <div className={styles.rewardAcquiredHeader}>
+                    <Sparkles size={14} className={styles.sparkleIcon} />
+                    <span className={styles.rewardAcquiredName}>{currentClosedSeason.rewardAcquisition.cardName}</span>
+                    {currentClosedSeason.rewardAcquisition.cardDescription && (
+                      <span className={styles.rewardAcquiredDesc}>({currentClosedSeason.rewardAcquisition.cardDescription})</span>
+                    )}
+                  </div>
+                  <div className={styles.rewardAcquiredDetails}>
+                    <span>Acquired: {currentClosedSeason.rewardAcquisition.acquiredDate}</span>
+                    {currentClosedSeason.rewardAcquisition.notes && (
+                      <span className={styles.rewardAcquiredNotes}>• "{currentClosedSeason.rewardAcquisition.notes}"</span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.textMuted} style={{ fontSize: '0.85rem' }}>
+                  {currentClosedSeason.rewardEligibility === 'Eligible'
+                    ? 'Season was Eligible for a reward card, but no reward was claimed before closure.'
+                    : currentClosedSeason.rewardEligibility === 'Not Eligible'
+                    ? `Rank exceeded ${REWARD_RANK_THRESHOLD.toLocaleString()} threshold. Reward not eligible.`
+                    : 'Final rank was not entered. Reward eligibility is unknown.'}
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Frozen Statistics Summary */}
+          <Card variant="glass" padding="lg">
+            <div className={styles.reviewSectionHeader}>
+              <h2 className={styles.reviewSectionTitle}>
+                <TrendingUp size={18} className="text-accent-purple" />
+                Frozen Player Statistics & Cumulative Deltas
+              </h2>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                {currentClosedSeason.closureSnapshot?.statsSummary.totalSnapshots ?? (currentClosedSeason.progressSnapshots?.length || 0)} Confirmed Snapshots
+              </span>
+            </div>
+
+            <div className={styles.summaryGrid} style={{ marginTop: '1rem' }}>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Total Match Delta</span>
+                <span className={styles.summaryStatVal}>
+                  {currentClosedSeason.closureSnapshot?.statsSummary.totalMatchesDelta !== undefined
+                    ? (currentClosedSeason.closureSnapshot.statsSummary.totalMatchesDelta > 0
+                        ? `+${currentClosedSeason.closureSnapshot.statsSummary.totalMatchesDelta}`
+                        : currentClosedSeason.closureSnapshot.statsSummary.totalMatchesDelta)
+                    : 0}
+                </span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Total Goals Delta</span>
+                <span className={styles.summaryStatVal}>
+                  {currentClosedSeason.closureSnapshot?.statsSummary.totalGoalsDelta !== undefined
+                    ? (currentClosedSeason.closureSnapshot.statsSummary.totalGoalsDelta > 0
+                        ? `+${currentClosedSeason.closureSnapshot.statsSummary.totalGoalsDelta}`
+                        : currentClosedSeason.closureSnapshot.statsSummary.totalGoalsDelta)
+                    : 0}
+                </span>
+              </div>
+              <div className={styles.summaryStatCard}>
+                <span className={styles.summaryStatLabel}>Total Assists Delta</span>
+                <span className={styles.summaryStatVal}>
+                  {currentClosedSeason.closureSnapshot?.statsSummary.totalAssistsDelta !== undefined
+                    ? (currentClosedSeason.closureSnapshot.statsSummary.totalAssistsDelta > 0
+                        ? `+${currentClosedSeason.closureSnapshot.statsSummary.totalAssistsDelta}`
+                        : currentClosedSeason.closureSnapshot.statsSummary.totalAssistsDelta)
+                    : 0}
+                </span>
+              </div>
+            </div>
+
+            {/* Historical Player Stats Table */}
+            {closedSeasonDeltas.length > 0 && (
+              <div style={{ marginTop: '1rem' }}>
+                <div className={styles.sectionTabs}>
+                  <button
+                    type="button"
+                    className={`${styles.sectionTab} ${closedDetailTab === 'all' ? styles.sectionTabActive : ''}`}
+                    onClick={() => setClosedDetailTab('all')}
+                  >
+                    All Players (23)
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.sectionTab} ${closedDetailTab === 'starters' ? styles.sectionTabActive : ''}`}
+                    onClick={() => setClosedDetailTab('starters')}
+                  >
+                    Starting XI (11)
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.sectionTab} ${closedDetailTab === 'subs' ? styles.sectionTabActive : ''}`}
+                    onClick={() => setClosedDetailTab('subs')}
+                  >
+                    Substitutes (12)
+                  </button>
+                </div>
+
+                <div className={styles.tableContainer}>
+                  <table className={styles.statsTable}>
+                    <thead>
+                      <tr>
+                        <th>Player</th>
+                        <th>Role</th>
+                        <th>Baseline (M / G / A)</th>
+                        <th>Final Cumulative (M / G / A)</th>
+                        <th>Matches Δ</th>
+                        <th>Goals Δ</th>
+                        <th>Assists Δ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredClosedDeltas.map((d) => (
+                        <tr key={d.playerId}>
+                          <td>
+                            <div className={styles.playerInfo}>
+                              <span className={styles.posChip}>{d.position}</span>
+                              <span className={styles.playerName}>{d.playerName}</span>
+                              <span className={styles.idBadge}>{d.playerId}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <Badge variant={d.roleClassification === 'Starting XI' ? 'lime' : 'default'} size="sm">
+                              {d.roleClassification}
+                            </Badge>
+                          </td>
+                          <td>
+                            <span className={styles.statReferenceVal}>
+                              {d.baselineMatches} / {d.baselineGoals} / {d.baselineAssists}
+                            </span>
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600 }}>
+                              {d.currentMatches} / {d.currentGoals} / {d.currentAssists}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`${styles.deltaPill} ${
+                                d.matchesDelta > 0
+                                  ? styles.deltaPositive
+                                  : d.matchesDelta < 0
+                                  ? styles.deltaNegative
+                                  : styles.deltaZero
+                              }`}
+                            >
+                              {d.matchesDelta > 0 ? `+${d.matchesDelta}` : d.matchesDelta}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`${styles.deltaPill} ${
+                                d.goalsDelta > 0
+                                  ? styles.deltaPositive
+                                  : d.goalsDelta < 0
+                                  ? styles.deltaNegative
+                                  : styles.deltaZero
+                              }`}
+                            >
+                              {d.goalsDelta > 0 ? `+${d.goalsDelta}` : d.goalsDelta}
+                            </span>
+                          </td>
+                          <td>
+                            <span
+                              className={`${styles.deltaPill} ${
+                                d.assistsDelta > 0
+                                  ? styles.deltaPositive
+                                  : d.assistsDelta < 0
+                                  ? styles.deltaNegative
+                                  : styles.deltaZero
+                              }`}
+                            >
+                              {d.assistsDelta > 0 ? `+${d.assistsDelta}` : d.assistsDelta}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* Preserved Progress Snapshots Ledger */}
+          {((currentClosedSeason.closureSnapshot?.progressSnapshots?.length || currentClosedSeason.progressSnapshots?.length || 0) > 0) && (
+            <Card variant="glass" padding="lg">
+              <div className={styles.reviewSectionHeader}>
+                <h2 className={styles.reviewSectionTitle}>
+                  <History size={18} className="text-accent-purple" />
+                  Preserved Progress Snapshots
+                </h2>
+              </div>
+
+              <div className={styles.snapshotsSection} style={{ marginTop: '1rem' }}>
+                {(currentClosedSeason.closureSnapshot?.progressSnapshots || currentClosedSeason.progressSnapshots || []).map((snap, idx) => (
+                  <div key={snap.id} className={styles.snapshotCard}>
+                    <div className={styles.snapshotInfo}>
+                      <span className={styles.snapshotDate}>
+                        Snapshot #{idx + 1} — {snap.recordingDate}
+                      </span>
+                      <span className={styles.snapshotMeta}>
+                        {snap.notes || 'No notes'}
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedSeasonId(currentClosedSeason.id);
+                        handleViewSnapshotDetail(snap);
+                      }}
+                    >
+                      View Deltas
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Acknowledged Warnings Card if present */}
+          {currentClosedSeason.closureSnapshot?.warnings && currentClosedSeason.closureSnapshot.warnings.length > 0 && (
+            <div className={styles.acknowledgementBox}>
+              <div className={styles.acknowledgementTitle}>
+                <Info size={18} />
+                <span>Incomplete Data Acknowledged at Closure</span>
+              </div>
+              <ul className={styles.warningList}>
+                {currentClosedSeason.closureSnapshot.warnings.map((w, idx) => (
+                  <li key={idx}>{w}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Footer Back Button */}
+          <div className={styles.formFooterActions}>
+            <Button
+              variant="secondary"
+              icon={<ArrowLeft size={16} />}
+              onClick={() => setViewMode('list')}
+            >
+              Back to Seasons List
+            </Button>
+          </div>
+        </div>
       )}
 
       {/* =====================================================================
@@ -2506,6 +3469,108 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                 onClick={handleSaveReward}
               >
                 Confirm & Record Reward
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          MILESTONE 4C2: SEASON CLOSURE CONFIRMATION MODAL
+          ===================================================================== */}
+      {isConfirmCloseModalOpen && reviewSummary && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => !isClosing && setIsConfirmCloseModalOpen(false)}
+        >
+          <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitleArea}>
+                <h3 className={styles.modalTitle}>Confirm Permanent Season Closure</h3>
+                <p className={styles.modalSubtitle}>{reviewSummary.seasonId}</p>
+              </div>
+              <button
+                type="button"
+                className={styles.modalCloseBtn}
+                onClick={() => !isClosing && setIsConfirmCloseModalOpen(false)}
+                aria-label="Close"
+                disabled={isClosing}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {closureError && (
+                <div className={styles.modalError}>
+                  <AlertCircle size={16} />
+                  <span>{closureError}</span>
+                </div>
+              )}
+
+              <div className={styles.closureIrreversibleBox}>
+                <div className={styles.closureIrreversibleTitle}>
+                  <AlertTriangle size={18} />
+                  <span>Permanent & Irreversible Action</span>
+                </div>
+                <div>
+                  You are about to permanently close <strong>{reviewSummary.seasonId}</strong>.
+                  This freezes all statistics, starting baseline, deltas, final rank, and reward acquisition into an immutable historical snapshot.
+                  Duplicate closures, reopenings, and further mutations will be permanently rejected.
+                </div>
+              </div>
+
+              <div
+                style={{
+                  fontSize: '0.9rem',
+                  color: 'var(--text-secondary)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.4rem',
+                }}
+              >
+                <div>
+                  • <strong>Baseline:</strong> Confirmed ({reviewSummary.baseline?.players.length || 0} players)
+                </div>
+                <div>
+                  • <strong>Progress Snapshots:</strong> {reviewSummary.snapshotCount} confirmed snapshot
+                  {reviewSummary.snapshotCount !== 1 ? 's' : ''}
+                </div>
+                <div>
+                  • <strong>Final Rank:</strong>{' '}
+                  {reviewSummary.finalRank != null
+                    ? `#${reviewSummary.finalRank.toLocaleString()}`
+                    : 'Not Recorded (Eligibility Unknown)'}
+                </div>
+                <div>
+                  • <strong>Phase Reward:</strong>{' '}
+                  {reviewSummary.isRewardAcquired
+                    ? `Acquired (${reviewSummary.rewardAcquisition?.cardName})`
+                    : 'Not Acquired'}
+                </div>
+                {reviewSummary.warnings.length > 0 && (
+                  <div>
+                    • <strong>Incomplete Data:</strong> Explicitly acknowledged by user
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <Button
+                variant="secondary"
+                onClick={() => setIsConfirmCloseModalOpen(false)}
+                disabled={isClosing}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                icon={<Lock size={16} />}
+                disabled={isClosing}
+                onClick={handleConfirmClosure}
+              >
+                {isClosing ? 'Closing Season...' : 'Confirm & Permanently Close Season'}
               </Button>
             </div>
           </div>

@@ -15,7 +15,12 @@ import type {
   SeasonProgressDraft,
   PlayerStatDelta,
   RewardEligibilityStatus,
+  RewardAcquisitionStatus,
   SeasonRewardAcquisition,
+  SeasonClosureSnapshot,
+  SeasonReviewSummary,
+  CloseSeasonInput,
+  CloseSeasonResult,
 } from '../types';
 
 export const SEASONS_STORAGE_KEY = 'bala_efoot_seasons_v1';
@@ -283,6 +288,110 @@ function sanitizeRewardAcquisition(raw: unknown): SeasonRewardAcquisition | null
 }
 
 /**
+ * Deep-copies data objects to ensure in-memory immutability
+ */
+function deepCopy<T>(val: T): T {
+  return JSON.parse(JSON.stringify(val));
+}
+
+/**
+ * Sanitizes a season closure snapshot loaded from storage (Milestone 4C2)
+ */
+function sanitizeClosureSnapshot(raw: unknown): SeasonClosureSnapshot | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const c = raw as Record<string, unknown>;
+  if (typeof c.id !== 'string' || typeof c.seasonId !== 'string' || typeof c.closedAt !== 'string') {
+    return null;
+  }
+
+  const baseline = sanitizeBaseline(c.baseline);
+  if (!baseline) return null;
+
+  const progressSnapshots = sanitizeProgressSnapshots(c.progressSnapshots);
+  const metadataRaw =
+    c.metadata && typeof c.metadata === 'object' ? (c.metadata as Record<string, unknown>) : {};
+  const metadata = {
+    id: typeof metadataRaw.id === 'string' ? metadataRaw.id : c.seasonId,
+    startDate: typeof metadataRaw.startDate === 'string' ? metadataRaw.startDate : '',
+    startingDivision:
+      typeof metadataRaw.startingDivision === 'number' ? metadataRaw.startingDivision : 10,
+    notes: typeof metadataRaw.notes === 'string' ? metadataRaw.notes : undefined,
+    createdAt: typeof metadataRaw.createdAt === 'string' ? metadataRaw.createdAt : c.closedAt,
+  };
+
+  const finalRank = isValidRankValue(c.finalRank) ? c.finalRank : null;
+  let rewardEligibility: RewardEligibilityStatus = 'Eligibility Unknown';
+  if (finalRank !== null) {
+    rewardEligibility = computeRewardEligibility(finalRank);
+  } else if (
+    c.rewardEligibility === 'Eligible' ||
+    c.rewardEligibility === 'Not Eligible' ||
+    c.rewardEligibility === 'Eligibility Unknown'
+  ) {
+    rewardEligibility = c.rewardEligibility;
+  }
+
+  const rewardAcquisition = sanitizeRewardAcquisition(c.rewardAcquisition);
+  const rewardAcquisitionStatus: RewardAcquisitionStatus = rewardAcquisition
+    ? 'Acquired'
+    : 'Not Acquired';
+
+  const warnings = Array.isArray(c.warnings)
+    ? c.warnings.filter((w): w is string => typeof w === 'string')
+    : [];
+  const acknowledgedWarnings = Array.isArray(c.acknowledgedWarnings)
+    ? c.acknowledgedWarnings.filter((w): w is string => typeof w === 'string')
+    : [];
+
+  const statsSummaryRaw =
+    c.statsSummary && typeof c.statsSummary === 'object'
+      ? (c.statsSummary as Record<string, unknown>)
+      : {};
+  const statsSummary = {
+    totalSnapshots:
+      typeof statsSummaryRaw.totalSnapshots === 'number'
+        ? statsSummaryRaw.totalSnapshots
+        : progressSnapshots.length,
+    latestSnapshotDate:
+      typeof statsSummaryRaw.latestSnapshotDate === 'string'
+        ? statsSummaryRaw.latestSnapshotDate
+        : undefined,
+    totalMatchesDelta:
+      typeof statsSummaryRaw.totalMatchesDelta === 'number'
+        ? statsSummaryRaw.totalMatchesDelta
+        : 0,
+    totalGoalsDelta:
+      typeof statsSummaryRaw.totalGoalsDelta === 'number'
+        ? statsSummaryRaw.totalGoalsDelta
+        : 0,
+    totalAssistsDelta:
+      typeof statsSummaryRaw.totalAssistsDelta === 'number'
+        ? statsSummaryRaw.totalAssistsDelta
+        : 0,
+  };
+
+  return {
+    id: c.id,
+    seasonId: c.seasonId,
+    version: typeof c.version === 'number' ? c.version : 1,
+    closedAt: c.closedAt,
+    closedDate: typeof c.closedDate === 'string' ? c.closedDate : c.closedAt.split('T')[0],
+    metadata,
+    baseline,
+    progressSnapshots,
+    statsSummary,
+    finalRank,
+    rewardEligibility,
+    rewardAcquisitionStatus,
+    rewardAcquisition,
+    warnings,
+    incompleteDataAcknowledged: Boolean(c.incompleteDataAcknowledged),
+    acknowledgedWarnings,
+    closureNotes: typeof c.closureNotes === 'string' ? c.closureNotes : undefined,
+  };
+}
+
+/**
  * Validates and sanitizes a raw season object loaded from storage
  */
 function sanitizeSeason(raw: unknown): Season | null {
@@ -329,6 +438,9 @@ function sanitizeSeason(raw: unknown): Season | null {
   }
   const rewardAcquisition = sanitizeRewardAcquisition(candidate.rewardAcquisition);
 
+  // Milestone 4C2: Closure Snapshot sanitization
+  const closureSnapshot = sanitizeClosureSnapshot(candidate.closureSnapshot);
+
   return {
     id,
     startDate,
@@ -348,6 +460,7 @@ function sanitizeSeason(raw: unknown): Season | null {
     rewardAcquired: Boolean(rewardAcquisition), // legacy compatibility
     closedAt: typeof candidate.closedAt === 'string' ? candidate.closedAt : undefined,
     closureNotes: typeof candidate.closureNotes === 'string' ? candidate.closureNotes : undefined,
+    closureSnapshot,
   };
 }
 
@@ -785,6 +898,12 @@ export function saveBaselineDraft(
   }
 
   const season = state.seasons[seasonIndex];
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${seasonId}" is closed and immutable. Baseline drafts cannot be saved.`,
+    };
+  }
   if (season.baseline) {
     return {
       success: false,
@@ -845,6 +964,13 @@ export function confirmSeasonBaseline(
 
   const season = state.seasons[seasonIndex];
 
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${seasonId}" is closed and immutable. Baseline cannot be confirmed.`,
+    };
+  }
+
   // Prevent duplicate baseline confirmation
   if (season.baseline) {
     return {
@@ -898,6 +1024,13 @@ export function discardBaselineDraft(seasonId: string): { success: boolean; erro
   const state = loadSeasonsState();
   const season = state.seasons.find((s) => s.id === seasonId);
   if (!season) return { success: false, error: 'Season not found' };
+
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${seasonId}" is closed and immutable. Baseline drafts cannot be discarded.`,
+    };
+  }
 
   season.baselineDraft = null;
   season.updatedAt = new Date().toISOString();
@@ -953,6 +1086,12 @@ export function saveProgressDraft(
   }
 
   const season = state.seasons[seasonIndex];
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${seasonId}" is closed and immutable. Progress drafts cannot be saved.`,
+    };
+  }
   if (!season.baseline) {
     return { success: false, error: 'Cannot record progress without a confirmed baseline.' };
   }
@@ -989,6 +1128,13 @@ export function discardProgressDraft(seasonId: string): { success: boolean; erro
   const state = loadSeasonsState();
   const season = state.seasons.find((s) => s.id === seasonId);
   if (!season) return { success: false, error: 'Season not found' };
+
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${seasonId}" is closed and immutable. Progress drafts cannot be discarded.`,
+    };
+  }
 
   season.progressDraft = null;
   season.updatedAt = new Date().toISOString();
@@ -1108,6 +1254,12 @@ export function confirmProgressSnapshot(
   }
 
   const season = state.seasons[seasonIndex];
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${seasonId}" is closed and immutable. Progress snapshots cannot be added.`,
+    };
+  }
   if (!season.baseline) {
     return { success: false, error: 'Cannot record progress snapshot without a confirmed baseline.' };
   }
@@ -1232,6 +1384,13 @@ export function setSeasonRank(
 
   const season = state.seasons[seasonIndex];
 
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${seasonId}" is closed and immutable. Final rank cannot be modified.`,
+    };
+  }
+
   if (rank !== null && !isValidRankValue(rank)) {
     return {
       success: false,
@@ -1286,6 +1445,13 @@ export function recordSeasonReward(
   }
 
   const season = state.seasons[seasonIndex];
+
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${seasonId}" is closed and immutable. Reward acquisitions cannot be recorded.`,
+    };
+  }
 
   // 1. Enforce eligibility rule: rank must be Eligible
   if (season.rewardEligibility !== 'Eligible') {
@@ -1349,5 +1515,298 @@ export function recordSeasonReward(
 export function getSeasonReward(seasonId: string): SeasonRewardAcquisition | null {
   const season = getSeasonById(seasonId);
   return season?.rewardAcquisition || null;
+}
+
+// ============================================================================
+// MILESTONE 4C2: FINAL SEASON REVIEW & CLOSURE BUSINESS LOGIC
+// ============================================================================
+
+/**
+ * Builds a comprehensive review summary for an active season prior to closure.
+ * - Summarizes confirmed baseline, confirmed progress snapshots, rank, and reward data.
+ * - Confirmed data only; unconfirmed drafts are never presented as confirmed stats.
+ * - Evaluates essential prerequisites and flags non-essential incomplete data warnings.
+ */
+export function getSeasonReviewSummary(
+  seasonId: string,
+  playerMetadataMap?: Record<string, { name: string; position: string }>
+): SeasonReviewSummary | null {
+  const season = getSeasonById(seasonId);
+  if (!season) return null;
+
+  const hasBaseline = Boolean(season.baseline);
+  const hasUnconfirmedBaselineDraft = Boolean(season.baselineDraft);
+  const hasUnconfirmedProgressDraft = Boolean(season.progressDraft);
+  const snapshotCount = season.progressSnapshots?.length || 0;
+  const latestSnapshot = snapshotCount > 0 ? season.progressSnapshots![snapshotCount - 1] : null;
+
+  let deltas: PlayerStatDelta[] = [];
+  let totalMatchesDelta = 0;
+  let totalGoalsDelta = 0;
+  let totalAssistsDelta = 0;
+
+  if (season.baseline) {
+    if (latestSnapshot) {
+      const deltaRes = calculatePlayerStatDeltas(season, latestSnapshot.players, playerMetadataMap);
+      deltas = deltaRes.deltas;
+    } else {
+      // 0 progress snapshots: deltas against confirmed baseline are exactly zero
+      deltas = season.baseline.players.map((p) => {
+        const meta = playerMetadataMap?.[p.playerId] || { name: p.playerId, position: 'N/A' };
+        return {
+          playerId: p.playerId,
+          playerName: meta.name,
+          position: meta.position,
+          roleClassification: p.roleClassification,
+          baselineMatches: p.matches,
+          baselineGoals: p.goals,
+          baselineAssists: p.assists,
+          currentMatches: p.matches,
+          currentGoals: p.goals,
+          currentAssists: p.assists,
+          matchesDelta: 0,
+          goalsDelta: 0,
+          assistsDelta: 0,
+          matchesDecreased: false,
+          goalsDecreased: false,
+          assistsDecreased: false,
+          referenceMatches: p.matches,
+          referenceGoals: p.goals,
+          referenceAssists: p.assists,
+        };
+      });
+    }
+
+    for (const d of deltas) {
+      totalMatchesDelta += d.matchesDelta;
+      totalGoalsDelta += d.goalsDelta;
+      totalAssistsDelta += d.assistsDelta;
+    }
+  }
+
+  const blockingReasons: string[] = [];
+  if (season.status !== 'Active') {
+    blockingReasons.push(`Only Active seasons can be closed. Current status is "${season.status}".`);
+  }
+  if (!hasBaseline) {
+    blockingReasons.push(
+      'Season does not have a confirmed baseline. A confirmed starting baseline is required before closure.'
+    );
+  }
+
+  const warnings: string[] = [];
+  if (season.finalRank === null || season.finalRank === undefined) {
+    warnings.push(
+      'Final rank has not been recorded. Reward eligibility will remain "Eligibility Unknown" permanently.'
+    );
+  }
+  if (season.rewardEligibility === 'Eligible' && !season.rewardAcquisition) {
+    warnings.push(
+      'Season qualifies for a division reward card (Rank ≤ 100,000), but no reward acquisition was recorded. The reward will be permanently marked as "Not Acquired".'
+    );
+  }
+  if (snapshotCount === 0) {
+    warnings.push(
+      'No progress snapshots were recorded for this season. Final performance statistics will reflect only the baseline.'
+    );
+  }
+
+  const canClose = blockingReasons.length === 0;
+
+  return {
+    seasonId: season.id,
+    startDate: season.startDate,
+    startingDivision: season.startingDivision,
+    notes: season.notes,
+    createdAt: season.createdAt,
+    updatedAt: season.updatedAt,
+    status: season.status,
+    hasBaseline,
+    baseline: season.baseline || null,
+    hasUnconfirmedBaselineDraft,
+    snapshotCount,
+    hasUnconfirmedProgressDraft,
+    latestSnapshot,
+    deltas,
+    totalMatchesDelta,
+    totalGoalsDelta,
+    totalAssistsDelta,
+    finalRank: season.finalRank ?? null,
+    rewardEligibility: season.rewardEligibility || 'Eligibility Unknown',
+    isRewardAcquired: Boolean(season.rewardAcquisition),
+    rewardAcquisition: season.rewardAcquisition || null,
+    canClose,
+    blockingReasons,
+    warnings,
+  };
+}
+
+/**
+ * Explicitly closes an active season and creates a frozen, immutable closure snapshot.
+ * - Enforces essential checks: season exists, is Active, has confirmed baseline.
+ * - Concurrency protection: verifies expectedUpdatedAt to ensure season was not changed concurrently.
+ * - Enforces explicit user acknowledgement if non-essential information is incomplete.
+ * - Generates immutable deep-copied snapshot of baseline, progress snapshots, rank, and reward records.
+ * - Sets season status to Closed and clears unconfirmed draft records.
+ * - Prevents duplicate closure; rejects closing already closed seasons.
+ */
+export function closeSeason(input: CloseSeasonInput): CloseSeasonResult {
+  const state = loadSeasonsState();
+  const seasonIndex = state.seasons.findIndex((s) => s.id === input.seasonId);
+
+  if (seasonIndex < 0) {
+    return {
+      success: false,
+      error: `Season "${input.seasonId}" was not found.`,
+    };
+  }
+
+  const season = state.seasons[seasonIndex];
+
+  // 1. Reject if already closed
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${season.id}" is already closed and immutable. Duplicate closure is rejected.`,
+    };
+  }
+
+  // 2. Reject if not Active
+  if (season.status !== 'Active') {
+    return {
+      success: false,
+      error: `Only Active seasons can be closed. Current status is "${season.status}".`,
+    };
+  }
+
+  // 3. Essential requirement: must have confirmed baseline
+  if (!season.baseline) {
+    return {
+      success: false,
+      error: 'Cannot close season: a confirmed baseline snapshot is required.',
+    };
+  }
+
+  // 4. Concurrency check: Reject closure if season data has changed since review was loaded
+  if (input.expectedUpdatedAt && season.updatedAt !== input.expectedUpdatedAt) {
+    return {
+      success: false,
+      error: 'Season data has changed or been updated since the review was loaded. Please review the updated season before closing.',
+    };
+  }
+
+  // 5. Compute non-essential warnings
+  const warnings: string[] = [];
+  if (season.finalRank === null || season.finalRank === undefined) {
+    warnings.push(
+      'Final rank has not been recorded. Reward eligibility will remain "Eligibility Unknown" permanently.'
+    );
+  }
+  if (season.rewardEligibility === 'Eligible' && !season.rewardAcquisition) {
+    warnings.push(
+      'Season qualifies for a division reward card (Rank ≤ 100,000), but no reward acquisition was recorded. The reward will be permanently marked as "Not Acquired".'
+    );
+  }
+  if (!season.progressSnapshots || season.progressSnapshots.length === 0) {
+    warnings.push(
+      'No progress snapshots were recorded for this season. Final performance statistics will reflect only the baseline.'
+    );
+  }
+
+  // 6. Explicit acknowledgement check for incomplete data
+  if (warnings.length > 0 && !input.acknowledgedIncompleteData) {
+    return {
+      success: false,
+      error: 'Explicit acknowledgement of incomplete season data is required before closure.',
+      warnings,
+    };
+  }
+
+  const now = new Date().toISOString();
+  const closedDate = now.split('T')[0];
+  const closureSnapshotId = `closure-${season.id}-${Date.now()}`;
+
+  // Deep copy confirmed data to prevent future in-memory mutations
+  const frozenBaseline = deepCopy(season.baseline);
+  const frozenSnapshots = deepCopy(season.progressSnapshots || []);
+  const frozenReward = season.rewardAcquisition ? deepCopy(season.rewardAcquisition) : null;
+
+  // Calculate cumulative stats deltas summary
+  let totalMatchesDelta = 0;
+  let totalGoalsDelta = 0;
+  let totalAssistsDelta = 0;
+  let latestSnapshotDate: string | undefined;
+
+  if (frozenSnapshots.length > 0) {
+    const latest = frozenSnapshots[frozenSnapshots.length - 1];
+    latestSnapshotDate = latest.recordingDate;
+    const deltaRes = calculatePlayerStatDeltas(season, latest.players);
+    for (const d of deltaRes.deltas) {
+      totalMatchesDelta += d.matchesDelta;
+      totalGoalsDelta += d.goalsDelta;
+      totalAssistsDelta += d.assistsDelta;
+    }
+  }
+
+  const closureSnapshot: SeasonClosureSnapshot = {
+    id: closureSnapshotId,
+    seasonId: season.id,
+    version: 1,
+    closedAt: now,
+    closedDate,
+    metadata: {
+      id: season.id,
+      startDate: season.startDate,
+      startingDivision: season.startingDivision,
+      notes: season.notes,
+      createdAt: season.createdAt,
+    },
+    baseline: frozenBaseline,
+    progressSnapshots: frozenSnapshots,
+    statsSummary: {
+      totalSnapshots: frozenSnapshots.length,
+      latestSnapshotDate,
+      totalMatchesDelta,
+      totalGoalsDelta,
+      totalAssistsDelta,
+    },
+    finalRank: season.finalRank ?? null,
+    rewardEligibility: season.rewardEligibility || 'Eligibility Unknown',
+    rewardAcquisitionStatus: frozenReward ? 'Acquired' : 'Not Acquired',
+    rewardAcquisition: frozenReward,
+    warnings: [...warnings],
+    incompleteDataAcknowledged: warnings.length > 0 ? Boolean(input.acknowledgedIncompleteData) : false,
+    acknowledgedWarnings: warnings.length > 0 ? [...warnings] : [],
+    closureNotes: input.closureNotes?.trim() || undefined,
+  };
+
+  const closedSeason: Season = {
+    ...season,
+    status: 'Closed',
+    closedAt: now,
+    closureNotes: input.closureNotes?.trim() || undefined,
+    closureSnapshot,
+    baselineDraft: null, // Unconfirmed drafts are cleared upon closure
+    progressDraft: null,
+    updatedAt: now,
+  };
+
+  state.seasons[seasonIndex] = closedSeason;
+  saveSeasonsState(state);
+
+  return {
+    success: true,
+    season: closedSeason,
+    closureSnapshot,
+    warnings,
+  };
+}
+
+/**
+ * Retrieves the closure snapshot for a season, if closed
+ */
+export function getSeasonClosureSnapshot(seasonId: string): SeasonClosureSnapshot | null {
+  const season = getSeasonById(seasonId);
+  return season?.closureSnapshot || null;
 }
 
