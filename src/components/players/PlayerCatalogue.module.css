@@ -1,0 +1,212 @@
+.catalogueContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6) 0 var(--space-12) 0;
+}
+
+@media (min-width: 768px) {
+  .catalogueContainer {
+    padding: var(--space-8) 0 var(--space-12) 0;
+  }
+}
+
+/* Header & Intro */
+.headerRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .headerRow {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.heading {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+@media (min-width: 768px) {
+  .heading {
+    font-size: 2.25rem;
+  }
+}
+
+.subheading {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* Filter Controls Box */
+.controlsBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .controlsBox {
+    padding: var(--space-5);
+  }
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  position: relative;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  height: 44px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-4) 0 42px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: all var(--transition-fast);
+}
+
+.searchInput:focus {
+  border-color: var(--accent-lime);
+  outline: none;
+  box-shadow: 0 0 12px var(--accent-lime-glow);
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+/* Squad Status Pill Filter */
+.squadTabs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.squadTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.squadTab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.squadTab:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+
+.squadTabActive {
+  background: var(--accent-lime-muted);
+  color: var(--accent-lime);
+  border-color: var(--border-lime);
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+}
+
+/* Secondary Filter Selects */
+.selectRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.selectGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.selectLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.selectInput {
+  height: 38px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-3);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.selectInput:focus {
+  border-color: var(--accent-blue);
+}
+
+.metaInfoBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Player Grid */
+.playerGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 480px) {
+  .playerGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .playerGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+@media (min-width: 1100px) {
+  .playerGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
