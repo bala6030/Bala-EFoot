@@ -4,7 +4,7 @@
 - **App**: Bala EFoot
 - **Tagline**: Squad • Skills • Seasons
 - **Repository**: https://github.com/bala6030/Bala-EFoot
-- **Active Branch**: `feature/squad-builder`
+- **Active Branch**: `feature/season-workflow`
 - **Cost Target**: ₹0; no billing-enabled usage, paid APIs, or payment method
 
 ## Git Branch Plan
@@ -12,7 +12,8 @@
 - `develop`: integration branch created from `main`.
 - `feature/project-foundation`: Milestone 1 foundation implementation (merged into `develop`).
 - `feature/player-catalogue`: Milestone 2 player catalogue and player profile implementation (merged into `develop`).
-- `feature/squad-builder`: Milestone 3 squad & pitch formation builder implementation.
+- `feature/squad-builder`: Milestone 3 squad & pitch formation builder implementation (merged into `develop`).
+- `feature/season-workflow`: Milestone 4 season workflow implementation.
 - Feature branches merge into `develop` after review.
 
 ## Milestones Status
@@ -64,16 +65,121 @@
 - **Automated Verification**:
   - Dedicated test suite in `scripts/test_squad_builder.js` (`npm run test:squad`) verifying formation structures, layout independence, transition mappings, and validation logic.
 
+### Milestone 4A — Season Foundation (Completed)
+- **Typed Season Model**:
+  - Created `Season`, `SeasonStatus` (`Draft` | `Active` | `Closed`), `SeasonDraftInput`, `SeasonsState`, and `SeasonValidationResult` models in `src/types/index.ts`.
+  - Structured with extensible fields for starting baselines, progress snapshots, reward eligibility, acquisition records, and final closure data.
+- **Season Storage & Repository Layer**:
+  - Dedicated `seasonRepository.ts` utilizing versioned `localStorage` key `bala_efoot_seasons_v1`.
+  - Comprehensive data validation and corruption recovery (recovers gracefully from malformed JSON or corrupted records without crashing or data loss).
+  - Strict duplicate season identifier prevention (case-insensitive and trimmed checking) that preserves existing data on collision.
+  - Separate draft persistence (`activeDraftId`) ensuring drafts survive page refresh without silent activation.
+  - Explicit activation requiring full validation (non-empty identifier, valid start date, starting division between 1 and 10).
+  - Completely isolated storage: preserves existing player catalogue and squad builder storage keys.
+- **Seasons Screen & Guided Workflow**:
+  - Full Seasons screen (`SeasonsView.tsx` + `SeasonsView.module.css`) integrated into desktop, mobile drawer, and mobile bottom navigation.
+  - Connected Dashboard CTA ("Add Match Stats") directly to Seasons view.
+  - Guided 2-step season creation wizard:
+    - **Step 1 (Season Setup)**: Inputs for unique identifier, start date, starting division (1-10), and optional tactical notes, with inline validation errors and explicit "Save Draft" action.
+    - **Step 2 (Review & Activation)**: Comprehensive review card with explicit "Activate Season" confirmation.
+  - Responsive saved seasons grid showing status badges (`Active` neon lime, `Draft` electric blue, `Closed` purple), metadata, and resume/discard controls.
+- **Automated Verification**:
+  - Dedicated test suite `scripts/test_season_repository.js` (`npm run test:season`) verifying creation, reload persistence, duplicate rejection, explicit activation, corrupted storage resilience, and subsystem storage isolation.
+
+### Milestone 4B — Player Statistics Baselines & Progress Tracking (Completed)
+- **Baseline Data Model & Immutability**:
+  - Implemented typed `SeasonBaselineSnapshot`, `BaselinePlayerRecord`, `SeasonBaselineDraft`, and `PlayerRoleClassification` ('Starting XI' | 'Substitute') in `src/types/index.ts`.
+  - Captures cumulative matches, goals, and assists for all 23 authentic player cards using stable IDs (`P001` - `P023`).
+  - Distinguishes unentered values (`null`) from genuine zeroes (`0`).
+  - Enforces strict validation requiring all 23 cards to be filled with non-negative integers before confirmation.
+  - Immutability guarantee: confirmed baseline cannot be overwritten by progress updates, re-confirmation, or duplicate submissions.
+  - Canonical Starting XI (11 cards) and Substitutes (12 cards) classification locked into the baseline snapshot.
+- **Progress Snapshots & Append-Only History**:
+  - Implemented typed `SeasonProgressSnapshot`, `ProgressPlayerRecord`, `SeasonProgressDraft`, and `PlayerStatDelta`.
+  - Append-only snapshot ledger with stable snapshot IDs, recording date, and user notes.
+  - Draft saving for incomplete data that survives browser reloads.
+- **Delta Calculations & Decrease Warning Safeguard**:
+  - Exact deltas calculated as `current cumulative − baseline`.
+  - Positive, zero, and negative deltas displayed accurately without silent clamping.
+  - Stat decrease detection compared against the latest reference record (most recent snapshot or baseline).
+  - Prominent decrease warning banner and mandatory explicit confirmation checkbox ("I confirm that these decreased values are intentional source corrections") required before confirmation.
+- **User Interface Integration**:
+  - Extended `SeasonsView.tsx` with dedicated Baseline setup/review, Progress entry/review, and Snapshot detail inspection views.
+  - Filterable tabs for All Players (23), Starting XI (11), and Substitutes (12).
+  - Real-time completion progress indicators (`X/23 Completed`).
+  - Responsive tables with dark theme styling, delta pills (green positive, gray zero, red negative), and accessible inputs.
+- **Automated Verification**:
+  - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 12 comprehensive test suites covering 23-card creation, null vs 0 distinction, negative/fractional stat rejection, duplicate prevention, baseline immutability, exact delta calculation (positive/zero/negative), decrease warnings, append-only history, reload persistence, and backward compatibility.
+
+### Milestone 4C1 — Reward Eligibility & Acquisition (Completed)
+- **Rank-Based Eligibility**:
+  - Implemented explicit threshold logic (`REWARD_RANK_THRESHOLD = 100000`).
+  - Final rank 1 through 100,000 inclusive: `Eligible`.
+  - Final rank 100,001 or greater: `Not Eligible`.
+  - Missing rank (null/undefined): `Eligibility Unknown`.
+  - Zero, negative numbers, fractional values, and invalid rank inputs are strictly rejected.
+  - Immediate recomputation of eligibility upon rank entry or correction.
+- **Strict Decoupling of Eligibility and Acquisition**:
+  - Eligibility status (`Eligible` | `Not Eligible` | `Eligibility Unknown`) is maintained independently from acquisition state.
+  - Being `Eligible` never automatically implies a reward has been acquired.
+  - Recording a reward card is strictly prohibited when the season status is `Not Eligible` or `Eligibility Unknown`.
+- **Enforce Limit of At Most One Reward Card Per Season**:
+  - Exactly at most one reward card can be acquired and recorded per season.
+  - Once a reward card has been acquired, recording a second reward card is rejected.
+  - Duplicate or repeated submissions are prevented; existing acquisition and season records are preserved intact upon rejection.
+- **Manual Acquisition Recording & Modal Interface**:
+  - Explicit modal workflow for claiming/recording reward card with required card name, valid acquisition date (`YYYY-MM-DD`), optional card version/details, optional notes, and mandatory confirmation checkbox.
+  - Clear rank modal with live eligibility preview (`Rank ≤ 100,000: Eligible` in neon lime, `Rank > 100,000: Not Eligible` in danger, blank: `Eligibility Unknown`).
+  - Dedicated Phase Rank & Rewards section on each season card displaying rank, eligibility badge, acquisition badge, acquired card details, and contextual actions.
+- **Persistence & Regression Safety**:
+  - Rank, eligibility, and acquisition data persist cleanly in `localStorage` under `bala_efoot_seasons_v1` and survive browser refresh.
+  - Baseline records, progress snapshots, player catalogue, and squad builder data are fully preserved without mutation.
+- **Automated Verification**:
+  - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 12 new test suites (Tests 13–24, 24 total) covering boundary conditions (100,000 vs 100,001), missing rank, invalid rank rejection, rank corrections, acquisition decoupling, 1-card limit enforcement, duplicate prevention, and reload persistence.
+
+### Milestone 4C2 — Final Season Review & Closure (Completed)
+- **Guided Final Season Review**:
+  - Implemented `getSeasonReviewSummary` in `src/data/seasonRepository.ts` and `close-review` view mode in `SeasonsView.tsx`.
+  - Aggregates verified season metadata: season identifier, start date, starting division, tactical notes, confirmed baseline status, confirmed snapshot count, latest confirmed cumulative statistics snapshot, and deltas.
+  - Distinguishes entered zeroes from missing values; draft progress entries and unconfirmed baseline drafts are strictly excluded from confirmed review metrics.
+  - Computes and displays squad-level totals and individual player stat deltas with filter tabs (All 23, Starting XI 11, Substitutes 12).
+  - Evaluates data completeness and generates visible warnings for missing rank, zero progress snapshots, or unconfirmed progress drafts.
+  - Requires explicit user acknowledgement checkbox ("I acknowledge the incomplete or unrecorded data listed above...") before permitting closure when non-essential data is missing.
+  - Supports inline rank updates and reward claims directly within the review panel with immediate eligibility recomputation.
+- **Explicit Closure Workflow & Concurrency Protection**:
+  - Requires deliberate two-step closure: complete review followed by an explicit irreversible closure confirmation modal.
+  - Only `Active` seasons with a confirmed baseline can be closed; `Draft` seasons and unconfirmed seasons are strictly rejected.
+  - Concurrency protection via `expectedUpdatedAt`: rejects closure if the season record was modified concurrently after the review was loaded.
+  - Duplicate submission prevention: disables actions during submission and domain-level rejection for already closed seasons.
+  - Non-closure on inspection: loading review summary or saving drafts never triggers season closure.
+- **Immutable Final Snapshot Data Model**:
+  - Defined typed `SeasonClosureSnapshot` in `src/types/index.ts` with schema version `1`, unique snapshot ID (`closure-<seasonId>-<timestamp>`), closedAt, closedDate, frozen metadata, deep-copied confirmed baseline, deep-copied confirmed progress snapshots (in original chronological order), stats summary (matches, goals, assists deltas), final rank, reward eligibility, reward acquisition record, closure warnings, acknowledgement status, and closure notes.
+  - Deep-copies all confirmed arrays and nested objects (`JSON.parse(JSON.stringify(...))`) ensuring subsequent in-memory mutations cannot alter saved historical snapshots.
+  - Discards unconfirmed progress drafts upon closure so only verified data is retained.
+- **Closed-Season Mutation Protections**:
+  - Enforced comprehensive domain-level immutability guards in `seasonRepository.ts`.
+  - Normal season mutations are strictly rejected on closed seasons: `saveBaselineDraft`, `confirmSeasonBaseline`, `discardBaselineDraft`, `saveProgressDraft`, `confirmProgressSnapshot`, `discardProgressDraft`, `setSeasonRank`, `recordSeasonReward`, `saveSeasonDraft`, `activateSeason`, and `discardDraft`.
+  - Closed seasons cannot be reopened or closed again; duplicate closure attempts leave the original timestamp and snapshot untouched.
+- **Read-Only Historical Seasons Inspection**:
+  - Integrated `closed-detail` view mode in `SeasonsView.tsx`.
+  - Closed season cards feature a purple `Immutable` badge, closure date, and "View Historical Record" action. Normal edit, progress entry, rank update, and reward claim controls are hidden.
+  - Detailed historical view presents frozen closure metadata, snapshot ID, final rank, reward acquisition status (with recorded card details or explicit "Not Acquired"), cumulative statistics deltas table, preserved chronological progress snapshots ledger with individual snapshot inspection, and acknowledged warnings.
+- **Automated Verification**:
+  - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 14 new test suites (Tests 25–38, 38 total) verifying confirmed snapshot isolation, missing rank handling, rank boundary conditions, active closure, draft rejection, explicit confirmation requirement, duplicate closure rejection, closed-season mutation rejection, deep-copy immutability, reward preservation, acknowledgement requirement, concurrency mismatch rejection, storage reload persistence, and backward compatibility with new seasons.
+
 ## Known Limitations
+- Milestone 4 (Season Workflow: 4A Foundation, 4B Baselines & Progress, 4C1 Reward Eligibility & Acquisition, and 4C2 Final Review & Closure) is now fully completed.
+- Reopening closed seasons and silent historical edits are intentionally prohibited; if corrections are required in future milestones, they must be recorded as explicit correction records rather than in-place mutations.
 - Position familiarity is intentionally not tracked (per specification).
 - Tactician/manager auto-arrange and tactical instruction controls are excluded (per milestone scope).
 - Card artwork currently displays clean initials and rating badges until official image assets are added to the repository.
+- Cross-season broad analytics dashboards, cloud sync, authentication, and automatic/date-based season closure are excluded (per ₹0 budget and milestone scope).
 
 ## Commands Executed & Results
-- `npm run import-data`: Ingested 23 authentic players from Excel template (Exit 0).
-- `npm run test:squad`: Ran Node.js unit test suite for formations, independence, and validation (Exit 0).
 - `npm run lint`: ESLint check passed with 0 errors and 0 warnings (Exit 0).
-- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 966ms (Exit 0).
+- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.01s (Exit 0).
+- `npm run test:squad`: Node.js unit test suite for formations, independence, and validation passed (Exit 0).
+- `npm run test:season`: Node.js unit test suite for season workflows passed (38 tests covering Milestones 4A, 4B, 4C1, and 4C2, Exit 0).
 
 ## Next Action
-Review Milestone 3 and prepare for **Milestone 4: Season Workflow** (manual season start/closure, guided division stats entry, baseline deltas, cumulative matches/goals/assists validation, draft saving, and rank 100,000 reward qualification).
+Milestone 4C2 is complete and verified on branch `feature/season-workflow`. Awaiting user review before any commit, merge, or subsequent milestone execution.

@@ -5,6 +5,7 @@ export type NavigationView =
   | 'dashboard'
   | 'squad'
   | 'players'
+  | 'seasons'
   | 'skills'
   | 'stats'
   | 'wishlist';
@@ -293,3 +294,303 @@ export interface SquadValidationResult {
   missingPlayerIds: string[];
   unfilledSlotNames: string[];
 }
+
+/**
+ * Season lifecycle status
+ */
+export type SeasonStatus = 'Draft' | 'Active' | 'Closed';
+
+/**
+ * Reward eligibility status based on final rank threshold (<= 100,000)
+ */
+export type RewardEligibilityStatus = 'Eligible' | 'Not Eligible' | 'Eligibility Unknown';
+
+/**
+ * Reward acquisition status
+ */
+export type RewardAcquisitionStatus = 'Acquired' | 'Not Acquired';
+
+/**
+ * Season reward player/card acquisition record (at most one per season)
+ */
+export interface SeasonRewardAcquisition {
+  id: string; // e.g. "rew-Phase-1-1729420000000"
+  seasonId: string;
+  cardName: string; // Reward player/card name (e.g. "Alessandro Costacurta")
+  cardDescription?: string; // Card or version description if known
+  acquiredDate: string; // YYYY-MM-DD
+  notes?: string;
+  confirmedAt: string; // ISO 8601 timestamp
+}
+
+/**
+ * Core Season entity
+ */
+export interface Season {
+  id: string; // Unique season/phase identifier (e.g. "Phase 1 - Season 2024", "Season 1")
+  startDate: string; // ISO date string (YYYY-MM-DD)
+  startingDivision: number; // eFootball starting division (1-10)
+  notes?: string; // Optional user notes / objectives
+  status: SeasonStatus; // Draft | Active | Closed
+  createdAt: string; // ISO 8601 creation timestamp
+  updatedAt: string; // ISO 8601 update timestamp
+
+  // Milestone 4B: Baseline & Progress tracking
+  baseline?: SeasonBaselineSnapshot | null;
+  baselineDraft?: SeasonBaselineDraft | null;
+  progressSnapshots?: SeasonProgressSnapshot[];
+  progressDraft?: SeasonProgressDraft | null;
+
+  // Backward compatibility alias:
+  baselineSnapshot?: unknown;
+
+  // Milestone 4C1: Reward Eligibility & Acquisition
+  finalRank?: number | null; // Entered final rank (1 to 100,000 qualifies)
+  rewardEligibility?: RewardEligibilityStatus;
+  rewardAcquisition?: SeasonRewardAcquisition | null;
+
+  // Extensibility hooks for future milestones (Milestones 4C2, 5):
+  rewardAcquired?: unknown;
+  closedAt?: string;
+  closureNotes?: string;
+  closureSnapshot?: SeasonClosureSnapshot | null;
+}
+
+/**
+ * Draft input model for creating or editing a season
+ */
+export interface SeasonDraftInput {
+  id?: string;
+  startDate?: string;
+  startingDivision?: number;
+  notes?: string;
+}
+
+/**
+ * Player role classification in baseline
+ */
+export type PlayerRoleClassification = 'Starting XI' | 'Substitute';
+
+/**
+ * Single player's statistics in baseline
+ */
+export interface BaselinePlayerRecord {
+  playerId: string; // Stable ID e.g. "P001"
+  roleClassification: PlayerRoleClassification;
+  matches: number; // Non-negative integer
+  goals: number; // Non-negative integer
+  assists: number; // Non-negative integer
+}
+
+/**
+ * Baseline snapshot for a season (immutable once confirmed)
+ */
+export interface SeasonBaselineSnapshot {
+  id: string; // e.g. "baseline-Phase-1-1729420000000"
+  confirmedAt: string; // ISO 8601 timestamp
+  confirmedDate: string; // YYYY-MM-DD
+  players: BaselinePlayerRecord[]; // Exactly 23 player records
+  notes?: string;
+}
+
+/**
+ * Draft entry for a player in a baseline draft (null represents unentered)
+ */
+export interface BaselineDraftPlayerEntry {
+  playerId: string;
+  roleClassification: PlayerRoleClassification;
+  matches: number | null; // null represents unentered, 0 represents genuine zero
+  goals: number | null;
+  assists: number | null;
+}
+
+/**
+ * Draft for season baseline before confirmation
+ */
+export interface SeasonBaselineDraft {
+  seasonId: string;
+  updatedAt: string;
+  players: BaselineDraftPlayerEntry[];
+  notes?: string;
+}
+
+/**
+ * Single player's cumulative statistics in a progress snapshot
+ */
+export interface ProgressPlayerRecord {
+  playerId: string;
+  matches: number;
+  goals: number;
+  assists: number;
+}
+
+/**
+ * Confirmed progress snapshot (append-only)
+ */
+export interface SeasonProgressSnapshot {
+  id: string; // e.g. "snap-1729420000000"
+  recordingDate: string; // YYYY-MM-DD
+  recordedAt: string; // ISO timestamp
+  players: ProgressPlayerRecord[]; // Exactly 23 player records
+  notes?: string;
+  hasConfirmedDecreases?: boolean;
+}
+
+/**
+ * Draft entry for progress snapshot
+ */
+export interface ProgressDraftPlayerEntry {
+  playerId: string;
+  matches: number | null;
+  goals: number | null;
+  assists: number | null;
+}
+
+/**
+ * Draft for in-progress snapshot
+ */
+export interface SeasonProgressDraft {
+  seasonId: string;
+  recordingDate: string;
+  updatedAt: string;
+  players: ProgressDraftPlayerEntry[];
+  notes?: string;
+}
+
+/**
+ * Computed delta record for display and analysis
+ */
+export interface PlayerStatDelta {
+  playerId: string;
+  playerName: string;
+  position: string;
+  roleClassification: PlayerRoleClassification;
+  baselineMatches: number;
+  baselineGoals: number;
+  baselineAssists: number;
+  currentMatches: number;
+  currentGoals: number;
+  currentAssists: number;
+  matchesDelta: number; // currentMatches - baselineMatches
+  goalsDelta: number; // currentGoals - baselineGoals
+  assistsDelta: number; // currentAssists - baselineAssists
+  matchesDecreased: boolean;
+  goalsDecreased: boolean;
+  assistsDecreased: boolean;
+  referenceMatches: number;
+  referenceGoals: number;
+  referenceAssists: number;
+}
+
+/**
+ * Persisted seasons storage state container
+ */
+export interface SeasonsState {
+  version: number;
+  seasons: Season[];
+  activeDraftId: string | null;
+}
+
+/**
+ * Validation result for season form inputs
+ */
+export interface SeasonValidationResult {
+  isValid: boolean;
+  errors: Record<string, string>;
+}
+
+/**
+ * Frozen, immutable snapshot of the season at time of closure (Milestone 4C2)
+ */
+export interface SeasonClosureSnapshot {
+  id: string; // e.g. "closure-Phase-1-1729420000000"
+  seasonId: string;
+  version: number; // Snapshot schema version (e.g. 1)
+  closedAt: string; // ISO 8601 timestamp
+  closedDate: string; // YYYY-MM-DD
+  metadata: {
+    id: string;
+    startDate: string;
+    startingDivision: number;
+    notes?: string;
+    createdAt: string;
+  };
+  baseline: SeasonBaselineSnapshot;
+  progressSnapshots: SeasonProgressSnapshot[];
+  statsSummary: {
+    totalSnapshots: number;
+    latestSnapshotDate?: string;
+    totalMatchesDelta: number;
+    totalGoalsDelta: number;
+    totalAssistsDelta: number;
+  };
+  finalRank: number | null;
+  rewardEligibility: RewardEligibilityStatus;
+  rewardAcquisitionStatus: RewardAcquisitionStatus;
+  rewardAcquisition: SeasonRewardAcquisition | null;
+  warnings: string[];
+  incompleteDataAcknowledged: boolean;
+  acknowledgedWarnings: string[];
+  closureNotes?: string;
+}
+
+/**
+ * Comprehensive review summary for an active season prior to closure
+ */
+export interface SeasonReviewSummary {
+  seasonId: string;
+  startDate: string;
+  startingDivision: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  status: SeasonStatus;
+
+  // Baseline confirmation status
+  hasBaseline: boolean;
+  baseline: SeasonBaselineSnapshot | null;
+  hasUnconfirmedBaselineDraft: boolean;
+
+  // Snapshots & Cumulative statistics
+  snapshotCount: number;
+  hasUnconfirmedProgressDraft: boolean;
+  latestSnapshot: SeasonProgressSnapshot | null;
+  deltas: PlayerStatDelta[];
+  totalMatchesDelta: number;
+  totalGoalsDelta: number;
+  totalAssistsDelta: number;
+
+  // Rank & Reward status
+  finalRank: number | null;
+  rewardEligibility: RewardEligibilityStatus;
+  isRewardAcquired: boolean;
+  rewardAcquisition: SeasonRewardAcquisition | null;
+
+  // Closure eligibility & checks
+  canClose: boolean;
+  blockingReasons: string[];
+  warnings: string[];
+}
+
+/**
+ * Input parameters for explicit season closure
+ */
+export interface CloseSeasonInput {
+  seasonId: string;
+  expectedUpdatedAt?: string;
+  acknowledgedIncompleteData?: boolean;
+  closureNotes?: string;
+}
+
+/**
+ * Result of season closure operation
+ */
+export interface CloseSeasonResult {
+  success: boolean;
+  season?: Season;
+  closureSnapshot?: SeasonClosureSnapshot;
+  error?: string;
+  warnings?: string[];
+}
+
+
