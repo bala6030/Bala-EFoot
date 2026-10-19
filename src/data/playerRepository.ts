@@ -1,4 +1,4 @@
-import { PlayerCard, AttributeDefinition } from '../types';
+import type { PlayerCard, AttributeDefinition } from '../types';
 import rawPlayersData from './players.json';
 
 const players: PlayerCard[] = rawPlayersData as unknown as PlayerCard[];

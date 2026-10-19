@@ -312,9 +312,16 @@ export interface Season {
   createdAt: string; // ISO 8601 creation timestamp
   updatedAt: string; // ISO 8601 update timestamp
 
-  // Extensibility hooks for future milestones (Milestones 4B, 4C, 5):
+  // Milestone 4B: Baseline & Progress tracking
+  baseline?: SeasonBaselineSnapshot | null;
+  baselineDraft?: SeasonBaselineDraft | null;
+  progressSnapshots?: SeasonProgressSnapshot[];
+  progressDraft?: SeasonProgressDraft | null;
+
+  // Backward compatibility alias:
   baselineSnapshot?: unknown;
-  progressSnapshots?: unknown[];
+
+  // Extensibility hooks for future milestones (Milestones 4C, 5):
   rewardEligibility?: unknown;
   rewardAcquired?: unknown;
   closedAt?: string;
@@ -329,6 +336,122 @@ export interface SeasonDraftInput {
   startDate?: string;
   startingDivision?: number;
   notes?: string;
+}
+
+/**
+ * Player role classification in baseline
+ */
+export type PlayerRoleClassification = 'Starting XI' | 'Substitute';
+
+/**
+ * Single player's statistics in baseline
+ */
+export interface BaselinePlayerRecord {
+  playerId: string; // Stable ID e.g. "P001"
+  roleClassification: PlayerRoleClassification;
+  matches: number; // Non-negative integer
+  goals: number; // Non-negative integer
+  assists: number; // Non-negative integer
+}
+
+/**
+ * Baseline snapshot for a season (immutable once confirmed)
+ */
+export interface SeasonBaselineSnapshot {
+  id: string; // e.g. "baseline-Phase-1-1729420000000"
+  confirmedAt: string; // ISO 8601 timestamp
+  confirmedDate: string; // YYYY-MM-DD
+  players: BaselinePlayerRecord[]; // Exactly 23 player records
+  notes?: string;
+}
+
+/**
+ * Draft entry for a player in a baseline draft (null represents unentered)
+ */
+export interface BaselineDraftPlayerEntry {
+  playerId: string;
+  roleClassification: PlayerRoleClassification;
+  matches: number | null; // null represents unentered, 0 represents genuine zero
+  goals: number | null;
+  assists: number | null;
+}
+
+/**
+ * Draft for season baseline before confirmation
+ */
+export interface SeasonBaselineDraft {
+  seasonId: string;
+  updatedAt: string;
+  players: BaselineDraftPlayerEntry[];
+  notes?: string;
+}
+
+/**
+ * Single player's cumulative statistics in a progress snapshot
+ */
+export interface ProgressPlayerRecord {
+  playerId: string;
+  matches: number;
+  goals: number;
+  assists: number;
+}
+
+/**
+ * Confirmed progress snapshot (append-only)
+ */
+export interface SeasonProgressSnapshot {
+  id: string; // e.g. "snap-1729420000000"
+  recordingDate: string; // YYYY-MM-DD
+  recordedAt: string; // ISO timestamp
+  players: ProgressPlayerRecord[]; // Exactly 23 player records
+  notes?: string;
+  hasConfirmedDecreases?: boolean;
+}
+
+/**
+ * Draft entry for progress snapshot
+ */
+export interface ProgressDraftPlayerEntry {
+  playerId: string;
+  matches: number | null;
+  goals: number | null;
+  assists: number | null;
+}
+
+/**
+ * Draft for in-progress snapshot
+ */
+export interface SeasonProgressDraft {
+  seasonId: string;
+  recordingDate: string;
+  updatedAt: string;
+  players: ProgressDraftPlayerEntry[];
+  notes?: string;
+}
+
+/**
+ * Computed delta record for display and analysis
+ */
+export interface PlayerStatDelta {
+  playerId: string;
+  playerName: string;
+  position: string;
+  roleClassification: PlayerRoleClassification;
+  baselineMatches: number;
+  baselineGoals: number;
+  baselineAssists: number;
+  currentMatches: number;
+  currentGoals: number;
+  currentAssists: number;
+  matchesDelta: number; // currentMatches - baselineMatches
+  goalsDelta: number; // currentGoals - baselineGoals
+  assistsDelta: number; // currentAssists - baselineAssists
+  matchesDecreased: boolean;
+  goalsDecreased: boolean;
+  assistsDecreased: boolean;
+  referenceMatches: number;
+  referenceGoals: number;
+  referenceAssists: number;
 }
 
 /**
@@ -347,4 +470,5 @@ export interface SeasonValidationResult {
   isValid: boolean;
   errors: Record<string, string>;
 }
+
 

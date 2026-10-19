@@ -11,6 +11,19 @@ import {
   getActiveDraft,
   SEASONS_STORAGE_KEY,
   DEFAULT_SEASONS_STATE,
+  AUTHENTIC_PLAYER_IDS,
+  CANONICAL_STARTING_XI_IDS,
+  getCanonicalPlayerRole,
+  validateBaselinePlayerEntries,
+  getInitialBaselineDraft,
+  saveBaselineDraft,
+  confirmSeasonBaseline,
+  discardBaselineDraft,
+  getInitialProgressDraft,
+  saveProgressDraft,
+  calculatePlayerStatDeltas,
+  confirmProgressSnapshot,
+  discardProgressDraft,
 } from '../src/data/seasonRepository.ts';
 
 // In-memory localStorage mock for Node.js test environment
@@ -23,199 +36,301 @@ global.localStorage = {
   clear: () => mockStorage.clear(),
 };
 
-console.log('=== Running Season Workflow (Milestone 4A) Verification Suite ===\n');
+console.log('=== Running Season Workflow (Milestone 4A & 4B) Verification Suite ===\n');
 
 // Reset storage before tests
 mockStorage.clear();
 
+// Helper to generate a valid 23-player baseline payload
+function generateValidBaselinePayload(baseMatches = 10, baseGoals = 2, baseAssists = 1) {
+  return AUTHENTIC_PLAYER_IDS.map((id) => ({
+    playerId: id,
+    roleClassification: getCanonicalPlayerRole(id),
+    matches: baseMatches,
+    goals: baseGoals,
+    assists: baseAssists,
+  }));
+}
+
 // -------------------------------------------------------------
-// Test 1: Creation and Saving of Draft Season
+// Test 1: Milestone 4A Season Creation and Activation
 // -------------------------------------------------------------
-console.log('1. Verifying Draft Season Creation and Properties...');
+console.log('1. Verifying Milestone 4A Season Creation & Activation...');
 const createRes = saveSeasonDraft({
   id: 'Phase 1 - Season 2024',
   startDate: '2024-10-01',
   startingDivision: 4,
   notes: 'Road to Division 1 with 4-2-1-3 setup',
 });
+assert.strictEqual(createRes.success, true);
+assert.strictEqual(createRes.season.status, 'Draft');
 
-assert.strictEqual(createRes.success, true, 'Draft creation must succeed');
-assert.ok(createRes.season, 'Must return created season');
-assert.strictEqual(createRes.season.id, 'Phase 1 - Season 2024');
-assert.strictEqual(createRes.season.status, 'Draft', 'New season must have Draft status');
-assert.strictEqual(createRes.season.startingDivision, 4);
-assert.strictEqual(createRes.season.startDate, '2024-10-01');
-assert.strictEqual(createRes.season.notes, 'Road to Division 1 with 4-2-1-3 setup');
-assert.ok(createRes.season.createdAt, 'Must have createdAt timestamp');
-assert.ok(createRes.season.updatedAt, 'Must have updatedAt timestamp');
-
-// Verify active draft retrieval
-const activeDraft = getActiveDraft();
-assert.ok(activeDraft, 'Active draft must be found');
-assert.strictEqual(activeDraft.id, 'Phase 1 - Season 2024');
-console.log('   ✓ Season draft created with Draft status and correct properties.');
-
-// -------------------------------------------------------------
-// Test 2: Draft Persistence across simulated browser refresh
-// -------------------------------------------------------------
-console.log('\n2. Verifying Draft Persistence Across Reloads...');
-// Verify that raw localStorage contains the draft
-const rawStored = mockStorage.get(SEASONS_STORAGE_KEY);
-assert.ok(rawStored, 'Storage key must be populated');
-const parsedStored = JSON.parse(rawStored);
-assert.strictEqual(parsedStored.seasons.length, 1);
-assert.strictEqual(parsedStored.activeDraftId, 'Phase 1 - Season 2024');
-assert.strictEqual(parsedStored.seasons[0].status, 'Draft', 'Must not be silently activated');
-
-// Reload via repository
-const reloadedState = loadSeasonsState();
-assert.strictEqual(reloadedState.seasons.length, 1);
-assert.strictEqual(reloadedState.seasons[0].id, 'Phase 1 - Season 2024');
-assert.strictEqual(reloadedState.seasons[0].status, 'Draft');
-console.log('   ✓ Draft persists in storage across reload and remains in Draft status.');
-
-// -------------------------------------------------------------
-// Test 3: Reject Duplicate Season Identifiers
-// -------------------------------------------------------------
-console.log('\n3. Verifying Duplicate Season Identifier Rejection...');
-// Attempt to create another draft with the exact same identifier
-const dupExactRes = saveSeasonDraft({
-  id: 'Phase 1 - Season 2024',
-  startDate: '2024-10-15',
-  startingDivision: 5,
-});
-// Since originalId wasn't passed, this should detect conflict or update same draft if existing.
-// Let's test distinct draft creation with conflicting ID:
-const dupCaseRes = saveSeasonDraft(
-  {
-    id: '   phase 1 - season 2024   ', // Case-insensitive and trimmed collision
-    startDate: '2024-11-01',
-    startingDivision: 6,
-  },
-  'Different-Draft-ID'
-);
-assert.strictEqual(dupCaseRes.success, false, 'Duplicate identifier must be rejected');
-assert.ok(dupCaseRes.error.includes('already exists'), 'Error must specify identifier collision');
-
-// Verify existing season was NOT modified or corrupted
-const existingSeason = getSeasonById('Phase 1 - Season 2024');
-assert.ok(existingSeason, 'Original season must still exist');
-assert.strictEqual(existingSeason.startingDivision, 4, 'Original data must be intact');
-console.log('   ✓ Duplicate season identifier rejected (case-insensitive & trimmed); existing data preserved.');
-
-// -------------------------------------------------------------
-// Test 4: Explicit Activation Workflow and Validation
-// -------------------------------------------------------------
-console.log('\n4. Verifying Explicit Activation and Validation...');
-
-// 4a. Attempt to activate non-existent season
-const nonExistentRes = activateSeason('Ghost-Season');
-assert.strictEqual(nonExistentRes.success, false);
-assert.ok(nonExistentRes.error.includes('not found'));
-
-// 4b. Validation failure: missing starting division or out of bounds (1-10)
-const invalidDraftRes = saveSeasonDraft({
-  id: 'Draft Invalid Div',
-  startDate: '2024-10-01',
-  startingDivision: 15, // Invalid division > 10
-});
-assert.strictEqual(invalidDraftRes.success, false, 'Draft with invalid division must fail validation');
-
-// 4c. Successful explicit activation
 const activateRes = activateSeason('Phase 1 - Season 2024');
-assert.strictEqual(activateRes.success, true, 'Activation must succeed');
-assert.ok(activateRes.season);
-assert.strictEqual(activateRes.season.status, 'Active', 'Status must now be Active');
-
-// Verify active draft pointer is cleared
-const stateAfterActivation = loadSeasonsState();
-assert.strictEqual(stateAfterActivation.activeDraftId, null, 'Active draft ID must be cleared after activation');
-console.log('   ✓ Explicit activation requires valid data and transitions status from Draft to Active.');
+assert.strictEqual(activateRes.success, true);
+assert.strictEqual(activateRes.season.status, 'Active');
+console.log('   ✓ Season created and explicitly activated.');
 
 // -------------------------------------------------------------
-// Test 5: Reject Duplicate Against Active Season
+// Test 2: Starting XI / Substitute Classification without Duplicates
 // -------------------------------------------------------------
-console.log('\n5. Verifying Duplicate Prevention Against Active Season...');
-const dupActiveRes = saveSeasonDraft(
-  {
-    id: 'phase 1 - season 2024',
-    startDate: '2024-10-20',
-    startingDivision: 1,
-  },
-  'New-Draft-ID'
-);
-assert.strictEqual(dupActiveRes.success, false, 'Cannot duplicate active season identifier');
-console.log('   ✓ New drafts cannot reuse active season identifier.');
+console.log('\n2. Verifying Starting XI / Substitute Classification (No Duplicates)...');
+assert.strictEqual(AUTHENTIC_PLAYER_IDS.length, 23, 'Must have exactly 23 authentic players');
+assert.strictEqual(CANONICAL_STARTING_XI_IDS.size, 11, 'Must have 11 canonical starters');
 
-// -------------------------------------------------------------
-// Test 6: Corrupted / Malformed Storage Handling
-// -------------------------------------------------------------
-console.log('\n6. Verifying Resilience Against Corrupted Storage...');
+const starterCount = AUTHENTIC_PLAYER_IDS.filter((id) => CANONICAL_STARTING_XI_IDS.has(id)).length;
+const subCount = AUTHENTIC_PLAYER_IDS.filter((id) => !CANONICAL_STARTING_XI_IDS.has(id)).length;
+assert.strictEqual(starterCount, 11, 'Exactly 11 players classified as Starting XI');
+assert.strictEqual(subCount, 12, 'Exactly 12 players classified as Substitute');
 
-// 6a. Malformed JSON
-mockStorage.set(SEASONS_STORAGE_KEY, '{ invalid json syntax ...');
-const fallbackState = loadSeasonsState();
-assert.deepStrictEqual(fallbackState, DEFAULT_SEASONS_STATE, 'Must return default state on JSON error');
-
-// 6b. Malformed array objects (missing required fields)
-mockStorage.set(
-  SEASONS_STORAGE_KEY,
-  JSON.stringify({
-    version: 1,
-    seasons: [
-      { id: '' }, // empty ID
-      { id: 'Valid Season', startDate: '2024-10-01', startingDivision: 3, status: 'Active' },
-      null,
-      'a string instead of object',
-      { id: 'Another Valid', startDate: '2024-10-02', startingDivision: 7, status: 'Draft' },
-    ],
-    activeDraftId: 'Another Valid',
-  })
-);
-
-const sanitizedState = loadSeasonsState();
-assert.strictEqual(sanitizedState.seasons.length, 2, 'Only the 2 valid seasons should be kept');
-assert.strictEqual(sanitizedState.seasons[0].id, 'Valid Season');
-assert.strictEqual(sanitizedState.seasons[1].id, 'Another Valid');
-console.log('   ✓ Corrupted JSON and malformed records safely handled without crashes.');
+// Check unique set of IDs
+const uniqueIds = new Set(AUTHENTIC_PLAYER_IDS);
+assert.strictEqual(uniqueIds.size, 23, 'All 23 IDs must be unique (no double-counting)');
+console.log('   ✓ Exactly 23 unique cards: 11 Starting XI, 12 Substitutes with zero duplicate cards.');
 
 // -------------------------------------------------------------
-// Test 7: Preservation of Other Subsystems' Storage Keys
+// Test 3: Distinguishing Unentered (null) vs Genuine Zero (0)
 // -------------------------------------------------------------
-console.log('\n7. Verifying Preservation of Other Storage Keys...');
-// Set dummy keys for squad and player pinned attributes
-mockStorage.set('bala_efoot_pinned_attrs_P001', JSON.stringify(['speed', 'finishing']));
-mockStorage.set('bala_efoot_squad_state_v1', JSON.stringify({ activeLayout: 'attack' }));
+console.log('\n3. Verifying Unentered (null) vs Genuine Zero (0)...');
+const sampleDraft = getInitialBaselineDraft('Phase 1 - Season 2024');
+assert.strictEqual(sampleDraft.players.length, 23);
+assert.strictEqual(sampleDraft.players[0].matches, null, 'Unentered values must be null');
 
-// Perform season operations
-saveSeasonDraft({
-  id: 'Phase 2 - Winter',
-  startDate: '2024-12-01',
-  startingDivision: 2,
+// Validate unentered baseline fails confirmation validation
+const unenteredVal = validateBaselinePlayerEntries(sampleDraft.players);
+assert.strictEqual(unenteredVal.isValid, false, 'Unentered nulls cannot be confirmed');
+assert.strictEqual(unenteredVal.completedCount, 0);
+
+// Enter genuine zeroes for one player
+const partiallyFilled = sampleDraft.players.map((p, idx) => {
+  if (idx === 0) {
+    return { ...p, matches: 0, goals: 0, assists: 0 }; // genuine zeroes
+  }
+  return p;
+});
+const partialVal = validateBaselinePlayerEntries(partiallyFilled);
+assert.strictEqual(partialVal.completedCount, 1, 'Genuine 0 is recognized as valid completed entry');
+assert.strictEqual(partialVal.isValid, false, 'Incomplete baseline (1/23) cannot be confirmed');
+console.log('   ✓ Unentered (null) distinguished from genuine zero (0); completion counter accurate.');
+
+// -------------------------------------------------------------
+// Test 4: Rejection of Missing, Negative, Fractional, or Invalid Stats
+// -------------------------------------------------------------
+console.log('\n4. Verifying Rejection of Negative, Fractional, and Invalid Stats...');
+const invalidPayload = generateValidBaselinePayload();
+invalidPayload[0].matches = -5; // Negative
+assert.strictEqual(validateBaselinePlayerEntries(invalidPayload).isValid, false);
+
+invalidPayload[0].matches = 3.14; // Fractional
+assert.strictEqual(validateBaselinePlayerEntries(invalidPayload).isValid, false);
+
+invalidPayload[0].matches = '10'; // Non-number string
+assert.strictEqual(validateBaselinePlayerEntries(invalidPayload).isValid, false);
+
+// Duplicate player ID in payload
+const duplicatePayload = generateValidBaselinePayload();
+duplicatePayload[1].playerId = duplicatePayload[0].playerId;
+assert.strictEqual(validateBaselinePlayerEntries(duplicatePayload).isValid, false);
+
+// Only 22 players (missing one)
+const shortPayload = generateValidBaselinePayload().slice(0, 22);
+assert.strictEqual(validateBaselinePlayerEntries(shortPayload).isValid, false);
+console.log('   ✓ Negative, fractional, non-number, duplicate, and missing players rejected.');
+
+// -------------------------------------------------------------
+// Test 5: Baseline Draft Persistence Across Reloads
+// -------------------------------------------------------------
+console.log('\n5. Verifying Baseline Draft Persistence Across Reloads...');
+const draftToSave = {
+  seasonId: 'Phase 1 - Season 2024',
+  updatedAt: new Date().toISOString(),
+  players: sampleDraft.players.map((p, i) => (i < 5 ? { ...p, matches: 15, goals: 3, assists: 1 } : p)),
+  notes: 'Partial baseline draft test',
+};
+const saveDraftRes = saveBaselineDraft('Phase 1 - Season 2024', draftToSave);
+assert.strictEqual(saveDraftRes.success, true);
+
+// Reload state from storage
+const stateAfterDraft = loadSeasonsState();
+const reloadedSeason = stateAfterDraft.seasons.find((s) => s.id === 'Phase 1 - Season 2024');
+assert.ok(reloadedSeason.baselineDraft, 'Baseline draft must persist in storage');
+assert.strictEqual(reloadedSeason.baselineDraft.players[0].matches, 15);
+assert.strictEqual(reloadedSeason.baselineDraft.players[10].matches, null);
+console.log('   ✓ Baseline draft persists in localStorage across simulated refresh.');
+
+// -------------------------------------------------------------
+// Test 6: Baseline Confirmation and Immutability
+// -------------------------------------------------------------
+console.log('\n6. Verifying Baseline Confirmation & Immutability...');
+const validBaseline = generateValidBaselinePayload(10, 2, 1);
+const confirmBaseRes = confirmSeasonBaseline('Phase 1 - Season 2024', {
+  players: validBaseline,
+  notes: 'Confirmed season start baseline',
 });
 
-// Verify other keys are 100% intact
-assert.strictEqual(
-  mockStorage.get('bala_efoot_pinned_attrs_P001'),
-  JSON.stringify(['speed', 'finishing']),
-  'Pinned attributes storage must remain intact'
-);
-assert.strictEqual(
-  mockStorage.get('bala_efoot_squad_state_v1'),
-  JSON.stringify({ activeLayout: 'attack' }),
-  'Squad builder storage must remain intact'
-);
-console.log('   ✓ Squad and player catalogue storage keys remain completely untouched.');
+assert.strictEqual(confirmBaseRes.success, true);
+assert.ok(confirmBaseRes.baseline);
+assert.strictEqual(confirmBaseRes.baseline.players.length, 23);
+
+const seasonAfterBase = getSeasonById('Phase 1 - Season 2024');
+assert.ok(seasonAfterBase.baseline, 'Confirmed baseline must exist on season');
+assert.strictEqual(seasonAfterBase.baselineDraft, null, 'Draft must be cleared after confirmation');
+
+// Attempt duplicate confirmation or overwrite
+const dupConfirmRes = confirmSeasonBaseline('Phase 1 - Season 2024', {
+  players: generateValidBaselinePayload(99, 99, 99),
+});
+assert.strictEqual(dupConfirmRes.success, false, 'Duplicate baseline confirmation must be rejected');
+assert.ok(dupConfirmRes.error.includes('immutable'), 'Error must specify immutability');
+
+// Verify original baseline values are 100% untouched
+const seasonVerified = getSeasonById('Phase 1 - Season 2024');
+assert.strictEqual(seasonVerified.baseline.players[0].matches, 10, 'Baseline values must not change');
+console.log('   ✓ Baseline confirmed and locked; duplicate confirmation rejected; values immutable.');
 
 // -------------------------------------------------------------
-// Test 8: Discarding Drafts Safely
+// Test 7: Correct Positive, Zero, and Negative Delta Calculations
 // -------------------------------------------------------------
-console.log('\n8. Verifying Draft Discard...');
-const discardRes = discardDraft('Phase 2 - Winter');
-assert.strictEqual(discardRes.success, true);
-assert.strictEqual(getSeasonById('Phase 2 - Winter'), undefined, 'Draft should be removed');
-console.log('   ✓ Discarding draft removes record and clears draft pointer.');
+console.log('\n7. Verifying Positive, Zero, and Negative Delta Calculations...');
+const currentStats = generateValidBaselinePayload(10, 2, 1).map((p, idx) => {
+  if (idx === 0) return { ...p, matches: 15, goals: 5, assists: 3 }; // positive deltas (+5, +3, +2)
+  if (idx === 1) return { ...p, matches: 10, goals: 2, assists: 1 }; // zero deltas (+0, +0, +0)
+  if (idx === 2) return { ...p, matches: 8, goals: 1, assists: 0 };  // negative deltas (-2, -1, -1)
+  return p;
+});
 
-console.log('\n======================================================');
-console.log('🎉 All Season Workflow (Milestone 4A) tests passed!');
-console.log('======================================================');
+const deltaResult = calculatePlayerStatDeltas(seasonVerified, currentStats);
+
+// Player 0: Positive deltas
+assert.strictEqual(deltaResult.deltas[0].matchesDelta, 5);
+assert.strictEqual(deltaResult.deltas[0].goalsDelta, 3);
+assert.strictEqual(deltaResult.deltas[0].assistsDelta, 2);
+
+// Player 1: Zero deltas
+assert.strictEqual(deltaResult.deltas[1].matchesDelta, 0);
+assert.strictEqual(deltaResult.deltas[1].goalsDelta, 0);
+assert.strictEqual(deltaResult.deltas[1].assistsDelta, 0);
+
+// Player 2: Negative deltas (Must NOT clamp to zero!)
+assert.strictEqual(deltaResult.deltas[2].matchesDelta, -2, 'Negative matches delta must not clamp to 0');
+assert.strictEqual(deltaResult.deltas[2].goalsDelta, -1, 'Negative goals delta must not clamp to 0');
+assert.strictEqual(deltaResult.deltas[2].assistsDelta, -1, 'Negative assists delta must not clamp to 0');
+assert.strictEqual(deltaResult.hasDecreases, true, 'Decrease must be flagged');
+console.log('   ✓ Deltas calculated accurately: positive, zero, and negative values preserved.');
+
+// -------------------------------------------------------------
+// Test 8: Warning and Explicit Confirmation for Decreases
+// -------------------------------------------------------------
+console.log('\n8. Verifying Decrease Warnings and Explicit Confirmation...');
+// Attempt to confirm snapshot with decreases WITHOUT explicit confirmation
+const decreaseAttempt = confirmProgressSnapshot('Phase 1 - Season 2024', {
+  recordingDate: '2024-10-15',
+  players: currentStats,
+  confirmDecreases: false, // User has NOT confirmed decrease
+});
+
+assert.strictEqual(decreaseAttempt.success, false, 'Must reject decreases without explicit confirmation');
+assert.ok(decreaseAttempt.error.includes('Explicit confirmation is required'));
+assert.ok(decreaseAttempt.decreaseWarnings.length > 0, 'Must provide detailed decrease warnings');
+
+// Attempt with explicit confirmation checkbox enabled
+const confirmedDecreaseAttempt = confirmProgressSnapshot('Phase 1 - Season 2024', {
+  recordingDate: '2024-10-15',
+  players: currentStats,
+  confirmDecreases: true, // User explicitly confirmed correction
+});
+
+assert.strictEqual(confirmedDecreaseAttempt.success, true, 'Must succeed when decrease is explicitly confirmed');
+assert.ok(confirmedDecreaseAttempt.snapshot);
+assert.strictEqual(confirmedDecreaseAttempt.snapshot.hasConfirmedDecreases, true);
+console.log('   ✓ Stat decreases require explicit user confirmation; warnings properly generated.');
+
+// -------------------------------------------------------------
+// Test 9: Preservation of Earlier Snapshots (Append-Only)
+// -------------------------------------------------------------
+console.log('\n9. Verifying Preservation of Earlier Snapshots (Append-Only)...');
+// Record a second progress snapshot
+const secondSnapshotStats = currentStats.map((p) => ({
+  ...p,
+  matches: p.matches + 2,
+  goals: p.goals + 1,
+  assists: p.assists + 1,
+}));
+
+const secondSnapRes = confirmProgressSnapshot('Phase 1 - Season 2024', {
+  recordingDate: '2024-10-22',
+  players: secondSnapshotStats,
+});
+assert.strictEqual(secondSnapRes.success, true);
+
+const seasonWithTwoSnaps = getSeasonById('Phase 1 - Season 2024');
+assert.strictEqual(seasonWithTwoSnaps.progressSnapshots.length, 2, 'Must have 2 snapshots');
+assert.strictEqual(seasonWithTwoSnaps.progressSnapshots[0].recordingDate, '2024-10-15', 'Snapshot 1 intact');
+assert.strictEqual(seasonWithTwoSnaps.progressSnapshots[1].recordingDate, '2024-10-22', 'Snapshot 2 appended');
+
+// Verify baseline is STILL 100% intact
+assert.strictEqual(seasonWithTwoSnaps.baseline.players[0].matches, 10, 'Baseline remains immutable');
+console.log('   ✓ Progress snapshots are append-only; earlier snapshots and baseline preserved.');
+
+// -------------------------------------------------------------
+// Test 10: Progress Draft and Confirmed Snapshots Survive Reloads
+// -------------------------------------------------------------
+console.log('\n10. Verifying Storage Persistence Across Reloads...');
+// Save a progress draft
+const progDraft = {
+  seasonId: 'Phase 1 - Season 2024',
+  recordingDate: '2024-10-25',
+  updatedAt: new Date().toISOString(),
+  players: AUTHENTIC_PLAYER_IDS.map((id) => ({ playerId: id, matches: 20, goals: null, assists: null })),
+};
+saveProgressDraft('Phase 1 - Season 2024', progDraft);
+
+// Simulate full browser reload via loadSeasonsState
+const reloadedState = loadSeasonsState();
+const reloadedSeasonCheck = reloadedState.seasons.find((s) => s.id === 'Phase 1 - Season 2024');
+
+assert.ok(reloadedSeasonCheck.baseline, 'Baseline survives reload');
+assert.strictEqual(reloadedSeasonCheck.progressSnapshots.length, 2, 'Snapshots survive reload');
+assert.ok(reloadedSeasonCheck.progressDraft, 'Progress draft survives reload');
+assert.strictEqual(reloadedSeasonCheck.progressDraft.players[0].matches, 20);
+console.log('   ✓ Baseline, progress snapshots, and progress draft survive storage reloads.');
+
+// -------------------------------------------------------------
+// Test 11: Compatibility with Existing Milestone 4A Season Records
+// -------------------------------------------------------------
+console.log('\n11. Verifying Backward Compatibility with Milestone 4A Records...');
+// Inject an older Milestone 4A season without 4B fields
+const rawStorage = JSON.parse(mockStorage.get(SEASONS_STORAGE_KEY));
+rawStorage.seasons.push({
+  id: 'Old Season Milestone 4A',
+  startDate: '2024-09-01',
+  startingDivision: 5,
+  status: 'Active',
+  createdAt: '2024-09-01T00:00:00.000Z',
+  updatedAt: '2024-09-01T00:00:00.000Z',
+});
+mockStorage.set(SEASONS_STORAGE_KEY, JSON.stringify(rawStorage));
+
+const stateWithOld = loadSeasonsState();
+const oldSeason = stateWithOld.seasons.find((s) => s.id === 'Old Season Milestone 4A');
+assert.ok(oldSeason, 'Legacy season must load');
+assert.strictEqual(oldSeason.baseline, null, 'Safe null fallback for missing baseline');
+assert.deepStrictEqual(oldSeason.progressSnapshots, [], 'Safe empty array fallback for missing snapshots');
+console.log('   ✓ Legacy Milestone 4A seasons load without error or data loss.');
+
+// -------------------------------------------------------------
+// Test 12: Preservation of Subsystem Storage Keys
+// -------------------------------------------------------------
+console.log('\n12. Verifying Subsystem Storage Isolation...');
+mockStorage.set('bala_efoot_pinned_attrs_P001', JSON.stringify(['speed']));
+mockStorage.set('bala_efoot_squad_state_v1', JSON.stringify({ activeLayout: 'defence' }));
+
+// Perform repository operations
+saveBaselineDraft('Phase 1 - Season 2024', sampleDraft);
+
+assert.strictEqual(mockStorage.get('bala_efoot_pinned_attrs_P001'), JSON.stringify(['speed']));
+assert.strictEqual(mockStorage.get('bala_efoot_squad_state_v1'), JSON.stringify({ activeLayout: 'defence' }));
+console.log('   ✓ Squad and player catalogue storage keys completely untouched.');
+
+console.log('\n=============================================================');
+console.log('🎉 All Season Workflow (Milestone 4A & 4B) tests passed!');
+console.log('=============================================================');

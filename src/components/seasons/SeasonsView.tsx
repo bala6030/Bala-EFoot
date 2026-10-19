@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   CalendarDays,
   PlusCircle,
@@ -12,8 +12,25 @@ import {
   Trash2,
   Clock,
   Sparkles,
+  ShieldCheck,
+  TrendingUp,
+  History,
+  AlertTriangle,
 } from 'lucide-react';
-import { Season, SeasonDraftInput, SeasonValidationResult } from '../../types';
+import {
+  Season,
+  SeasonDraftInput,
+  SeasonValidationResult,
+  BaselinePlayerRecord,
+  BaselineDraftPlayerEntry,
+  SeasonBaselineDraft,
+  ProgressPlayerRecord,
+  ProgressDraftPlayerEntry,
+  SeasonProgressDraft,
+  PlayerRoleClassification,
+  PlayerStatDelta,
+  SeasonProgressSnapshot,
+} from '../../types';
 import {
   loadSeasonsState,
   saveSeasonDraft,
@@ -22,7 +39,17 @@ import {
   validateSeasonDraft,
   getActiveDraft,
   clearActiveDraftPointer,
+  validateBaselinePlayerEntries,
+  getInitialBaselineDraft,
+  saveBaselineDraft,
+  confirmSeasonBaseline,
+  getInitialProgressDraft,
+  saveProgressDraft,
+  calculatePlayerStatDeltas,
+  confirmProgressSnapshot,
+  isValidStatValue,
 } from '../../data/seasonRepository';
+import { getAllPlayers } from '../../data/playerRepository';
 import { Button } from '../common/Button';
 import { Card } from '../common/Card';
 import { Badge } from '../common/Badge';
@@ -37,12 +64,18 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [activeDraftSeason, setActiveDraftSeason] = useState<Season | null>(null);
 
-  // View state: 'list' | 'create'
-  const [viewMode, setViewMode] = useState<'list' | 'create'>('list');
-  // Guided step in create mode: 1 (Setup) | 2 (Review)
+  // View state: 'list' | 'create' | 'baseline' | 'progress' | 'snapshot-detail'
+  const [viewMode, setViewMode] = useState<
+    'list' | 'create' | 'baseline' | 'progress' | 'snapshot-detail'
+  >('list');
+
+  // Currently selected season for baseline or progress
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null);
+
+  // Guided step (1: Input/Setup | 2: Review & Confirmation)
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
 
-  // Form State
+  // Form State (Season Creation)
   const [formId, setFormId] = useState<string>('');
   const [originalDraftId, setOriginalDraftId] = useState<string | undefined>(undefined);
   const [startDate, setStartDate] = useState<string>(
@@ -51,12 +84,49 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
   const [startingDivision, setStartingDivision] = useState<number>(10);
   const [notes, setNotes] = useState<string>('');
 
+  // Milestone 4B: Baseline State
+  const [baselinePlayers, setBaselinePlayers] = useState<BaselineDraftPlayerEntry[]>([]);
+  const [baselineNotes, setBaselineNotes] = useState<string>('');
+  const [baselineTab, setBaselineTab] = useState<'all' | 'starters' | 'subs'>('all');
+
+  // Milestone 4B: Progress State
+  const [progressDate, setProgressDate] = useState<string>(
+    () => new Date().toISOString().split('T')[0]
+  );
+  const [progressNotes, setProgressNotes] = useState<string>('');
+  const [progressPlayers, setProgressPlayers] = useState<ProgressDraftPlayerEntry[]>([]);
+  const [progressTab, setProgressTab] = useState<'all' | 'starters' | 'subs'>('all');
+  const [confirmDecreasesChecked, setConfirmDecreasesChecked] = useState<boolean>(false);
+  const [calculatedDeltas, setCalculatedDeltas] = useState<PlayerStatDelta[]>([]);
+  const [decreaseWarnings, setDecreaseWarnings] = useState<string[]>([]);
+
+  // Selected snapshot for detail view
+  const [selectedSnapshot, setSelectedSnapshot] = useState<SeasonProgressSnapshot | null>(null);
+
   // Validation & Feedback state
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [baselineErrors, setBaselineErrors] = useState<string[]>([]);
+  const [progressErrors, setProgressErrors] = useState<string[]>([]);
   const [statusMessage, setStatusMessage] = useState<{
     type: 'success' | 'info' | 'warning' | 'danger';
     text: string;
   } | null>(null);
+
+  // Player catalogue reference map
+  const allPlayers = useMemo(() => getAllPlayers(), []);
+  const playerMap = useMemo(() => {
+    const map = new Map<string, (typeof allPlayers)[0]>();
+    allPlayers.forEach((p) => map.set(p.id, p));
+    return map;
+  }, [allPlayers]);
+
+  const playerMetaMap = useMemo(() => {
+    const map: Record<string, { name: string; position: string }> = {};
+    allPlayers.forEach((p) => {
+      map[p.id] = { name: p.name, position: p.primaryPosition };
+    });
+    return map;
+  }, [allPlayers]);
 
   // Reload data from repository
   const refreshData = () => {
@@ -69,6 +139,11 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
   useEffect(() => {
     refreshData();
   }, []);
+
+  const currentSelectedSeason = useMemo(() => {
+    if (!selectedSeasonId) return null;
+    return seasons.find((s) => s.id === selectedSeasonId) || null;
+  }, [seasons, selectedSeasonId]);
 
   // Helper to pre-populate form with existing draft data
   const populateFormWithDraft = (draft: Season) => {
@@ -159,7 +234,6 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
     }
 
     setFormErrors({});
-    // Auto-save draft before proceeding to review
     const res = saveSeasonDraft(
       {
         id: formId.trim(),
@@ -217,7 +291,7 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
       });
       if (res.validationErrors) {
         setFormErrors(res.validationErrors);
-        setCurrentStep(1); // Return to edit step on error
+        setCurrentStep(1);
       }
     }
   };
@@ -244,7 +318,300 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
     }
   };
 
+  // ==========================================================================
+  // MILESTONE 4B: BASELINE WORKFLOW HANDLERS
+  // ==========================================================================
+
+  const handleOpenBaselineSetup = (season: Season) => {
+    setSelectedSeasonId(season.id);
+    const initialDraft = getInitialBaselineDraft(season.id);
+    setBaselinePlayers(initialDraft.players);
+    setBaselineNotes(initialDraft.notes || '');
+    setBaselineErrors([]);
+    setCurrentStep(1);
+    setViewMode('baseline');
+  };
+
+  const handleBaselineStatChange = (
+    playerId: string,
+    field: 'matches' | 'goals' | 'assists',
+    rawVal: string
+  ) => {
+    const trimmed = rawVal.trim();
+    const val = trimmed === '' ? null : Number(trimmed);
+
+    setBaselinePlayers((prev) =>
+      prev.map((p) => {
+        if (p.playerId !== playerId) return p;
+        return {
+          ...p,
+          [field]: val !== null && !isNaN(val) && val >= 0 && Number.isInteger(val) ? val : val === null ? null : val,
+        };
+      })
+    );
+  };
+
+  const handleBaselineRoleChange = (playerId: string, role: PlayerRoleClassification) => {
+    setBaselinePlayers((prev) =>
+      prev.map((p) => (p.playerId === playerId ? { ...p, roleClassification: role } : p))
+    );
+  };
+
+  const handleSaveBaselineDraft = () => {
+    if (!selectedSeasonId) return;
+    const draft: SeasonBaselineDraft = {
+      seasonId: selectedSeasonId,
+      updatedAt: new Date().toISOString(),
+      players: baselinePlayers,
+      notes: baselineNotes.trim() || undefined,
+    };
+
+    const res = saveBaselineDraft(selectedSeasonId, draft);
+    if (res.success) {
+      setStatusMessage({
+        type: 'info',
+        text: 'Baseline draft saved. You can safely close or refresh without losing progress.',
+      });
+      refreshData();
+    } else {
+      setStatusMessage({
+        type: 'danger',
+        text: res.error || 'Failed to save baseline draft.',
+      });
+    }
+  };
+
+  const handleProceedToBaselineReview = () => {
+    const validation = validateBaselinePlayerEntries(baselinePlayers);
+    if (!validation.isValid) {
+      setBaselineErrors(validation.errors);
+      setStatusMessage({
+        type: 'warning',
+        text: `Please enter valid non-negative statistics for all 23 players (${validation.completedCount}/23 completed).`,
+      });
+      return;
+    }
+
+    setBaselineErrors([]);
+    // Auto-save draft before proceeding
+    if (selectedSeasonId) {
+      saveBaselineDraft(selectedSeasonId, {
+        seasonId: selectedSeasonId,
+        updatedAt: new Date().toISOString(),
+        players: baselinePlayers,
+        notes: baselineNotes.trim() || undefined,
+      });
+    }
+    setCurrentStep(2);
+  };
+
+  const handleConfirmBaseline = () => {
+    if (!selectedSeasonId) return;
+
+    // Cast entries to BaselinePlayerRecord
+    const records: BaselinePlayerRecord[] = baselinePlayers.map((p) => ({
+      playerId: p.playerId,
+      roleClassification: p.roleClassification,
+      matches: Number(p.matches),
+      goals: Number(p.goals),
+      assists: Number(p.assists),
+    }));
+
+    const res = confirmSeasonBaseline(selectedSeasonId, {
+      players: records,
+      notes: baselineNotes.trim() || undefined,
+    });
+
+    if (res.success && res.baseline) {
+      setStatusMessage({
+        type: 'success',
+        text: `Baseline for "${selectedSeasonId}" confirmed and locked. It is now immutable.`,
+      });
+      refreshData();
+      setViewMode('list');
+      setCurrentStep(1);
+    } else {
+      setStatusMessage({
+        type: 'danger',
+        text: res.error || 'Failed to confirm baseline.',
+      });
+      if (res.errors) {
+        setBaselineErrors(res.errors);
+      }
+    }
+  };
+
+  // ==========================================================================
+  // MILESTONE 4B: PROGRESS TRACKING WORKFLOW HANDLERS
+  // ==========================================================================
+
+  const handleOpenProgressEntry = (season: Season) => {
+    if (!season.baseline) {
+      setStatusMessage({
+        type: 'warning',
+        text: 'A confirmed baseline is required before recording progress.',
+      });
+      return;
+    }
+
+    setSelectedSeasonId(season.id);
+    const initialDraft = getInitialProgressDraft(season.id);
+    if (initialDraft) {
+      setProgressDate(initialDraft.recordingDate || new Date().toISOString().split('T')[0]);
+      setProgressNotes(initialDraft.notes || '');
+      setProgressPlayers(initialDraft.players);
+    }
+    setProgressErrors([]);
+    setConfirmDecreasesChecked(false);
+    setCurrentStep(1);
+    setViewMode('progress');
+  };
+
+  const handleProgressStatChange = (
+    playerId: string,
+    field: 'matches' | 'goals' | 'assists',
+    rawVal: string
+  ) => {
+    const trimmed = rawVal.trim();
+    const val = trimmed === '' ? null : Number(trimmed);
+
+    setProgressPlayers((prev) =>
+      prev.map((p) => {
+        if (p.playerId !== playerId) return p;
+        return {
+          ...p,
+          [field]: val !== null && !isNaN(val) && val >= 0 && Number.isInteger(val) ? val : val === null ? null : val,
+        };
+      })
+    );
+  };
+
+  const handleSaveProgressDraft = () => {
+    if (!selectedSeasonId) return;
+    const draft: SeasonProgressDraft = {
+      seasonId: selectedSeasonId,
+      recordingDate: progressDate,
+      updatedAt: new Date().toISOString(),
+      players: progressPlayers,
+      notes: progressNotes.trim() || undefined,
+    };
+
+    const res = saveProgressDraft(selectedSeasonId, draft);
+    if (res.success) {
+      setStatusMessage({
+        type: 'info',
+        text: 'Progress draft saved successfully.',
+      });
+      refreshData();
+    } else {
+      setStatusMessage({
+        type: 'danger',
+        text: res.error || 'Failed to save progress draft.',
+      });
+    }
+  };
+
+  const handleProceedToProgressReview = () => {
+    if (!currentSelectedSeason || !currentSelectedSeason.baseline) return;
+
+    // Check all 23 cards entered
+    const invalidList: string[] = [];
+    for (const p of progressPlayers) {
+      if (!isValidStatValue(p.matches) || !isValidStatValue(p.goals) || !isValidStatValue(p.assists)) {
+        const name = playerMap.get(p.playerId)?.name || p.playerId;
+        invalidList.push(`${name} (${p.playerId}) has incomplete or invalid values.`);
+      }
+    }
+
+    if (invalidList.length > 0) {
+      setProgressErrors(invalidList);
+      setStatusMessage({
+        type: 'warning',
+        text: `Please enter valid cumulative values for all 23 players (${23 - invalidList.length}/23 completed).`,
+      });
+      return;
+    }
+
+    // Calculate deltas and check for decreases
+    const records: ProgressPlayerRecord[] = progressPlayers.map((p) => ({
+      playerId: p.playerId,
+      matches: Number(p.matches),
+      goals: Number(p.goals),
+      assists: Number(p.assists),
+    }));
+
+    const deltaResult = calculatePlayerStatDeltas(
+      currentSelectedSeason,
+      records,
+      playerMetaMap
+    );
+
+    setCalculatedDeltas(deltaResult.deltas);
+    setDecreaseWarnings(deltaResult.decreaseWarnings);
+    setProgressErrors([]);
+    setConfirmDecreasesChecked(false);
+    setCurrentStep(2);
+  };
+
+  const handleConfirmProgressSnapshot = () => {
+    if (!selectedSeasonId) return;
+
+    const records: ProgressPlayerRecord[] = progressPlayers.map((p) => ({
+      playerId: p.playerId,
+      matches: Number(p.matches),
+      goals: Number(p.goals),
+      assists: Number(p.assists),
+    }));
+
+    const res = confirmProgressSnapshot(selectedSeasonId, {
+      recordingDate: progressDate,
+      players: records,
+      notes: progressNotes.trim() || undefined,
+      confirmDecreases: confirmDecreasesChecked,
+      playerMetadataMap: playerMetaMap,
+    });
+
+    if (res.success && res.snapshot) {
+      setStatusMessage({
+        type: 'success',
+        text: `Progress snapshot for ${res.snapshot.recordingDate} recorded successfully!`,
+      });
+      refreshData();
+      setViewMode('list');
+      setCurrentStep(1);
+    } else {
+      setStatusMessage({
+        type: 'danger',
+        text: res.error || 'Failed to confirm progress snapshot.',
+      });
+      if (res.decreaseWarnings) {
+        setDecreaseWarnings(res.decreaseWarnings);
+      }
+    }
+  };
+
+  const handleViewSnapshotDetail = (snapshot: SeasonProgressSnapshot) => {
+    if (!currentSelectedSeason || !currentSelectedSeason.baseline) return;
+
+    const deltaResult = calculatePlayerStatDeltas(
+      currentSelectedSeason,
+      snapshot.players,
+      playerMetaMap
+    );
+
+    setSelectedSnapshot(snapshot);
+    setCalculatedDeltas(deltaResult.deltas);
+    setViewMode('snapshot-detail');
+  };
+
+  // Counters
   const activeSeasonCount = seasons.filter((s) => s.status === 'Active').length;
+  const baselineCompletedCount = baselinePlayers.filter(
+    (p) => isValidStatValue(p.matches) && isValidStatValue(p.goals) && isValidStatValue(p.assists)
+  ).length;
+  const progressCompletedCount = progressPlayers.filter(
+    (p) => isValidStatValue(p.matches) && isValidStatValue(p.goals) && isValidStatValue(p.assists)
+  ).length;
 
   return (
     <div className={styles.container}>
@@ -260,7 +627,7 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
             )}
           </div>
           <p className={styles.subheading}>
-            Manage eFootball competition phases, divisions, and season records
+            Manage eFootball competition phases, player statistics baselines, and progress deltas
           </p>
         </div>
 
@@ -319,7 +686,7 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
         </div>
       )}
 
-      {/* In-Progress Draft Alert Banner (List Mode) */}
+      {/* In-Progress Season Creation Draft Banner (List Mode) */}
       {viewMode === 'list' && activeDraftSeason && (
         <div className={`${styles.banner} ${styles.bannerInfo}`} role="status">
           <Clock size={18} className="text-neon-blue" />
@@ -348,10 +715,11 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
         </div>
       )}
 
-      {/* Guided Season Creation Flow */}
-      {viewMode === 'create' ? (
+      {/* =====================================================================
+          VIEW 1: GUIDED SEASON CREATION FLOW (Milestone 4A)
+          ===================================================================== */}
+      {viewMode === 'create' && (
         <Card variant="glass" padding="lg" className={styles.formCard}>
-          {/* Step Progress Indicator */}
           <div className={styles.stepIndicator}>
             <div className={styles.stepPills}>
               <div
@@ -379,9 +747,7 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
           </div>
 
           {currentStep === 1 ? (
-            /* Step 1: Form Inputs */
             <div className={styles.formGrid}>
-              {/* Season Identifier */}
               <div className={styles.formGroup}>
                 <label htmlFor="seasonId" className={styles.label}>
                   <span>
@@ -418,9 +784,7 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                 )}
               </div>
 
-              {/* Start Date & Starting Division Row */}
               <div className={styles.formRow}>
-                {/* Start Date */}
                 <div className={styles.formGroup}>
                   <label htmlFor="startDate" className={styles.label}>
                     <span>
@@ -455,7 +819,6 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                   )}
                 </div>
 
-                {/* Starting Division */}
                 <div className={styles.formGroup}>
                   <label htmlFor="startingDivision" className={styles.label}>
                     <span>
@@ -498,7 +861,6 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                 </div>
               </div>
 
-              {/* Optional Notes */}
               <div className={styles.formGroup}>
                 <label htmlFor="notes" className={styles.label}>
                   <span>Optional Notes & Strategy</span>
@@ -515,7 +877,6 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                 </span>
               </div>
 
-              {/* Form Navigation Actions */}
               <div className={styles.formFooterActions}>
                 <div className={styles.leftGroup}>
                   <Button
@@ -548,7 +909,6 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
               </div>
             </div>
           ) : (
-            /* Step 2: Review and Activation */
             <div className={styles.formGrid}>
               <div className={styles.reviewBox}>
                 <div className={styles.reviewRow}>
@@ -586,7 +946,6 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                 )}
               </div>
 
-              {/* Confirmation Callout */}
               <div className={styles.calloutCard}>
                 <Sparkles size={20} className="text-neon-lime" style={{ flexShrink: 0 }} />
                 <div className={styles.calloutText}>
@@ -597,7 +956,6 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                 </div>
               </div>
 
-              {/* Review Actions */}
               <div className={styles.formFooterActions}>
                 <div className={styles.leftGroup}>
                   <Button
@@ -635,8 +993,844 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
             </div>
           )}
         </Card>
-      ) : (
-        /* List Mode: Saved Seasons Display */
+      )}
+
+      {/* =====================================================================
+          VIEW 2: BASELINE SETUP & REVIEW FLOW (Milestone 4B)
+          ===================================================================== */}
+      {viewMode === 'baseline' && currentSelectedSeason && (
+        <Card variant="glass" padding="lg">
+          <div className={styles.subHeaderBar}>
+            <div>
+              <h2 className={styles.heading}>
+                Starting Baseline: {currentSelectedSeason.id}
+              </h2>
+              <p className={styles.subheading}>
+                Record cumulative statistics at season start for all 23 player cards
+              </p>
+            </div>
+
+            <div
+              className={`${styles.completionPill} ${
+                baselineCompletedCount === 23 ? styles.completionPillComplete : ''
+              }`}
+            >
+              <CheckCircle2 size={16} />
+              <span>
+                {baselineCompletedCount}/23 Players Completed
+              </span>
+            </div>
+          </div>
+
+          {currentStep === 1 ? (
+            /* Baseline Step 1: Input Table */
+            <div>
+              <div className={styles.sectionTabs}>
+                <button
+                  type="button"
+                  className={`${styles.sectionTab} ${
+                    baselineTab === 'all' ? styles.sectionTabActive : ''
+                  }`}
+                  onClick={() => setBaselineTab('all')}
+                >
+                  All Players (23)
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.sectionTab} ${
+                    baselineTab === 'starters' ? styles.sectionTabActive : ''
+                  }`}
+                  onClick={() => setBaselineTab('starters')}
+                >
+                  Starting XI ({baselinePlayers.filter((p) => p.roleClassification === 'Starting XI').length})
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.sectionTab} ${
+                    baselineTab === 'subs' ? styles.sectionTabActive : ''
+                  }`}
+                  onClick={() => setBaselineTab('subs')}
+                >
+                  Substitutes ({baselinePlayers.filter((p) => p.roleClassification === 'Substitute').length})
+                </button>
+              </div>
+
+              {baselineErrors.length > 0 && (
+                <div className={`${styles.banner} ${styles.bannerDanger}`} style={{ marginBottom: '1rem' }}>
+                  <AlertCircle size={18} />
+                  <div className={styles.bannerContent}>
+                    <strong>Validation errors encountered:</strong>
+                    <ul style={{ margin: '0.25rem 0 0 1rem', padding: 0 }}>
+                      {baselineErrors.slice(0, 4).map((err, i) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                      {baselineErrors.length > 4 && <li>...and {baselineErrors.length - 4} more.</li>}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.tableContainer}>
+                <table className={styles.statsTable}>
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Baseline Role</th>
+                      <th style={{ textAlign: 'right' }}>Matches</th>
+                      <th style={{ textAlign: 'right' }}>Goals</th>
+                      <th style={{ textAlign: 'right' }}>Assists</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {baselinePlayers
+                      .filter((p) => {
+                        if (baselineTab === 'starters') return p.roleClassification === 'Starting XI';
+                        if (baselineTab === 'subs') return p.roleClassification === 'Substitute';
+                        return true;
+                      })
+                      .map((p) => {
+                        const player = playerMap.get(p.playerId);
+
+                        return (
+                          <tr key={p.playerId}>
+                            <td>
+                              <div className={styles.playerCell}>
+                                <div className={styles.playerIdentity}>
+                                  <span className={styles.playerNameText}>
+                                    {player?.name || p.playerId}
+                                  </span>
+                                  <div className={styles.playerMetaRow}>
+                                    <span className={styles.idBadge}>{p.playerId}</span>
+                                    <span className={styles.posChip}>{player?.primaryPosition || '—'}</span>
+                                    {player?.overallRating && (
+                                      <span className="text-neon-lime" style={{ fontWeight: 700 }}>
+                                        {player.overallRating}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td>
+                              <select
+                                className={styles.roleSelect}
+                                value={p.roleClassification}
+                                onChange={(e) =>
+                                  handleBaselineRoleChange(
+                                    p.playerId,
+                                    e.target.value as PlayerRoleClassification
+                                  )
+                                }
+                              >
+                                <option value="Starting XI">Starting XI</option>
+                                <option value="Substitute">Substitute</option>
+                              </select>
+                            </td>
+
+                            <td style={{ textAlign: 'right' }}>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                placeholder="—"
+                                className={`${styles.statInput} ${
+                                  p.matches !== null ? styles.statInputFilled : styles.statInputEmpty
+                                }`}
+                                value={p.matches !== null ? p.matches : ''}
+                                onChange={(e) =>
+                                  handleBaselineStatChange(p.playerId, 'matches', e.target.value)
+                                }
+                              />
+                            </td>
+
+                            <td style={{ textAlign: 'right' }}>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                placeholder="—"
+                                className={`${styles.statInput} ${
+                                  p.goals !== null ? styles.statInputFilled : styles.statInputEmpty
+                                }`}
+                                value={p.goals !== null ? p.goals : ''}
+                                onChange={(e) =>
+                                  handleBaselineStatChange(p.playerId, 'goals', e.target.value)
+                                }
+                              />
+                            </td>
+
+                            <td style={{ textAlign: 'right' }}>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                placeholder="—"
+                                className={`${styles.statInput} ${
+                                  p.assists !== null ? styles.statInputFilled : styles.statInputEmpty
+                                }`}
+                                value={p.assists !== null ? p.assists : ''}
+                                onChange={(e) =>
+                                  handleBaselineStatChange(p.playerId, 'assists', e.target.value)
+                                }
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ marginTop: '1.25rem' }}>
+                <label htmlFor="baseNotes" className={styles.label}>
+                  Optional Baseline Notes
+                </label>
+                <textarea
+                  id="baseNotes"
+                  className={styles.textarea}
+                  placeholder="Record baseline source notes (e.g. In-game card records on Oct 20, 2024)..."
+                  value={baselineNotes}
+                  onChange={(e) => setBaselineNotes(e.target.value)}
+                />
+              </div>
+
+              <div className={styles.formFooterActions}>
+                <div className={styles.leftGroup}>
+                  <Button variant="ghost" onClick={() => setViewMode('list')}>
+                    Back to Seasons
+                  </Button>
+                </div>
+
+                <div className={styles.rightGroup}>
+                  <Button
+                    variant="secondary"
+                    icon={<Save size={16} />}
+                    onClick={handleSaveBaselineDraft}
+                  >
+                    Save Baseline Draft
+                  </Button>
+                  <Button
+                    variant="primary"
+                    iconRight={<ArrowRight size={16} />}
+                    onClick={handleProceedToBaselineReview}
+                  >
+                    Review Baseline
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Baseline Step 2: Review and Confirmation */
+            <div>
+              <div className={styles.calloutCard} style={{ marginBottom: '1.5rem' }}>
+                <ShieldCheck size={24} className="text-neon-lime" style={{ flexShrink: 0 }} />
+                <div className={styles.calloutText}>
+                  <span className={styles.calloutHighlight}>Immutable Reference:</span> Confirming
+                  this baseline locks cumulative starting statistics for all 23 authentic player cards.
+                  Once confirmed, normal progress updates will calculate deltas against these values and
+                  cannot overwrite them.
+                </div>
+              </div>
+
+              <div className={styles.tableContainer}>
+                <table className={styles.statsTable}>
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Role</th>
+                      <th style={{ textAlign: 'right' }}>Starting Matches</th>
+                      <th style={{ textAlign: 'right' }}>Starting Goals</th>
+                      <th style={{ textAlign: 'right' }}>Starting Assists</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {baselinePlayers.map((p) => {
+                      const player = playerMap.get(p.playerId);
+                      return (
+                        <tr key={p.playerId}>
+                          <td>
+                            <div className={styles.playerCell}>
+                              <div className={styles.playerIdentity}>
+                                <span className={styles.playerNameText}>
+                                  {player?.name || p.playerId}
+                                </span>
+                                <div className={styles.playerMetaRow}>
+                                  <span className={styles.idBadge}>{p.playerId}</span>
+                                  <span className={styles.posChip}>{player?.primaryPosition || '—'}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>
+                            <Badge
+                              variant={p.roleClassification === 'Starting XI' ? 'blue' : 'purple'}
+                              size="sm"
+                            >
+                              {p.roleClassification}
+                            </Badge>
+                          </td>
+
+                          <td style={{ textAlign: 'right', fontWeight: 600 }}>{p.matches}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 600 }}>{p.goals}</td>
+                          <td style={{ textAlign: 'right', fontWeight: 600 }}>{p.assists}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={styles.formFooterActions}>
+                <div className={styles.leftGroup}>
+                  <Button
+                    variant="secondary"
+                    icon={<ArrowLeft size={16} />}
+                    onClick={() => setCurrentStep(1)}
+                  >
+                    Edit Baseline
+                  </Button>
+                </div>
+
+                <div className={styles.rightGroup}>
+                  <Button
+                    variant="primary"
+                    icon={<CheckCircle2 size={16} />}
+                    onClick={handleConfirmBaseline}
+                  >
+                    Confirm & Lock Baseline
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* =====================================================================
+          VIEW 3: PROGRESS TRACKING FLOW (Milestone 4B)
+          ===================================================================== */}
+      {viewMode === 'progress' && currentSelectedSeason && currentSelectedSeason.baseline && (
+        <Card variant="glass" padding="lg">
+          <div className={styles.subHeaderBar}>
+            <div>
+              <h2 className={styles.heading}>
+                Record Season Progress: {currentSelectedSeason.id}
+              </h2>
+              <p className={styles.subheading}>
+                Enter updated cumulative statistics for all 23 cards to compute season deltas
+              </p>
+            </div>
+
+            <div
+              className={`${styles.completionPill} ${
+                progressCompletedCount === 23 ? styles.completionPillComplete : ''
+              }`}
+            >
+              <CheckCircle2 size={16} />
+              <span>{progressCompletedCount}/23 Cards Entered</span>
+            </div>
+          </div>
+
+          {currentStep === 1 ? (
+            /* Progress Step 1: Input Table */
+            <div>
+              <div className={styles.formRow} style={{ marginBottom: '1.25rem' }}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="progDate" className={styles.label}>
+                    Recording Date
+                  </label>
+                  <input
+                    id="progDate"
+                    type="date"
+                    className={styles.input}
+                    value={progressDate}
+                    onChange={(e) => setProgressDate(e.target.value)}
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label htmlFor="progNotes" className={styles.label}>
+                    Snapshot Notes
+                  </label>
+                  <input
+                    id="progNotes"
+                    type="text"
+                    className={styles.input}
+                    placeholder="e.g. Division 2 promotion milestone, Weekend league results..."
+                    value={progressNotes}
+                    onChange={(e) => setProgressNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {progressErrors.length > 0 && (
+                <div className={`${styles.banner} ${styles.bannerDanger}`} style={{ marginBottom: '1rem' }}>
+                  <AlertCircle size={18} />
+                  <div className={styles.bannerContent}>
+                    <strong>Validation errors:</strong>
+                    <ul style={{ margin: '0.25rem 0 0 1rem', padding: 0 }}>
+                      {progressErrors.slice(0, 4).map((err, i) => (
+                        <li key={i}>{err}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.sectionTabs}>
+                <button
+                  type="button"
+                  className={`${styles.sectionTab} ${
+                    progressTab === 'all' ? styles.sectionTabActive : ''
+                  }`}
+                  onClick={() => setProgressTab('all')}
+                >
+                  All Players (23)
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.sectionTab} ${
+                    progressTab === 'starters' ? styles.sectionTabActive : ''
+                  }`}
+                  onClick={() => setProgressTab('starters')}
+                >
+                  Starting XI ({progressPlayers.filter((p) => {
+                    const baseP = currentSelectedSeason.baseline?.players.find((bp) => bp.playerId === p.playerId);
+                    return baseP?.roleClassification === 'Starting XI';
+                  }).length})
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.sectionTab} ${
+                    progressTab === 'subs' ? styles.sectionTabActive : ''
+                  }`}
+                  onClick={() => setProgressTab('subs')}
+                >
+                  Substitutes ({progressPlayers.filter((p) => {
+                    const baseP = currentSelectedSeason.baseline?.players.find((bp) => bp.playerId === p.playerId);
+                    return baseP?.roleClassification === 'Substitute';
+                  }).length})
+                </button>
+              </div>
+
+              <div className={styles.tableContainer}>
+                <table className={styles.statsTable}>
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Role</th>
+                      <th style={{ textAlign: 'right' }}>Cumulative Matches</th>
+                      <th style={{ textAlign: 'right' }}>Cumulative Goals</th>
+                      <th style={{ textAlign: 'right' }}>Cumulative Assists</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {progressPlayers
+                      .filter((p) => {
+                        const baseP = currentSelectedSeason.baseline?.players.find(
+                          (bp) => bp.playerId === p.playerId
+                        );
+                        if (progressTab === 'starters') return baseP?.roleClassification === 'Starting XI';
+                        if (progressTab === 'subs') return baseP?.roleClassification === 'Substitute';
+                        return true;
+                      })
+                      .map((p) => {
+                      const player = playerMap.get(p.playerId);
+                      const baseP = currentSelectedSeason.baseline?.players.find(
+                        (bp) => bp.playerId === p.playerId
+                      );
+
+                      return (
+                        <tr key={p.playerId}>
+                          <td>
+                            <div className={styles.playerCell}>
+                              <div className={styles.playerIdentity}>
+                                <span className={styles.playerNameText}>
+                                  {player?.name || p.playerId}
+                                </span>
+                                <div className={styles.playerMetaRow}>
+                                  <span className={styles.idBadge}>{p.playerId}</span>
+                                  <span className={styles.posChip}>{player?.primaryPosition || '—'}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td>
+                            <Badge
+                              variant={baseP?.roleClassification === 'Starting XI' ? 'blue' : 'purple'}
+                              size="sm"
+                            >
+                              {baseP?.roleClassification || '—'}
+                            </Badge>
+                          </td>
+
+                          <td style={{ textAlign: 'right' }}>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              placeholder="—"
+                              className={`${styles.statInput} ${
+                                p.matches !== null ? styles.statInputFilled : styles.statInputEmpty
+                              }`}
+                              value={p.matches !== null ? p.matches : ''}
+                              onChange={(e) =>
+                                handleProgressStatChange(p.playerId, 'matches', e.target.value)
+                              }
+                            />
+                            <span className={styles.statReferenceVal}>
+                              Base: {baseP?.matches ?? 0}
+                            </span>
+                          </td>
+
+                          <td style={{ textAlign: 'right' }}>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              placeholder="—"
+                              className={`${styles.statInput} ${
+                                p.goals !== null ? styles.statInputFilled : styles.statInputEmpty
+                              }`}
+                              value={p.goals !== null ? p.goals : ''}
+                              onChange={(e) =>
+                                handleProgressStatChange(p.playerId, 'goals', e.target.value)
+                              }
+                            />
+                            <span className={styles.statReferenceVal}>
+                              Base: {baseP?.goals ?? 0}
+                            </span>
+                          </td>
+
+                          <td style={{ textAlign: 'right' }}>
+                            <input
+                              type="number"
+                              min="0"
+                              step="1"
+                              placeholder="—"
+                              className={`${styles.statInput} ${
+                                p.assists !== null ? styles.statInputFilled : styles.statInputEmpty
+                              }`}
+                              value={p.assists !== null ? p.assists : ''}
+                              onChange={(e) =>
+                                handleProgressStatChange(p.playerId, 'assists', e.target.value)
+                              }
+                            />
+                            <span className={styles.statReferenceVal}>
+                              Base: {baseP?.assists ?? 0}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={styles.formFooterActions}>
+                <div className={styles.leftGroup}>
+                  <Button variant="ghost" onClick={() => setViewMode('list')}>
+                    Back to Seasons
+                  </Button>
+                </div>
+
+                <div className={styles.rightGroup}>
+                  <Button
+                    variant="secondary"
+                    icon={<Save size={16} />}
+                    onClick={handleSaveProgressDraft}
+                  >
+                    Save Progress Draft
+                  </Button>
+                  <Button
+                    variant="primary"
+                    iconRight={<ArrowRight size={16} />}
+                    onClick={handleProceedToProgressReview}
+                  >
+                    Review Deltas
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Progress Step 2: Deltas Review & Confirmation */
+            <div>
+              {/* Decrease Warning Box if any stat decreased */}
+              {decreaseWarnings.length > 0 && (
+                <div className={styles.decreaseWarningBox}>
+                  <div className={styles.decreaseWarningHeader}>
+                    <AlertTriangle size={20} />
+                    <span>Stat Decrease Warning</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '0.85rem' }}>
+                    One or more cumulative statistics are lower than the previous record.
+                    This may represent a data-entry error or a corrected source value.
+                  </p>
+                  <ul className={styles.decreaseList}>
+                    {decreaseWarnings.map((warning, i) => (
+                      <li key={i}>{warning}</li>
+                    ))}
+                  </ul>
+                  <label className={styles.decreaseCheckboxLabel}>
+                    <input
+                      type="checkbox"
+                      className={styles.decreaseCheckbox}
+                      checked={confirmDecreasesChecked}
+                      onChange={(e) => setConfirmDecreasesChecked(e.target.checked)}
+                    />
+                    <span>I confirm that these decreased values are intentional source corrections.</span>
+                  </label>
+                </div>
+              )}
+
+              <div className={styles.tableContainer} style={{ marginTop: '1rem' }}>
+                <table className={styles.statsTable}>
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Role</th>
+                      <th style={{ textAlign: 'center' }}>Matches (Delta)</th>
+                      <th style={{ textAlign: 'center' }}>Goals (Delta)</th>
+                      <th style={{ textAlign: 'center' }}>Assists (Delta)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {calculatedDeltas.map((d) => (
+                      <tr key={d.playerId}>
+                        <td>
+                          <div className={styles.playerCell}>
+                            <div className={styles.playerIdentity}>
+                              <span className={styles.playerNameText}>{d.playerName}</span>
+                              <div className={styles.playerMetaRow}>
+                                <span className={styles.idBadge}>{d.playerId}</span>
+                                <span className={styles.posChip}>{d.position}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>
+                          <Badge
+                            variant={d.roleClassification === 'Starting XI' ? 'blue' : 'purple'}
+                            size="sm"
+                          >
+                            {d.roleClassification}
+                          </Badge>
+                        </td>
+
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{ fontWeight: 600, marginRight: '0.5rem' }}>
+                            {d.currentMatches}
+                          </span>
+                          <span
+                            className={`${styles.deltaPill} ${
+                              d.matchesDelta > 0
+                                ? styles.deltaPositive
+                                : d.matchesDelta < 0
+                                ? styles.deltaNegative
+                                : styles.deltaZero
+                            }`}
+                          >
+                            {d.matchesDelta > 0 ? `+${d.matchesDelta}` : d.matchesDelta}
+                          </span>
+                        </td>
+
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{ fontWeight: 600, marginRight: '0.5rem' }}>
+                            {d.currentGoals}
+                          </span>
+                          <span
+                            className={`${styles.deltaPill} ${
+                              d.goalsDelta > 0
+                                ? styles.deltaPositive
+                                : d.goalsDelta < 0
+                                ? styles.deltaNegative
+                                : styles.deltaZero
+                            }`}
+                          >
+                            {d.goalsDelta > 0 ? `+${d.goalsDelta}` : d.goalsDelta}
+                          </span>
+                        </td>
+
+                        <td style={{ textAlign: 'center' }}>
+                          <span style={{ fontWeight: 600, marginRight: '0.5rem' }}>
+                            {d.currentAssists}
+                          </span>
+                          <span
+                            className={`${styles.deltaPill} ${
+                              d.assistsDelta > 0
+                                ? styles.deltaPositive
+                                : d.assistsDelta < 0
+                                ? styles.deltaNegative
+                                : styles.deltaZero
+                            }`}
+                          >
+                            {d.assistsDelta > 0 ? `+${d.assistsDelta}` : d.assistsDelta}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={styles.formFooterActions}>
+                <div className={styles.leftGroup}>
+                  <Button
+                    variant="secondary"
+                    icon={<ArrowLeft size={16} />}
+                    onClick={() => setCurrentStep(1)}
+                  >
+                    Edit Values
+                  </Button>
+                </div>
+
+                <div className={styles.rightGroup}>
+                  <Button
+                    variant="primary"
+                    icon={<CheckCircle2 size={16} />}
+                    disabled={decreaseWarnings.length > 0 && !confirmDecreasesChecked}
+                    onClick={handleConfirmProgressSnapshot}
+                  >
+                    Confirm Progress Snapshot
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* =====================================================================
+          VIEW 4: SNAPSHOT DETAIL VIEW (Milestone 4B)
+          ===================================================================== */}
+      {viewMode === 'snapshot-detail' && selectedSnapshot && currentSelectedSeason && (
+        <Card variant="glass" padding="lg">
+          <div className={styles.subHeaderBar}>
+            <div>
+              <h2 className={styles.heading}>
+                Progress Snapshot: {selectedSnapshot.recordingDate}
+              </h2>
+              <p className={styles.subheading}>
+                Recorded on {new Date(selectedSnapshot.recordedAt).toLocaleString()} • {currentSelectedSeason.id}
+              </p>
+            </div>
+
+            <Button
+              variant="secondary"
+              icon={<ArrowLeft size={16} />}
+              onClick={() => setViewMode('list')}
+            >
+              Back to Seasons
+            </Button>
+          </div>
+
+          {selectedSnapshot.notes && (
+            <div className={styles.notesSnippet} style={{ marginBottom: '1rem' }}>
+              "{selectedSnapshot.notes}"
+            </div>
+          )}
+
+          <div className={styles.tableContainer}>
+            <table className={styles.statsTable}>
+              <thead>
+                <tr>
+                  <th>Player</th>
+                  <th>Role</th>
+                  <th style={{ textAlign: 'center' }}>Matches (Season Delta)</th>
+                  <th style={{ textAlign: 'center' }}>Goals (Season Delta)</th>
+                  <th style={{ textAlign: 'center' }}>Assists (Season Delta)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {calculatedDeltas.map((d) => (
+                  <tr key={d.playerId}>
+                    <td>
+                      <div className={styles.playerCell}>
+                        <div className={styles.playerIdentity}>
+                          <span className={styles.playerNameText}>{d.playerName}</span>
+                          <div className={styles.playerMetaRow}>
+                            <span className={styles.idBadge}>{d.playerId}</span>
+                            <span className={styles.posChip}>{d.position}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      <Badge
+                        variant={d.roleClassification === 'Starting XI' ? 'blue' : 'purple'}
+                        size="sm"
+                      >
+                        {d.roleClassification}
+                      </Badge>
+                    </td>
+
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ fontWeight: 600, marginRight: '0.5rem' }}>
+                        {d.currentMatches}
+                      </span>
+                      <span
+                        className={`${styles.deltaPill} ${
+                          d.matchesDelta > 0
+                            ? styles.deltaPositive
+                            : d.matchesDelta < 0
+                            ? styles.deltaNegative
+                            : styles.deltaZero
+                        }`}
+                      >
+                        {d.matchesDelta > 0 ? `+${d.matchesDelta}` : d.matchesDelta}
+                      </span>
+                    </td>
+
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ fontWeight: 600, marginRight: '0.5rem' }}>
+                        {d.currentGoals}
+                      </span>
+                      <span
+                        className={`${styles.deltaPill} ${
+                          d.goalsDelta > 0
+                            ? styles.deltaPositive
+                            : d.goalsDelta < 0
+                            ? styles.deltaNegative
+                            : styles.deltaZero
+                        }`}
+                      >
+                        {d.goalsDelta > 0 ? `+${d.goalsDelta}` : d.goalsDelta}
+                      </span>
+                    </td>
+
+                    <td style={{ textAlign: 'center' }}>
+                      <span style={{ fontWeight: 600, marginRight: '0.5rem' }}>
+                        {d.currentAssists}
+                      </span>
+                      <span
+                        className={`${styles.deltaPill} ${
+                          d.assistsDelta > 0
+                            ? styles.deltaPositive
+                            : d.assistsDelta < 0
+                            ? styles.deltaNegative
+                            : styles.deltaZero
+                        }`}
+                      >
+                        {d.assistsDelta > 0 ? `+${d.assistsDelta}` : d.assistsDelta}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {/* =====================================================================
+          VIEW 5: SEASONS LIST OVERVIEW
+          ===================================================================== */}
+      {viewMode === 'list' && (
         <>
           {seasons.length === 0 ? (
             <Card variant="glass" padding="lg">
@@ -661,6 +1855,8 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                 const isActive = season.status === 'Active';
                 const isDraft = season.status === 'Draft';
                 const isClosed = season.status === 'Closed';
+                const hasBaseline = Boolean(season.baseline);
+                const snapshotCount = season.progressSnapshots?.length || 0;
 
                 return (
                   <Card
@@ -668,18 +1864,29 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                     variant="glass"
                     padding="md"
                     className={`${styles.seasonCard} ${
-                      isActive ? styles.seasonCardActive : isDraft ? styles.seasonCardDraft : ''
+                      isActive ? styles.seasonCardActive : isDraft ? styles.seasonCardDraft : isClosed ? styles.seasonCardClosed : ''
                     }`}
                   >
                     <div>
                       <div className={styles.seasonHeader}>
                         <h2 className={styles.seasonTitle}>{season.id}</h2>
-                        <Badge
-                          variant={isActive ? 'lime' : isDraft ? 'blue' : 'purple'}
-                          size="sm"
-                        >
-                          {season.status}
-                        </Badge>
+                        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                          <Badge
+                            variant={isActive ? 'lime' : isDraft ? 'blue' : 'purple'}
+                            size="sm"
+                          >
+                            {season.status}
+                          </Badge>
+                          {hasBaseline ? (
+                            <Badge variant="lime" size="sm" icon={<ShieldCheck size={12} />}>
+                              Baseline Locked
+                            </Badge>
+                          ) : (
+                            <Badge variant="default" size="sm">
+                              No Baseline
+                            </Badge>
+                          )}
+                        </div>
                       </div>
 
                       <div className={styles.seasonMetaList}>
@@ -699,12 +1906,51 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                           <span className={styles.metaVal}>{season.startDate}</span>
                         </div>
 
+                        <div className={styles.metaItem}>
+                          <span className={styles.metaLabel}>
+                            <History size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                            Snapshots:
+                          </span>
+                          <span className={styles.metaVal}>
+                            {snapshotCount} recorded
+                          </span>
+                        </div>
+
                         {season.notes && (
-                          <div className={styles.notesSnippet}>
-                            "{season.notes}"
-                          </div>
+                          <div className={styles.notesSnippet}>"{season.notes}"</div>
                         )}
                       </div>
+
+                      {/* Snapshots History Accordion (if any recorded) */}
+                      {snapshotCount > 0 && (
+                        <div className={styles.snapshotsSection}>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                            Recorded Progress Snapshots:
+                          </span>
+                          {season.progressSnapshots!.map((snap, idx) => (
+                            <div key={snap.id} className={styles.snapshotCard}>
+                              <div className={styles.snapshotInfo}>
+                                <span className={styles.snapshotDate}>
+                                  Snapshot #{idx + 1} — {snap.recordingDate}
+                                </span>
+                                <span className={styles.snapshotMeta}>
+                                  {snap.notes || 'No notes'}
+                                </span>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedSeasonId(season.id);
+                                  handleViewSnapshotDetail(snap);
+                                }}
+                              >
+                                View Deltas
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className={styles.cardFooter}>
@@ -730,15 +1976,29 @@ export const SeasonsView: React.FC<SeasonsViewProps> = ({ onSeasonActivated }) =
                             <Trash2 size={14} />
                           </Button>
                         </div>
-                      ) : isActive ? (
-                        <Badge variant="lime" size="sm">
-                          Active Phase
-                        </Badge>
-                      ) : isClosed ? (
-                        <Badge variant="purple" size="sm">
-                          Closed
-                        </Badge>
-                      ) : null}
+                      ) : (
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {!hasBaseline ? (
+                            <Button
+                              variant="blue"
+                              size="sm"
+                              icon={<ShieldCheck size={14} />}
+                              onClick={() => handleOpenBaselineSetup(season)}
+                            >
+                              Setup Baseline
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              icon={<TrendingUp size={14} />}
+                              onClick={() => handleOpenProgressEntry(season)}
+                            >
+                              + Record Progress
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </Card>
                 );

@@ -86,17 +86,42 @@
 - **Automated Verification**:
   - Dedicated test suite `scripts/test_season_repository.js` (`npm run test:season`) verifying creation, reload persistence, duplicate rejection, explicit activation, corrupted storage resilience, and subsystem storage isolation.
 
+### Milestone 4B — Player Statistics Baselines & Progress Tracking (Completed)
+- **Baseline Data Model & Immutability**:
+  - Implemented typed `SeasonBaselineSnapshot`, `BaselinePlayerRecord`, `SeasonBaselineDraft`, and `PlayerRoleClassification` ('Starting XI' | 'Substitute') in `src/types/index.ts`.
+  - Captures cumulative matches, goals, and assists for all 23 authentic player cards using stable IDs (`P001` - `P023`).
+  - Distinguishes unentered values (`null`) from genuine zeroes (`0`).
+  - Enforces strict validation requiring all 23 cards to be filled with non-negative integers before confirmation.
+  - Immutability guarantee: confirmed baseline cannot be overwritten by progress updates, re-confirmation, or duplicate submissions.
+  - Canonical Starting XI (11 cards) and Substitutes (12 cards) classification locked into the baseline snapshot.
+- **Progress Snapshots & Append-Only History**:
+  - Implemented typed `SeasonProgressSnapshot`, `ProgressPlayerRecord`, `SeasonProgressDraft`, and `PlayerStatDelta`.
+  - Append-only snapshot ledger with stable snapshot IDs, recording date, and user notes.
+  - Draft saving for incomplete data that survives browser reloads.
+- **Delta Calculations & Decrease Warning Safeguard**:
+  - Exact deltas calculated as `current cumulative − baseline`.
+  - Positive, zero, and negative deltas displayed accurately without silent clamping.
+  - Stat decrease detection compared against the latest reference record (most recent snapshot or baseline).
+  - Prominent decrease warning banner and mandatory explicit confirmation checkbox ("I confirm that these decreased values are intentional source corrections") required before confirmation.
+- **User Interface Integration**:
+  - Extended `SeasonsView.tsx` with dedicated Baseline setup/review, Progress entry/review, and Snapshot detail inspection views.
+  - Filterable tabs for All Players (23), Starting XI (11), and Substitutes (12).
+  - Real-time completion progress indicators (`X/23 Completed`).
+  - Responsive tables with dark theme styling, delta pills (green positive, gray zero, red negative), and accessible inputs.
+- **Automated Verification**:
+  - Expanded `scripts/test_season_repository.js` (`npm run test:season`) with 12 comprehensive test suites covering 23-card creation, null vs 0 distinction, negative/fractional stat rejection, duplicate prevention, baseline immutability, exact delta calculation (positive/zero/negative), decrease warnings, append-only history, reload persistence, and backward compatibility.
+
 ## Known Limitations
-- Milestone 4A implements the season foundation only; starting baselines, cumulative player stats entry, deltas, reward eligibility, and season closure will be added in subsequent milestones (4B/4C).
+- Milestone 4B implements statistics baselines and progress snapshots; season reward qualification (rank 100,000 threshold), reward card acquisition tracking, and final immutable season closure will be added in Milestone 4C.
 - Position familiarity is intentionally not tracked (per specification).
 - Tactician/manager auto-arrange and tactical instruction controls are excluded (per milestone scope).
 - Card artwork currently displays clean initials and rating badges until official image assets are added to the repository.
 
 ## Commands Executed & Results
 - `npm run lint`: ESLint check passed with 0 errors and 0 warnings (Exit 0).
-- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.90s (Exit 0).
+- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 981ms (Exit 0).
 - `npm run test:squad`: Node.js unit test suite for formations, independence, and validation passed (Exit 0).
-- `npm run test:season`: Node.js unit test suite for season repository, persistence, duplicate rejection, and activation validation passed (Exit 0).
+- `npm run test:season`: Node.js unit test suite for season baseline creation, validation, immutability, deltas, decreases, drafts, and persistence passed (Exit 0).
 
 ## Next Action
-Review Milestone 4A and prepare for **Milestone 4B: Starting Baselines & Progress Entry** (Starting XI / substitutes baseline capture, cumulative player statistics, delta calculation, decrease warnings, and progress snapshots).
+Review Milestone 4B and prepare for **Milestone 4C: Season Closure & Reward Qualification** (rank 100,000 reward eligibility, reward card acquisition state, season closure review, and historical closed season snapshots).
