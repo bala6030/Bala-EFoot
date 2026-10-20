@@ -1,0 +1,687 @@
+.statsView {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6) 0;
+}
+
+@media (min-width: 768px) {
+  .statsView {
+    padding: var(--space-8) 0;
+    gap: var(--space-8);
+  }
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.topBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .topBar {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+
+.titleArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.heading {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .heading {
+    font-size: 2.25rem;
+  }
+}
+
+.subheading {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ── Primary Period Navigation Tabs (Strictly 3 tabs, No By Position) ── */
+.periodNav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--bg-surface);
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.periodTab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.periodTab:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface-elevated);
+}
+
+.periodTabActive {
+  color: var(--text-primary);
+  background: var(--bg-surface-elevated);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-hover);
+}
+
+.periodTabActiveLime {
+  color: var(--accent-lime);
+  border-color: rgba(57, 255, 20, 0.3);
+}
+
+.periodTabActiveBlue {
+  color: var(--accent-blue);
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+.periodTabActivePurple {
+  color: var(--accent-purple);
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+/* ── Summary KPI Cards ──────────────────────────────────── */
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .summaryGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+.summaryCard {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.summaryLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.summaryValue {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-feature-settings: 'tnum' on;
+  letter-spacing: -0.02em;
+}
+
+.summaryValueLime {
+  color: var(--accent-lime);
+}
+
+.summaryValueBlue {
+  color: var(--accent-blue);
+}
+
+.summaryValuePurple {
+  color: var(--accent-purple);
+}
+
+.summarySub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Partial Aggregate Warning Banner ───────────────────── */
+.partialNotice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.25);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  color: #fef08a;
+}
+
+.partialNoticeIcon {
+  flex-shrink: 0;
+  color: #eab308;
+}
+
+/* ── Controls Row (Search & Sorting info) ────────────────── */
+.controlsRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+  .controlsRow {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--space-3);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.55rem var(--space-3) 0.55rem 2.4rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.2);
+}
+
+.clearSearchBtn {
+  position: absolute;
+  right: var(--space-3);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.clearSearchBtn:hover {
+  color: var(--text-primary);
+}
+
+.resultsMeta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* ── 5-Season Selector ──────────────────────────────────── */
+.seasonSelectorCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.seasonSelectorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.seasonSelectorTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.seasonSelectorNote {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.seasonPillsList {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.seasonPill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.5rem 0.9rem;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.seasonPill:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.seasonPillActive {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: var(--accent-purple);
+  color: var(--text-primary);
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.25);
+}
+
+.seasonPillActiveActiveSeason {
+  background: rgba(57, 255, 20, 0.1);
+  border-color: var(--accent-lime);
+  color: var(--text-primary);
+  box-shadow: 0 0 8px rgba(57, 255, 20, 0.25);
+}
+
+/* ── Selected Season Meta Banner ─────────────────────────── */
+.seasonBanner {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.seasonBannerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.seasonBannerTitleArea {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.seasonBannerTitle {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.seasonBannerMetaGrid {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.metaHighlight {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.seasonBannerNotes {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-2);
+}
+
+/* ── Table Container ─────────────────────────────────────── */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  -webkit-overflow-scrolling: touch;
+}
+
+.statsTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+  min-width: 720px;
+}
+
+.statsTable th {
+  background: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border-default);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.sortableHeader {
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.sortableHeader:hover {
+  color: var(--text-primary);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sortIcon {
+  display: flex;
+  align-items: center;
+  color: var(--accent-blue);
+}
+
+.statsTable td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+}
+
+.statsTable tr:last-child td {
+  border-bottom: none;
+}
+
+.clickableRow {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.clickableRow:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ── Player Cell Identity ─────────────────────────────────── */
+.playerCell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 220px;
+}
+
+.avatarWrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarFallback {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.playerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.playerName {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: color var(--transition-fast);
+}
+
+.clickableRow:hover .playerName {
+  color: var(--accent-blue);
+}
+
+.playerMetaRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.cardIdTag {
+  font-family: var(--font-family-mono);
+  color: var(--accent-blue);
+  background: rgba(0, 229, 255, 0.08);
+  padding: 1px 4px;
+  border-radius: var(--radius-xs);
+  font-weight: 700;
+}
+
+.cardNameText {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+/* ── Position & Role Chips ────────────────────────────────── */
+.posChip {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  display: inline-block;
+}
+
+.posFWD {
+  color: var(--accent-lime);
+  background: rgba(57, 255, 20, 0.12);
+  border: 1px solid rgba(57, 255, 20, 0.25);
+}
+
+.posMID {
+  color: var(--accent-blue);
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+}
+
+.posDEF {
+  color: var(--accent-purple);
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+.posGK {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+.roleBadgeStarter {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background: rgba(57, 255, 20, 0.08);
+  color: var(--accent-lime);
+  border: 1px solid rgba(57, 255, 20, 0.25);
+}
+
+.roleBadgeSub {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
+}
+
+/* ── Numerical Stat Columns ───────────────────────────────── */
+.numCol {
+  font-family: var(--font-family-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-feature-settings: 'tnum' on;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.highlightCol {
+  color: var(--accent-lime);
+  font-weight: 700;
+}
+
+.rateCol {
+  font-family: var(--font-family-mono);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.unavailableStat {
+  color: var(--text-muted);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ── Delta Pills (Positive, Neutral, Negative) ────────────── */
+.deltaPositive {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background: rgba(57, 255, 20, 0.1);
+  color: var(--accent-lime);
+  font-weight: 700;
+  font-feature-settings: 'tnum' on;
+}
+
+.deltaZero {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  font-feature-settings: 'tnum' on;
+}
+
+.deltaNegative {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  font-weight: 700;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  font-feature-settings: 'tnum' on;
+}
+
+/* ── Period Info Note ────────────────────────────────────── */
+.periodNoteCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.periodNoteText {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.periodNoteBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  background: rgba(0, 229, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}

@@ -349,6 +349,9 @@ export interface Season {
   rewardEligibility?: RewardEligibilityStatus;
   rewardAcquisition?: SeasonRewardAcquisition | null;
 
+  // Milestone 5A: Division Progress tracking (append-only)
+  divisionProgressSnapshots?: DivisionProgressSnapshot[];
+
   // Extensibility hooks for future milestones (Milestones 4C2, 5):
   rewardAcquired?: unknown;
   closedAt?: string;
@@ -517,6 +520,7 @@ export interface SeasonClosureSnapshot {
   };
   baseline: SeasonBaselineSnapshot;
   progressSnapshots: SeasonProgressSnapshot[];
+  divisionProgressSnapshots?: DivisionProgressSnapshot[];
   statsSummary: {
     totalSnapshots: number;
     latestSnapshotDate?: string;
@@ -560,6 +564,10 @@ export interface SeasonReviewSummary {
   totalGoalsDelta: number;
   totalAssistsDelta: number;
 
+  // Division Progress (Milestone 5A)
+  divisionProgressSnapshotsCount?: number;
+  latestDivisionProgress?: DivisionProgressSnapshot | null;
+
   // Rank & Reward status
   finalRank: number | null;
   rewardEligibility: RewardEligibilityStatus;
@@ -591,6 +599,214 @@ export interface CloseSeasonResult {
   closureSnapshot?: SeasonClosureSnapshot;
   error?: string;
   warnings?: string[];
+}
+
+/**
+ * Single division-progress snapshot for an active season (append-only) (Milestone 5A)
+ */
+export interface DivisionProgressSnapshot {
+  id: string; // e.g. "div-snap-Phase-1-1729420000000"
+  seasonId: string;
+  recordingDate: string; // YYYY-MM-DD
+  recordedAt: string; // ISO 8601 timestamp
+  division: number; // 1-10 integer
+  points: number; // non-negative integer
+  rank: number | null; // positive integer or null
+  wins: number; // non-negative integer
+  draws: number; // non-negative integer
+  losses: number; // non-negative integer
+  matches: number; // wins + draws + losses
+  winRate: number; // wins / matches (or 0 if matches === 0)
+  notes?: string;
+}
+
+/**
+ * Input for recording a division-progress snapshot
+ */
+export interface DivisionProgressInput {
+  seasonId: string;
+  recordingDate?: string;
+  division: number; // 1-10
+  points: number; // >= 0
+  rank?: number | null; // >= 1 or null
+  wins: number; // >= 0
+  draws: number; // >= 0
+  losses: number; // >= 0
+  notes?: string;
+}
+
+/**
+ * Aggregated live KPI data for the Dashboard view
+ */
+export interface DashboardKPIs {
+  hasActiveSeason: boolean;
+  activeSeasonId?: string;
+  division: number | null;
+  divisionDisplay: string;
+  divisionSubtitle: string;
+  points: number | null;
+  pointsDisplay: string;
+  pointsSubtitle: string;
+  rank: number | null;
+  rankDisplay: string;
+  rankSubtitle: string;
+  wins: number | null;
+  draws: number | null;
+  losses: number | null;
+  matches: number | null;
+  recordDisplay: string;
+  recordSubtitle: string;
+  winRate: number | null;
+  winRateDisplay: string;
+  winRateSubtitle: string;
+  rewardStatus: string;
+  rewardSubtitle: string;
+  rewardColor: 'lime' | 'blue' | 'purple' | 'default';
+  isRewardEligible: boolean;
+}
+
+/**
+ * Top performer entry for Overall or Previous Month views
+ */
+export interface TopPerformerItem {
+  rank: number;
+  playerId: string;
+  playerName: string;
+  cardName: string | null;
+  primaryPosition: string;
+  imageUrl: string | null;
+  matches: number | null;
+  goals: number | null;
+  assists: number | null;
+  goalContributions: number | null;
+  goalsPerMatch: number | null;
+  assistsPerMatch: number | null;
+}
+
+/**
+ * Historical closed season record for Division History section
+ */
+export interface ClosedSeasonHistoryItem {
+  id: string;
+  startDate: string;
+  closedDate: string;
+  startingDivision: number;
+  finalDivision: number | null;
+  points: number | null;
+  finalRank: number | null;
+  record: string;
+  wins: number | null;
+  draws: number | null;
+  losses: number | null;
+  matches: number | null;
+  winRate: string;
+  totalMatchesDelta: number;
+  totalGoalsDelta: number;
+  totalAssistsDelta: number;
+  rewardStatus: string;
+  rewardCardName?: string;
+  closureNotes?: string;
+}
+
+// ============================================================================
+// MILESTONE 5B: STATS & RECORDS TYPES
+// ============================================================================
+
+/**
+ * Tab/Period navigation options for Stats & Records view
+ */
+export type StatsPeriodTab = 'overall' | 'previous-month' | 'seasons';
+
+/**
+ * Calendar month date window representation
+ */
+export interface MonthWindow {
+  year: number;
+  month: number; // 1-12
+  monthLabel: string; // e.g. "September 2026"
+  startStr: string; // YYYY-MM-01
+  endStr: string; // YYYY-MM-lastDay
+}
+
+/**
+ * Unified player stats row representation for Overall, Previous Month, and Season views
+ */
+export interface PlayerStatsRow {
+  playerId: string;
+  playerName: string;
+  cardName: string | null;
+  overallRating: number | null;
+  primaryPosition: string;
+  imageUrl: string | null;
+  roleClassification?: PlayerRoleClassification;
+  matches: number | null;
+  goals: number | null;
+  assists: number | null;
+  goalContributions: number | null;
+  goalsPerMatch: number | null;
+  assistsPerMatch: number | null;
+  isUnavailable?: boolean;
+}
+
+/**
+ * Item in the 5-season selector
+ */
+export interface SelectableSeasonItem {
+  id: string;
+  status: 'Active' | 'Closed';
+  startDate: string;
+  closedDate?: string;
+  startingDivision: number;
+  finalDivision?: number | null;
+  finalRank?: number | null;
+  hasConfirmedBaseline: boolean;
+  hasConfirmedProgress: boolean;
+  snapshotCount: number;
+  latestSnapshotDate?: string;
+  closureSnapshotId?: string;
+  closureNotes?: string;
+}
+
+/**
+ * Season statistics result bundle
+ */
+export interface SeasonStatsResult {
+  season: SelectableSeasonItem;
+  hasConfirmedProgress: boolean;
+  players: PlayerStatsRow[];
+  totalMatchesDelta: number | null;
+  totalGoalsDelta: number | null;
+  totalAssistsDelta: number | null;
+  totalGoalContributions: number | null;
+  notes?: string;
+}
+
+/**
+ * Overall (All-Time) statistics aggregate summary
+ */
+export interface OverallStatsSummary {
+  totalMatches: number;
+  totalGoals: number;
+  totalAssists: number;
+  totalGoalContributions: number;
+  recordedPlayersCount: number;
+  totalPlayersCount: number;
+  isPartial: boolean;
+  notes: string;
+}
+
+/**
+ * Previous Month statistics result bundle
+ */
+export interface PreviousMonthStatsResult {
+  window: MonthWindow;
+  hasData: boolean;
+  players: TopPerformerItem[];
+  allPlayerRows: PlayerStatsRow[];
+  totalMatches: number;
+  totalGoals: number;
+  totalAssists: number;
+  totalGoalContributions: number;
 }
 
 

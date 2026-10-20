@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "import-data": "python3 scripts/import_player_data.py",
     "test:squad": "node scripts/test_squad_builder.js",
-    "test:season": "node scripts/test_season_repository.js"
+    "test:season": "node scripts/test_season_repository.js",
+    "test:dashboard": "node scripts/test_dashboard_integration.js",
+    "test:stats": "node --import ./scripts/register-hooks.js scripts/test_stats_records.js"
   },
   "dependencies": {
     "lucide-react": "^1.16.0",

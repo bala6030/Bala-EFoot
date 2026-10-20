@@ -21,6 +21,8 @@ import type {
   SeasonReviewSummary,
   CloseSeasonInput,
   CloseSeasonResult,
+  DivisionProgressSnapshot,
+  DivisionProgressInput,
 } from '../types';
 
 export const SEASONS_STORAGE_KEY = 'bala_efoot_seasons_v1';
@@ -62,6 +64,13 @@ export const CANONICAL_STARTING_XI_IDS: ReadonlySet<string> = new Set([
  */
 export function isValidStatValue(val: unknown): val is number {
   return typeof val === 'number' && Number.isInteger(val) && val >= 0;
+}
+
+/**
+ * Validates whether a value is a valid eFootball division integer (1 to 10 inclusive)
+ */
+export function isValidDivisionValue(val: unknown): val is number {
+  return typeof val === 'number' && Number.isInteger(val) && val >= 1 && val <= 10;
 }
 
 /**
@@ -288,6 +297,61 @@ function sanitizeRewardAcquisition(raw: unknown): SeasonRewardAcquisition | null
 }
 
 /**
+ * Sanitizes division progress snapshots from raw storage (Milestone 5A)
+ */
+function sanitizeDivisionProgressSnapshots(raw: unknown): DivisionProgressSnapshot[] {
+  if (!Array.isArray(raw)) return [];
+  const validSnapshots: DivisionProgressSnapshot[] = [];
+
+  for (const s of raw) {
+    if (!s || typeof s !== 'object') continue;
+    const snap = s as Record<string, unknown>;
+    if (typeof snap.id !== 'string' || typeof snap.seasonId !== 'string' || typeof snap.recordedAt !== 'string') {
+      continue;
+    }
+    if (!isValidDivisionValue(snap.division)) continue;
+    if (!isValidStatValue(snap.points)) continue;
+    if (!isValidStatValue(snap.wins) || !isValidStatValue(snap.draws) || !isValidStatValue(snap.losses)) {
+      continue;
+    }
+
+    const rank = isValidRankValue(snap.rank) ? snap.rank : null;
+    const wins = snap.wins as number;
+    const draws = snap.draws as number;
+    const losses = snap.losses as number;
+    const matches =
+      typeof snap.matches === 'number' && Number.isInteger(snap.matches) && snap.matches >= 0
+        ? snap.matches
+        : wins + draws + losses;
+    const winRate =
+      typeof snap.winRate === 'number' && !Number.isNaN(snap.winRate) && snap.winRate >= 0
+        ? snap.winRate
+        : matches > 0
+        ? wins / matches
+        : 0;
+
+    validSnapshots.push({
+      id: snap.id,
+      seasonId: snap.seasonId,
+      recordingDate:
+        typeof snap.recordingDate === 'string' ? snap.recordingDate : snap.recordedAt.split('T')[0],
+      recordedAt: snap.recordedAt,
+      division: snap.division as number,
+      points: snap.points as number,
+      rank,
+      wins,
+      draws,
+      losses,
+      matches,
+      winRate,
+      notes: typeof snap.notes === 'string' ? snap.notes : undefined,
+    });
+  }
+
+  return validSnapshots;
+}
+
+/**
  * Deep-copies data objects to ensure in-memory immutability
  */
 function deepCopy<T>(val: T): T {
@@ -370,6 +434,8 @@ function sanitizeClosureSnapshot(raw: unknown): SeasonClosureSnapshot | null {
         : 0,
   };
 
+  const divisionProgressSnapshots = sanitizeDivisionProgressSnapshots(c.divisionProgressSnapshots);
+
   return {
     id: c.id,
     seasonId: c.seasonId,
@@ -379,6 +445,7 @@ function sanitizeClosureSnapshot(raw: unknown): SeasonClosureSnapshot | null {
     metadata,
     baseline,
     progressSnapshots,
+    divisionProgressSnapshots,
     statsSummary,
     finalRank,
     rewardEligibility,
@@ -424,6 +491,9 @@ function sanitizeSeason(raw: unknown): Season | null {
   const progressSnapshots = sanitizeProgressSnapshots(candidate.progressSnapshots);
   const progressDraft = sanitizeProgressDraft(candidate.progressDraft);
 
+  // Milestone 5A: Division Progress sanitization
+  const divisionProgressSnapshots = sanitizeDivisionProgressSnapshots(candidate.divisionProgressSnapshots);
+
   // Milestone 4C1: Reward Eligibility & Acquisition sanitization
   const finalRank = isValidRankValue(candidate.finalRank) ? candidate.finalRank : null;
   let rewardEligibility: RewardEligibilityStatus = 'Eligibility Unknown';
@@ -453,6 +523,7 @@ function sanitizeSeason(raw: unknown): Season | null {
     baselineDraft,
     progressSnapshots,
     progressDraft,
+    divisionProgressSnapshots,
     baselineSnapshot: baseline, // compatibility alias
     finalRank,
     rewardEligibility,
@@ -1631,6 +1702,11 @@ export function getSeasonReviewSummary(
     totalMatchesDelta,
     totalGoalsDelta,
     totalAssistsDelta,
+    divisionProgressSnapshotsCount: (season.divisionProgressSnapshots || []).length,
+    latestDivisionProgress:
+      season.divisionProgressSnapshots && season.divisionProgressSnapshots.length > 0
+        ? season.divisionProgressSnapshots[season.divisionProgressSnapshots.length - 1]
+        : null,
     finalRank: season.finalRank ?? null,
     rewardEligibility: season.rewardEligibility || 'Eligibility Unknown',
     isRewardAcquired: Boolean(season.rewardAcquisition),
@@ -1729,6 +1805,7 @@ export function closeSeason(input: CloseSeasonInput): CloseSeasonResult {
   // Deep copy confirmed data to prevent future in-memory mutations
   const frozenBaseline = deepCopy(season.baseline);
   const frozenSnapshots = deepCopy(season.progressSnapshots || []);
+  const frozenDivisionProgress = deepCopy(season.divisionProgressSnapshots || []);
   const frozenReward = season.rewardAcquisition ? deepCopy(season.rewardAcquisition) : null;
 
   // Calculate cumulative stats deltas summary
@@ -1763,6 +1840,7 @@ export function closeSeason(input: CloseSeasonInput): CloseSeasonResult {
     },
     baseline: frozenBaseline,
     progressSnapshots: frozenSnapshots,
+    divisionProgressSnapshots: frozenDivisionProgress,
     statsSummary: {
       totalSnapshots: frozenSnapshots.length,
       latestSnapshotDate,
@@ -1809,4 +1887,154 @@ export function getSeasonClosureSnapshot(seasonId: string): SeasonClosureSnapsho
   const season = getSeasonById(seasonId);
   return season?.closureSnapshot || null;
 }
+
+/**
+ * Records a division-progress snapshot for an active season (append-only) (Milestone 5A).
+ * Enforces strict validation:
+ * - Season must exist and be Active (cannot record on Draft or Closed seasons).
+ * - Division must be an integer between 1 and 10.
+ * - Points, Wins, Draws, Losses must be non-negative integers.
+ * - Rank (if supplied) must be a positive integer (>= 1).
+ * - Total matches computed as wins + draws + losses; winRate computed safely (0 if matches === 0).
+ * - Synchronizes finalRank and rewardEligibility if rank is supplied.
+ */
+export function recordDivisionProgress(input: DivisionProgressInput): {
+  success: boolean;
+  snapshot?: DivisionProgressSnapshot;
+  season?: Season;
+  error?: string;
+} {
+  const state = loadSeasonsState();
+  const season = state.seasons.find((s) => s.id === input.seasonId);
+
+  if (!season) {
+    return {
+      success: false,
+      error: `Season "${input.seasonId}" was not found.`,
+    };
+  }
+
+  if (season.status === 'Closed') {
+    return {
+      success: false,
+      error: `Season "${season.id}" is closed and immutable. Cannot record division progress on a closed season.`,
+    };
+  }
+
+  if (season.status !== 'Active') {
+    return {
+      success: false,
+      error: `Division progress can only be recorded for an Active season. Current status is "${season.status}".`,
+    };
+  }
+
+  // Validate division: 1-10 integer
+  if (!isValidDivisionValue(input.division)) {
+    return {
+      success: false,
+      error: 'Division must be an integer between 1 and 10.',
+    };
+  }
+
+  // Validate points: non-negative integer
+  if (!isValidStatValue(input.points)) {
+    return {
+      success: false,
+      error: 'Points must be a non-negative integer (0 or greater).',
+    };
+  }
+
+  // Validate wins, draws, losses: non-negative integers
+  if (!isValidStatValue(input.wins)) {
+    return {
+      success: false,
+      error: 'Wins must be a non-negative integer (0 or greater).',
+    };
+  }
+  if (!isValidStatValue(input.draws)) {
+    return {
+      success: false,
+      error: 'Draws must be a non-negative integer (0 or greater).',
+    };
+  }
+  if (!isValidStatValue(input.losses)) {
+    return {
+      success: false,
+      error: 'Losses must be a non-negative integer (0 or greater).',
+    };
+  }
+
+  // Validate rank if provided (can be null/undefined or positive integer)
+  let validatedRank: number | null = null;
+  if (input.rank !== undefined && input.rank !== null) {
+    if (!isValidRankValue(input.rank)) {
+      return {
+        success: false,
+        error: 'Rank must be a positive integer (1 or greater). Zero, negative, and fractional values are invalid.',
+      };
+    }
+    validatedRank = input.rank;
+  }
+
+  const matches = input.wins + input.draws + input.losses;
+  const winRate = matches > 0 ? input.wins / matches : 0;
+  const now = new Date().toISOString();
+  const recordingDate =
+    typeof input.recordingDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input.recordingDate.trim())
+      ? input.recordingDate.trim()
+      : now.split('T')[0];
+
+  const snapshot: DivisionProgressSnapshot = {
+    id: `div-snap-${season.id}-${Date.now()}`,
+    seasonId: season.id,
+    recordingDate,
+    recordedAt: now,
+    division: input.division,
+    points: input.points,
+    rank: validatedRank,
+    wins: input.wins,
+    draws: input.draws,
+    losses: input.losses,
+    matches,
+    winRate,
+    notes: input.notes?.trim() || undefined,
+  };
+
+  if (!season.divisionProgressSnapshots) {
+    season.divisionProgressSnapshots = [];
+  }
+  season.divisionProgressSnapshots.push(snapshot);
+
+  // Synchronize rank with season finalRank & rewardEligibility if rank supplied
+  if (validatedRank !== null) {
+    season.finalRank = validatedRank;
+    season.rewardEligibility = computeRewardEligibility(validatedRank);
+  }
+
+  season.updatedAt = now;
+  saveSeasonsState(state);
+
+  return {
+    success: true,
+    snapshot,
+    season,
+  };
+}
+
+/**
+ * Retrieves all division progress snapshots for a season
+ */
+export function getDivisionProgressSnapshots(seasonId: string): DivisionProgressSnapshot[] {
+  const season = getSeasonById(seasonId);
+  return season?.divisionProgressSnapshots || [];
+}
+
+/**
+ * Retrieves the latest division progress snapshot for a season, if any
+ */
+export function getLatestDivisionProgress(seasonId: string): DivisionProgressSnapshot | null {
+  const snapshots = getDivisionProgressSnapshots(seasonId);
+  return snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
+}
+
 
