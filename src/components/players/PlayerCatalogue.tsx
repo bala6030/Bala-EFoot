@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, X, Users, RotateCcw } from 'lucide-react';
 import { PlayerCard } from '../../types';
 import {
@@ -7,6 +7,11 @@ import {
   getDistinctPlayingStyles,
   getDistinctPreferredFeet,
 } from '../../data/playerRepository';
+import {
+  getWishlistItems,
+  addToWishlist,
+  removeFromWishlist,
+} from '../../data/wishlistRepository';
 import { PlayerCardTile } from './PlayerCardTile';
 import { EmptyState } from '../common/EmptyState';
 import { Button } from '../common/Button';
@@ -32,6 +37,33 @@ export const PlayerCatalogue: React.FC<PlayerCatalogueProps> = ({ onSelectPlayer
   const [selectedStyle, setSelectedStyle] = useState<string>('all');
   const [selectedFoot, setSelectedFoot] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('ratingDesc');
+
+  // Wishlist set for fast lookup
+  const [wishlistSet, setWishlistSet] = useState<Set<string>>(() => {
+    return new Set(getWishlistItems().map((i) => i.cardId));
+  });
+
+  useEffect(() => {
+    setWishlistSet(new Set(getWishlistItems().map((i) => i.cardId)));
+  }, []);
+
+  const handleToggleWishlist = (player: PlayerCard) => {
+    if (wishlistSet.has(player.id)) {
+      removeFromWishlist(player.id);
+      setWishlistSet((prev) => {
+        const next = new Set(prev);
+        next.delete(player.id);
+        return next;
+      });
+    } else {
+      addToWishlist(player.id, 'High');
+      setWishlistSet((prev) => {
+        const next = new Set(prev);
+        next.add(player.id);
+        return next;
+      });
+    }
+  };
 
   // Filter & Sort Logic
   const filteredPlayers = useMemo(() => {
@@ -279,7 +311,13 @@ export const PlayerCatalogue: React.FC<PlayerCatalogueProps> = ({ onSelectPlayer
       {filteredPlayers.length > 0 ? (
         <div className={styles.playerGrid}>
           {filteredPlayers.map((player) => (
-            <PlayerCardTile key={player.id} player={player} onClick={onSelectPlayer} />
+            <PlayerCardTile
+              key={player.id}
+              player={player}
+              onClick={onSelectPlayer}
+              isWishlisted={wishlistSet.has(player.id)}
+              onToggleWishlist={handleToggleWishlist}
+            />
           ))}
         </div>
       ) : (

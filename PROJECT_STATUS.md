@@ -4,7 +4,7 @@
 - **App**: Bala EFoot
 - **Tagline**: Squad • Skills • Seasons
 - **Repository**: https://github.com/bala6030/Bala-EFoot
-- **Active Branch**: `feature/stats-records`
+- **Active Branch**: `feature/skills-wishlist`
 - **Cost Target**: ₹0; no billing-enabled usage, paid APIs, or payment method
 
 ## Git Branch Plan
@@ -15,8 +15,9 @@
 - `feature/squad-builder`: Milestone 3 squad & pitch formation builder implementation (merged into `develop`).
 - `feature/season-workflow`: Milestone 4 season workflow implementation (merged into `develop`).
 - `feature/player-card-artwork`: Player card artwork integration and pitch marker enhancement (merged into `develop`).
-- `feature/dashboard-integration`: Milestone 5A dashboard integration implementation.
-- `feature/stats-records`: Milestone 5B stats & records implementation.
+- `feature/dashboard-integration`: Milestone 5A dashboard integration implementation (merged into `develop`).
+- `feature/stats-records`: Milestone 5B stats & records implementation (merged into `develop`).
+- `feature/skills-wishlist`: Milestone 6 skills planner & target wishlist implementation.
 - Feature branches merge into `develop` after review.
 
 ## Milestones Status
@@ -288,21 +289,94 @@
     16. Dashboard, season, squad, and artwork subsystems preserved without regression.
   - All 16 tests pass (Exit 0).
 
+### Milestone 6 — Skills & Wishlist (Completed)
+- **Reusable Skill Catalogue** (`src/data/skillCatalogue.ts`):
+  - Local, typed catalogue containing 45+ authentic eFootball skills across 6 distinct categories: Shooting, Passing, Dribbling, Defending, Goalkeeping, and Physical & Mental.
+  - Reusable helper utilities (`getAllSkills`, `getSkillsByCategory`, `getSkillByName`, `searchSkills`) maintained independently from UI components.
+  - Multi-attribute search indexing skill name, category, and functional descriptions.
+- **Skill Plan Storage & Repository Layer** (`src/data/skillPlanRepository.ts`):
+  - Typed models in `src/types/index.ts`: `SkillCategory`, `SkillDefinition`, `PlannedSkill`, `PlayerSkillPlan`, `SkillPlanState`.
+  - Persisted to browser storage via versioned `localStorage` key `bala_efoot_skill_plans_v1`.
+  - Strict enforcement of maximum 5 planned additional skills per player card (`MAX_ADDITIONAL_SKILLS = 5`).
+  - Strict duplicate prevention: rejects adding duplicate planned skills (case-insensitive) and rejects adding skills already present natively.
+  - Protection and honest representation of native skills (`getNativeSkills`):
+    - Reads default skills from source player records.
+    - Honest missing-data representation: cards lacking default skills in source data (e.g. `P023` Manuel Neuer) are marked as `Data Unavailable` without fabricated records.
+    - Supports recording user-managed verified native skills (`setCustomNativeSkills`) for cards with missing source data, automatically filtering conflicting planned skills.
+  - Gold highlight glow status (`isHighlightGold`) toggleable per planned skill with star indicator.
+  - Independent card versions: skill plans are strictly partitioned by stable card ID (`P001`–`P023`), ensuring separate cards never mutate each other.
+  - Full corruption recovery with `createDefaultSkillPlansState()` and automatic slot-clamping resilience against corrupted local storage.
+- **Target Wishlist Storage & Repository Layer** (`src/data/wishlistRepository.ts`):
+  - Typed models in `src/types/index.ts`: `WishlistPriority` ('High' | 'Medium' | 'Low'), `WishlistCardItem`, `WishlistState`, `ResolvedWishlistCard`.
+  - Persisted to browser storage via versioned `localStorage` key `bala_efoot_wishlist_v1`.
+  - Strict duplicate card ID prevention: rejects duplicate additions for the same card ID while maintaining existing list.
+  - Full CRUD capabilities: `addToWishlist`, `updateWishlistItem`, `removeFromWishlist`, `clearWishlist`, `isCardInWishlist`.
+  - Flexible priority rankings (`High`, `Medium`, `Low`) with safe default fallback to `Medium`.
+  - Free-form personal acquisition notes with edit and persistence capabilities.
+  - Resilient reconciliation with catalogue (`resolveWishlistCard`):
+    - Matches live card details (name, version, position, OVR, playing style, artwork).
+    - Missing catalogue records (e.g. legacy or deleted cards) do not crash the view; handled gracefully with prominent warning badges and safe fallback text.
+  - Storage corruption recovery with `createDefaultWishlistState()` and priority sanitization.
+- **Skill Planner Screen** (`src/components/skills/SkillPlannerView.tsx` + `SkillPlannerView.module.css`):
+  - Responsive two-column workspace:
+    - Left Column: Selected card identity hero banner, 5-slot visual rack with slot indices, gold star highlight toggles, slot counter badge (`X / 5 Slots Used`), reset action, and protected read-only native skills panel.
+    - Right Column: Searchable, categorized catalogue explorer with instant filtering by Shooting, Passing, Dribbling, Defending, Goalkeeping, and Physical & Mental.
+  - Recommended missing skills quick-add bar based on player's primary position (CF, Midfield, Defense, Goalkeeper).
+  - Native and added badges disable conflicting additions, and full slots disable further additions.
+  - Seamless navigation integration: select any squad card via dropdown, or jump directly from Player Profile via "Plan in Skills Lab" button.
+- **Target Wishlist Screen** (`src/components/wishlist/WishlistView.tsx` + `WishlistView.module.css`):
+  - Responsive card grid displaying target cards, artwork, position and OVR badges, card edition, playing style, priority pills, and personal notes.
+  - Interactive Add Card Modal with available card picker (excluding already-wishlisted cards), priority selector, and notes input.
+  - Interactive Edit Card Modal to update priority and personal notes with instant timestamping.
+  - Filter and sort controls:
+    - Search by player name, card version, position, or notes.
+    - Priority filter pills: All, High, Medium, Low.
+    - Sorting by Priority, Overall Rating, Player Name, and Date Added.
+  - Useful empty states for empty wishlist (direct CTA to browse catalogue) and empty search results (reset filter button).
+  - Graceful rendering for missing catalogue cards with alert badge and disabled profile links.
+- **Catalogue & Profile Integration**:
+  - `PlayerCardTile`: Quick-action bookmark button on each card tile in the catalogue to toggle wishlist status with instant visual feedback.
+  - `PlayerCatalogue`: Synchronized wishlist state tracking which cards are wishlisted.
+  - `PlayerProfile`:
+    - Header Wishlist CTA button reflecting current wishlist status and priority.
+    - Additional Skills card displaying active planned skills from repository, gold highlight glow indicators, slot count (`X / 5 Slots`), and "Plan in Skills Lab" shortcut button.
+    - Default Skills card displaying verified native skills from repository, honest `Data Unavailable` badge for cards lacking native records, and source note.
+- **Automated Verification** (`scripts/test_skills_wishlist.js`, `npm run test:skills-wishlist`):
+  - 15 comprehensive unit tests covering:
+    1. Skill catalogue structure, categorization, and search.
+    2. Native skills detection and separation from additional skills.
+    3. Adding, removing, and toggling planned additional skills.
+    4. Five-additional-skill maximum constraint enforcement (rejection of 6th).
+    5. Duplicate planned skill and native skill collision prevention.
+    6. Independent plans for different card versions.
+    7. Storage persistence across serialisation and simulated reload.
+    8. Missing or unknown native-skill data handling (Neuer P023 honestly unavailable, user-managed custom fallback).
+    9. Adding and removing cards from wishlist.
+    10. Duplicate card ID prevention in wishlist.
+    11. Priority and note updates with timestamp updates.
+    12. Wishlist search and priority filtering.
+    13. Wishlist persistence across reloads and graceful missing catalogue record handling without crash.
+    14. Storage corruption recovery, slot clamping, and priority sanitization for both skill plans and wishlist.
+    15. Edge cases, input boundary validations (empty strings, null values), and nonexistent record handling.
+  - All 15 tests pass (Exit 0).
+
 ## Known Limitations
 - Position familiarity is intentionally not tracked (per specification).
 - Tactician/manager auto-arrange and tactical instruction controls are excluded (per milestone scope).
 - Cross-season broad analytics dashboards, cloud sync, authentication, and automatic/date-based season closure are excluded (per ₹0 budget and milestone scope).
 
 ## Commands Executed & Results
-- `npm run lint`: ESLint check passed with 0 errors and 0 warnings (Exit 0).
-- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 1.50s (Exit 0).
-- `npm run test:squad`: Node.js unit test suite for formations, independence, and validation passed (Exit 0).
-- `npm run test:season`: Node.js unit test suite for season workflows passed (38 tests covering Milestones 4A, 4B, 4C1, and 4C2, Exit 0).
-- `npm run test:dashboard`: Node.js unit test suite for Milestone 5A dashboard integration passed (17 tests, Exit 0).
+- `npm test`: Unified test runner running all 5 milestone test suites passed (Exit 0).
+- `npm run test:skills-wishlist`: Node.js unit test suite for Milestone 6 Skills & Wishlist passed (15 tests, Exit 0).
 - `npm run test:stats`: Node.js unit test suite for Milestone 5B stats & records passed (16 tests, Exit 0).
+- `npm run test:dashboard`: Node.js unit test suite for Milestone 5A dashboard integration passed (17 tests, Exit 0).
+- `npm run test:season`: Node.js unit test suite for season workflows passed (38 tests covering Milestones 4A, 4B, 4C1, and 4C2, Exit 0).
+- `npm run test:squad`: Node.js unit test suite for formations, independence, and validation passed (Exit 0).
 - `node scripts/test_pitch_artwork.js`: Pitch artwork suite verifying 23 image files, CSS classes, contain sizing, pointer event safety, and zero collisions across formations passed (Exit 0).
+- `npm run lint`: ESLint check passed with 0 errors and 0 warnings (Exit 0).
+- `npm run build`: Production build via `tsc -b && vite build` bundled successfully in 5.36s (Exit 0).
 
 ## Next Action
-Milestone 5B Stats & Records is complete and verified on branch `feature/stats-records`. Awaiting user review before any commit, merge, or push.
+Milestone 6 Skills Planner & Target Wishlist is complete and verified on branch `feature/skills-wishlist`. Awaiting user review before any commit, merge, or push.
 
 

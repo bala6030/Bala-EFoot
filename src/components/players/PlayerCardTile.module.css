@@ -98,6 +98,37 @@
   line-height: 1;
 }
 
+/* Quick Wishlist Bookmark Button */
+.wishlistButton {
+  position: absolute;
+  top: 3.5%;
+  right: 4.5%;
+  background: rgba(10, 14, 23, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-sm);
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+  z-index: 3;
+}
+
+.wishlistButton:hover {
+  color: var(--accent-lime);
+  border-color: rgba(57, 255, 20, 0.4);
+}
+
+.wishlistButtonActive {
+  color: var(--accent-lime);
+  border-color: rgba(57, 255, 20, 0.6);
+  background: rgba(57, 255, 20, 0.18);
+}
+
 .overlayRatingBadge {
   display: inline-flex;
   align-items: baseline;

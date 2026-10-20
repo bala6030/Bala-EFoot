@@ -148,6 +148,55 @@ export interface PlayerSkillItem {
 }
 
 /**
+ * Categories for eFootball player skills
+ */
+export type SkillCategory =
+  | 'Shooting'
+  | 'Passing'
+  | 'Dribbling'
+  | 'Defending'
+  | 'Goalkeeping'
+  | 'Physical & Mental';
+
+/**
+ * Definition of a skill in the reusable skill catalogue
+ */
+export interface SkillDefinition {
+  id: string;
+  name: string;
+  category: SkillCategory;
+  description: string;
+}
+
+/**
+ * Single planned additional skill entry
+ */
+export interface PlannedSkill {
+  skillName: string;
+  isHighlightGold?: boolean;
+  addedAt: string;
+}
+
+/**
+ * Skill plan for a specific player card
+ */
+export interface PlayerSkillPlan {
+  playerId: string; // Stable card ID (e.g. 'P001')
+  additionalSkills: PlannedSkill[]; // Max 5 items
+  customNativeSkills?: string[]; // When native skills unavailable in source data
+  notes?: string;
+  updatedAt: string;
+}
+
+/**
+ * Persisted state of all skill plans
+ */
+export interface SkillPlanState {
+  version: number;
+  plans: Record<string, PlayerSkillPlan>;
+}
+
+/**
  * Player Overall Performance
  */
 export interface PlayerOverallPerformance {
@@ -215,7 +264,38 @@ export interface AttributeDefinition {
 }
 
 /**
- * Wishlist entry representation
+ * Priority levels for player wishlist targets
+ */
+export type WishlistPriority = 'High' | 'Medium' | 'Low';
+
+/**
+ * Wishlist player card item
+ */
+export interface WishlistCardItem {
+  id: string; // Unique entry ID (e.g. 'wishlist-P001')
+  cardId: string; // Stable card ID (e.g. 'P001')
+  targetPlayerName: string;
+  cardName: string | null;
+  primaryPosition: string;
+  overallRating: number | null;
+  imageUrl: string | null;
+  playingStyle: string;
+  priority: WishlistPriority;
+  notes?: string;
+  addedAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Persisted state of player wishlist
+ */
+export interface WishlistState {
+  version: number;
+  items: WishlistCardItem[];
+}
+
+/**
+ * Wishlist entry representation (legacy / compatibility)
  */
 export interface WishlistEntry {
   id: string;
@@ -223,7 +303,7 @@ export interface WishlistEntry {
   desiredVersion?: string;
   position: string;
   playingStyle?: string;
-  priority: 'High' | 'Medium' | 'Low';
+  priority: WishlistPriority;
   mustHaveSkills: string[];
   notes?: string;
   isAcquired: boolean;

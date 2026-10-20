@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Pin,
@@ -11,6 +11,7 @@ import {
   Shield,
   Crosshair,
   User,
+  Bookmark,
 } from 'lucide-react';
 import { PlayerCard } from '../../types';
 import {
@@ -18,6 +19,8 @@ import {
   setPinnedAttributesForPlayer,
   ALL_ATTRIBUTES,
 } from '../../data/playerRepository';
+import { getWishlistItemByCardId, addToWishlist, removeFromWishlist } from '../../data/wishlistRepository';
+import { getSkillPlan, getNativeSkills } from '../../data/skillPlanRepository';
 import { Button } from '../common/Button';
 import { Badge } from '../common/Badge';
 import { Card } from '../common/Card';
@@ -27,17 +30,44 @@ import styles from './PlayerProfile.module.css';
 export interface PlayerProfileProps {
   player: PlayerCard;
   onBack: () => void;
+  onOpenSkillPlanner?: (playerId: string) => void;
 }
 
 type TabCategory = 'attacking' | 'defending' | 'athleticism' | 'playerModel' | 'skills' | 'performance';
 
-export const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack }) => {
+export const PlayerProfile: React.FC<PlayerProfileProps> = ({
+  player,
+  onBack,
+  onOpenSkillPlanner,
+}) => {
   const [pinnedKeys, setPinnedKeys] = useState<string[]>(() =>
     getPinnedAttributesForPlayer(player.id, player.primaryPosition)
   );
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabCategory>('attacking');
   const [profileImageError, setProfileImageError] = useState(false);
+
+  const [wishlistItem, setWishlistItem] = useState(() => getWishlistItemByCardId(player.id));
+  const skillPlan = getSkillPlan(player.id);
+  const nativeSkillsData = getNativeSkills(player, skillPlan.customNativeSkills);
+
+  useEffect(() => {
+    setWishlistItem(getWishlistItemByCardId(player.id));
+    setPinnedKeys(getPinnedAttributesForPlayer(player.id, player.primaryPosition));
+    setProfileImageError(false);
+  }, [player.id, player.primaryPosition]);
+
+  const handleToggleWishlist = () => {
+    if (wishlistItem) {
+      removeFromWishlist(player.id);
+      setWishlistItem(undefined);
+    } else {
+      const res = addToWishlist(player.id, 'High');
+      if (res.success && res.item) {
+        setWishlistItem(res.item);
+      }
+    }
+  };
 
   const handleSavePinned = (newKeys: string[]) => {
     setPinnedKeys(newKeys);
@@ -130,7 +160,20 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack }) 
           <span>Back to Players Catalogue</span>
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <Button
+            variant={wishlistItem ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={handleToggleWishlist}
+            title={wishlistItem ? 'In Wishlist (Click to remove)' : 'Add to Wishlist'}
+          >
+            <Bookmark
+              size={14}
+              fill={wishlistItem ? 'var(--accent-lime)' : 'none'}
+              color={wishlistItem ? 'var(--accent-lime)' : 'currentColor'}
+            />
+            <span>{wishlistItem ? `In Wishlist (${wishlistItem.priority})` : 'Add to Wishlist'}</span>
+          </Button>
           <Badge variant="blue" size="sm">
             Stable ID: {player.id}
           </Badge>
@@ -418,26 +461,37 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack }) 
             <div className={styles.skillsGrid}>
               <Card variant="default" padding="md">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    Default Skills (Read-Only)
-                  </h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                      Default Skills (Read-Only)
+                    </h3>
+                    <Badge variant={nativeSkillsData.isKnown ? 'blue' : 'default'} size="sm">
+                      {nativeSkillsData.isKnown
+                        ? `${nativeSkillsData.skills.length} Skills`
+                        : 'Data Unavailable'}
+                    </Badge>
+                  </div>
                   <div className={styles.skillPills}>
-                    {player.skills.filter((s) => s.skillType === 'Default').length === 0 ? (
+                    {nativeSkillsData.skills.length === 0 ? (
                       <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        No default skills recorded.
+                        No default skills recorded (Unavailable in source data).
                       </span>
                     ) : (
-                      player.skills
-                        .filter((s) => s.skillType === 'Default')
-                        .map((s, idx) => (
+                      nativeSkillsData.skills.map((skillName, idx) => {
+                        const rawSkill = player.skills?.find(
+                          (s) => s.skillType === 'Default' && s.skillName.toLowerCase() === skillName.toLowerCase()
+                        );
+                        const isGold = Boolean(rawSkill?.isHighlightGold);
+                        return (
                           <span
                             key={idx}
-                            className={`${styles.skillPill} ${s.isHighlightGold ? styles.skillPillGold : ''}`}
+                            className={`${styles.skillPill} ${isGold ? styles.skillPillGold : ''}`}
                           >
-                            {s.isHighlightGold && <Sparkles size={12} />}
-                            <span>{s.skillName}</span>
+                            {isGold && <Sparkles size={12} />}
+                            <span>{skillName}</span>
                           </span>
-                        ))
+                        );
+                      })
                     )}
                   </div>
                 </div>
@@ -445,28 +499,47 @@ export const PlayerProfile: React.FC<PlayerProfileProps> = ({ player, onBack }) 
 
               <Card variant="default" padding="md">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
                     <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                       Additional Skills
                     </h3>
-                    <Badge variant="purple" size="sm">
-                      {player.skills.filter((s) => s.skillType === 'Additional').length} / 5 Slots
-                    </Badge>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Badge variant="purple" size="sm">
+                        {skillPlan.additionalSkills.length} / 5 Slots
+                      </Badge>
+                      {onOpenSkillPlanner && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => onOpenSkillPlanner(player.id)}
+                        >
+                          <Sparkles size={12} color="var(--accent-lime)" />
+                          <span>Plan in Skills Lab</span>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div className={styles.skillPills}>
-                    {player.skills.filter((s) => s.skillType === 'Additional').length === 0 ? (
+                    {skillPlan.additionalSkills.length === 0 ? (
                       <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                         No additional skills assigned.
                       </span>
                     ) : (
-                      player.skills
-                        .filter((s) => s.skillType === 'Additional')
-                        .map((s, idx) => (
-                          <span key={idx} className={styles.skillPill}>
+                      skillPlan.additionalSkills.map((s, idx) => (
+                        <span
+                          key={idx}
+                          className={`${styles.skillPill} ${
+                            s.isHighlightGold ? styles.skillPillGold : ''
+                          }`}
+                        >
+                          {s.isHighlightGold ? (
+                            <Sparkles size={12} color="#ffd700" />
+                          ) : (
                             <ShieldCheck size={12} color="var(--accent-purple)" />
-                            <span>{s.skillName}</span>
-                          </span>
-                        ))
+                          )}
+                          <span>{s.skillName}</span>
+                        </span>
+                      ))
                     )}
                   </div>
                 </div>

@@ -1,22 +1,23 @@
 import { useState } from 'react';
-import { Sparkles, Bookmark } from 'lucide-react';
 import { NavigationView, PlayerCard } from './types';
 import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
 import { Footer } from './components/layout/Footer';
 import { DashboardView } from './components/dashboard/DashboardView';
-import { ViewPlaceholder } from './components/common/ViewPlaceholder';
 import { PlayerCatalogue } from './components/players/PlayerCatalogue';
 import { PlayerProfile } from './components/players/PlayerProfile';
 import { SquadBuilderView } from './components/squad/SquadBuilderView';
 import { SeasonsView } from './components/seasons/SeasonsView';
 import { StatsRecordsView } from './components/stats/StatsRecordsView';
+import { SkillPlannerView } from './components/skills/SkillPlannerView';
+import { WishlistView } from './components/wishlist/WishlistView';
 import { getPlayerById } from './data/playerRepository';
 import styles from './App.module.css';
 
 export function App() {
   const [currentView, setCurrentView] = useState<NavigationView>('dashboard');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [selectedSkillPlayerId, setSelectedSkillPlayerId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const selectedPlayer = selectedPlayerId ? getPlayerById(selectedPlayerId) : undefined;
@@ -43,6 +44,10 @@ export function App() {
             <PlayerProfile
               player={selectedPlayer}
               onBack={() => setSelectedPlayerId(null)}
+              onOpenSkillPlanner={(playerId) => {
+                setSelectedSkillPlayerId(playerId);
+                setCurrentView('skills');
+              }}
             />
           );
         }
@@ -53,17 +58,12 @@ export function App() {
         );
       case 'skills':
         return (
-          <ViewPlaceholder
-            title="Skills Lab"
-            milestoneNumber={6}
-            description="Manage player skills, assign up to 5 additional skills, and customize gold highlight glows."
-            features={[
-              '5 additional skill slots per card',
-              'Read-only default skills protection',
-              'Gold highlight glow toggle for key skills',
-              'Before-save change preview and comparison',
-            ]}
-            icon={<Sparkles size={28} />}
+          <SkillPlannerView
+            initialPlayerId={selectedSkillPlayerId || undefined}
+            onSelectPlayerProfile={(playerId) => {
+              setSelectedPlayerId(playerId);
+              setCurrentView('players');
+            }}
           />
         );
       case 'stats':
@@ -78,17 +78,15 @@ export function App() {
         );
       case 'wishlist':
         return (
-          <ViewPlaceholder
-            title="Target Wishlist"
-            milestoneNumber={6}
-            description="Track target cards (e.g., Yamal, Varane, Pirlo, Buffon, Neymar), priority ratings, and must-have skills."
-            features={[
-              'Target cards with desired versions and positions',
-              'Priority ranking: High, Medium, and Low',
-              'Must-have skills checklist per target',
-              'Acquisition status toggle',
-            ]}
-            icon={<Bookmark size={28} />}
+          <WishlistView
+            onNavigateToCatalogue={() => {
+              setSelectedPlayerId(null);
+              setCurrentView('players');
+            }}
+            onSelectPlayerProfile={(playerId) => {
+              setSelectedPlayerId(playerId);
+              setCurrentView('players');
+            }}
           />
         );
       default:

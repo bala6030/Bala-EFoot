@@ -1,13 +1,21 @@
 import React from 'react';
+import { Bookmark } from 'lucide-react';
 import { PlayerCard } from '../../types';
 import styles from './PlayerCardTile.module.css';
 
 export interface PlayerCardTileProps {
   player: PlayerCard;
   onClick: (player: PlayerCard) => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (player: PlayerCard) => void;
 }
 
-export const PlayerCardTile: React.FC<PlayerCardTileProps> = ({ player, onClick }) => {
+export const PlayerCardTile: React.FC<PlayerCardTileProps> = ({
+  player,
+  onClick,
+  isWishlisted,
+  onToggleWishlist,
+}) => {
   const [imageError, setImageError] = React.useState(false);
 
   // Helper for position color coding
@@ -74,6 +82,22 @@ export const PlayerCardTile: React.FC<PlayerCardTileProps> = ({ player, onClick 
             </div>
           )}
         </div>
+
+        {/* Quick Wishlist Action */}
+        {onToggleWishlist && (
+          <button
+            type="button"
+            className={`${styles.wishlistButton} ${isWishlisted ? styles.wishlistButtonActive : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleWishlist(player);
+            }}
+            title={isWishlisted ? 'In Wishlist (Click to remove)' : 'Add to Wishlist'}
+            aria-label={isWishlisted ? `Remove ${player.name} from wishlist` : `Add ${player.name} to wishlist`}
+          >
+            <Bookmark size={13} fill={isWishlisted ? 'var(--accent-lime)' : 'none'} />
+          </button>
+        )}
       </div>
 
       {/* Identity */}
