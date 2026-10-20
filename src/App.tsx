@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, BarChart3, Bookmark } from 'lucide-react';
+import { Sparkles, Bookmark } from 'lucide-react';
 import { NavigationView, PlayerCard } from './types';
 import { Header } from './components/layout/Header';
 import { Navigation } from './components/layout/Navigation';
@@ -10,6 +10,7 @@ import { PlayerCatalogue } from './components/players/PlayerCatalogue';
 import { PlayerProfile } from './components/players/PlayerProfile';
 import { SquadBuilderView } from './components/squad/SquadBuilderView';
 import { SeasonsView } from './components/seasons/SeasonsView';
+import { StatsRecordsView } from './components/stats/StatsRecordsView';
 import { getPlayerById } from './data/playerRepository';
 import styles from './App.module.css';
 
@@ -67,17 +68,12 @@ export function App() {
         );
       case 'stats':
         return (
-          <ViewPlaceholder
-            title="Stats & Records"
-            milestoneNumber={5}
-            description="Cumulative matches, goals, assists, per-match rates, and 5-season historical snapshots."
-            features={[
-              'Matches, goals, assists & G/A contribution rates',
-              'Previous Month vs Overall (All-time) views',
-              'Last 5 seasons snapshot selectors',
-              'Strict validation preventing negative monthly stats',
-            ]}
-            icon={<BarChart3 size={28} />}
+          <StatsRecordsView
+            onSelectPlayer={(playerId) => {
+              setSelectedPlayerId(playerId);
+              setCurrentView('players');
+            }}
+            onNavigateToSeasons={() => setCurrentView('seasons')}
           />
         );
       case 'wishlist':

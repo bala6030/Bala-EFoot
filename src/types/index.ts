@@ -708,4 +708,105 @@ export interface ClosedSeasonHistoryItem {
   closureNotes?: string;
 }
 
+// ============================================================================
+// MILESTONE 5B: STATS & RECORDS TYPES
+// ============================================================================
+
+/**
+ * Tab/Period navigation options for Stats & Records view
+ */
+export type StatsPeriodTab = 'overall' | 'previous-month' | 'seasons';
+
+/**
+ * Calendar month date window representation
+ */
+export interface MonthWindow {
+  year: number;
+  month: number; // 1-12
+  monthLabel: string; // e.g. "September 2026"
+  startStr: string; // YYYY-MM-01
+  endStr: string; // YYYY-MM-lastDay
+}
+
+/**
+ * Unified player stats row representation for Overall, Previous Month, and Season views
+ */
+export interface PlayerStatsRow {
+  playerId: string;
+  playerName: string;
+  cardName: string | null;
+  overallRating: number | null;
+  primaryPosition: string;
+  imageUrl: string | null;
+  roleClassification?: PlayerRoleClassification;
+  matches: number | null;
+  goals: number | null;
+  assists: number | null;
+  goalContributions: number | null;
+  goalsPerMatch: number | null;
+  assistsPerMatch: number | null;
+  isUnavailable?: boolean;
+}
+
+/**
+ * Item in the 5-season selector
+ */
+export interface SelectableSeasonItem {
+  id: string;
+  status: 'Active' | 'Closed';
+  startDate: string;
+  closedDate?: string;
+  startingDivision: number;
+  finalDivision?: number | null;
+  finalRank?: number | null;
+  hasConfirmedBaseline: boolean;
+  hasConfirmedProgress: boolean;
+  snapshotCount: number;
+  latestSnapshotDate?: string;
+  closureSnapshotId?: string;
+  closureNotes?: string;
+}
+
+/**
+ * Season statistics result bundle
+ */
+export interface SeasonStatsResult {
+  season: SelectableSeasonItem;
+  hasConfirmedProgress: boolean;
+  players: PlayerStatsRow[];
+  totalMatchesDelta: number | null;
+  totalGoalsDelta: number | null;
+  totalAssistsDelta: number | null;
+  totalGoalContributions: number | null;
+  notes?: string;
+}
+
+/**
+ * Overall (All-Time) statistics aggregate summary
+ */
+export interface OverallStatsSummary {
+  totalMatches: number;
+  totalGoals: number;
+  totalAssists: number;
+  totalGoalContributions: number;
+  recordedPlayersCount: number;
+  totalPlayersCount: number;
+  isPartial: boolean;
+  notes: string;
+}
+
+/**
+ * Previous Month statistics result bundle
+ */
+export interface PreviousMonthStatsResult {
+  window: MonthWindow;
+  hasData: boolean;
+  players: TopPerformerItem[];
+  allPlayerRows: PlayerStatsRow[];
+  totalMatches: number;
+  totalGoals: number;
+  totalAssists: number;
+  totalGoalContributions: number;
+}
+
 

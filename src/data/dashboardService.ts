@@ -6,6 +6,9 @@ import type {
   DivisionProgressInput,
   Season,
   SeasonProgressSnapshot,
+  MonthWindow,
+  PlayerStatsRow,
+  PreviousMonthStatsResult,
 } from '../types';
 import {
   getAllSeasons,
@@ -254,15 +257,11 @@ export function getOverallTopPerformers(limit: number = 5): TopPerformerItem[] {
 }
 
 /**
- * Computes Top Performers for the Previous Month period.
- * Derives statistics exclusively from confirmed progress snapshots recorded in that calendar month.
- * If no snapshots exist for the previous month, returns an empty array.
- * NEVER falls back to all-time totals as previous-month totals.
+/**
+ * Calculates the calendar month date window for the previous month relative to a reference date.
+ * Handles month/year rollover (e.g. January -> December of prior year) and leap years correctly.
  */
-export function getPreviousMonthTopPerformers(
-  referenceDate: Date = new Date(),
-  limit: number = 5
-): TopPerformerItem[] {
+export function getPreviousMonthWindow(referenceDate: Date = new Date()): MonthWindow {
   const ref = new Date(referenceDate);
   const prevMonthDate = new Date(ref.getFullYear(), ref.getMonth() - 1, 1);
   const prevYear = prevMonthDate.getFullYear();
@@ -271,6 +270,27 @@ export function getPreviousMonthTopPerformers(
   const startStr = `${monthStr}-01`;
   const lastDay = new Date(prevYear, prevMonth, 0).getDate();
   const endStr = `${monthStr}-${String(lastDay).padStart(2, '0')}`;
+  const monthLabel = prevMonthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+  return {
+    year: prevYear,
+    month: prevMonth,
+    monthLabel,
+    startStr,
+    endStr,
+  };
+}
+
+/**
+ * Computes player statistics and deltas exclusively for the Previous Month period.
+ * Derives statistics exclusively from confirmed progress snapshots recorded in that calendar month.
+ * If no snapshots exist or no baseline/reference snapshots exist, returns an empty/unavailable state.
+ * NEVER falls back to all-time totals as previous-month totals.
+ * Preserves negative deltas from verified corrections without silent zero-clamping.
+ */
+export function getPreviousMonthStats(referenceDate: Date = new Date()): PreviousMonthStatsResult {
+  const window = getPreviousMonthWindow(referenceDate);
+  const { startStr, endStr } = window;
 
   const seasons = getAllSeasons();
   interface SnapshotEntry {
@@ -288,9 +308,18 @@ export function getPreviousMonthTopPerformers(
     }
   }
 
-  // If no snapshots were recorded in the previous month, return empty list (do not fallback!)
+  // If no snapshots were recorded in the previous month, return unavailable state (no fallback!)
   if (prevMonthSnapshots.length === 0) {
-    return [];
+    return {
+      window,
+      hasData: false,
+      players: [],
+      allPlayerRows: [],
+      totalMatches: 0,
+      totalGoals: 0,
+      totalAssists: 0,
+      totalGoalContributions: 0,
+    };
   }
 
   const players = getAllPlayers();
@@ -309,6 +338,8 @@ export function getPreviousMonthTopPerformers(
     { matches: number; goals: number; assists: number; contributions: number }
   >();
 
+  let hasValidReference = false;
+
   for (const { season, snaps } of bySeason.values()) {
     snaps.sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
     const latestInMonth = snaps[snaps.length - 1];
@@ -316,7 +347,7 @@ export function getPreviousMonthTopPerformers(
     const priorSnaps = (season.progressSnapshots || []).filter(
       (s) => s.recordingDate < startStr
     );
-    let basePlayers: { playerId: string; matches: number; goals: number; assists: number }[] = [];
+    let basePlayers: { playerId: string; matches: number; goals: number; assists: number }[] | null = null;
 
     if (priorSnaps.length > 0) {
       priorSnaps.sort((a, b) => a.recordedAt.localeCompare(b.recordedAt));
@@ -325,13 +356,22 @@ export function getPreviousMonthTopPerformers(
       basePlayers = season.baseline.players;
     }
 
+    // If neither prior snapshots nor confirmed baseline exist, we cannot calculate a month delta
+    if (!basePlayers) {
+      continue;
+    }
+
+    hasValidReference = true;
     const baseMap = new Map(basePlayers.map((p) => [p.playerId, p]));
 
     for (const cur of latestInMonth.players) {
       const base = baseMap.get(cur.playerId);
-      const matchesDelta = base ? Math.max(0, cur.matches - base.matches) : cur.matches;
-      const goalsDelta = base ? Math.max(0, cur.goals - base.goals) : cur.goals;
-      const assistsDelta = base ? Math.max(0, cur.assists - base.assists) : cur.assists;
+      if (!base) continue;
+
+      // Preserve actual deltas including negative corrections (do not clamp silently to 0)
+      const matchesDelta = cur.matches - base.matches;
+      const goalsDelta = cur.goals - base.goals;
+      const assistsDelta = cur.assists - base.assists;
       const contributions = goalsDelta + assistsDelta;
 
       const existing = playerDeltas.get(cur.playerId) || {
@@ -349,14 +389,39 @@ export function getPreviousMonthTopPerformers(
     }
   }
 
-  const results: TopPerformerItem[] = [];
+  // If no seasons had a valid reference baseline or prior snapshot, delta cannot be established
+  if (!hasValidReference || playerDeltas.size === 0) {
+    return {
+      window,
+      hasData: false,
+      players: [],
+      allPlayerRows: [],
+      totalMatches: 0,
+      totalGoals: 0,
+      totalAssists: 0,
+      totalGoalContributions: 0,
+    };
+  }
+
+  // Top performers list (podium eligible: matches > 0 || contributions > 0)
+  const topList: TopPerformerItem[] = [];
+  let totalMatches = 0;
+  let totalGoals = 0;
+  let totalAssists = 0;
+  let totalGoalContributions = 0;
+
   for (const [playerId, delta] of playerDeltas.entries()) {
+    totalMatches += delta.matches;
+    totalGoals += delta.goals;
+    totalAssists += delta.assists;
+    totalGoalContributions += delta.contributions;
+
     if (delta.matches > 0 || delta.contributions > 0) {
       const p = playerMap.get(playerId);
       const gpm = delta.matches > 0 ? Number((delta.goals / delta.matches).toFixed(2)) : 0;
       const apm = delta.matches > 0 ? Number((delta.assists / delta.matches).toFixed(2)) : 0;
 
-      results.push({
+      topList.push({
         rank: 0,
         playerId,
         playerName: p?.name || playerId,
@@ -373,7 +438,7 @@ export function getPreviousMonthTopPerformers(
     }
   }
 
-  results.sort((a, b) => {
+  topList.sort((a, b) => {
     const contribDiff = (b.goalContributions ?? 0) - (a.goalContributions ?? 0);
     if (contribDiff !== 0) return contribDiff;
     const goalsDiff = (b.goals ?? 0) - (a.goals ?? 0);
@@ -383,10 +448,76 @@ export function getPreviousMonthTopPerformers(
     return (b.matches ?? 0) - (a.matches ?? 0);
   });
 
-  return results.slice(0, limit).map((item, idx) => ({
+  const rankedTopList = topList.map((item, idx) => ({
     ...item,
     rank: idx + 1,
   }));
+
+  // Complete 23-player rows representation for Stats & Records table
+  const allPlayerRows: PlayerStatsRow[] = players.map((p) => {
+    const delta = playerDeltas.get(p.id);
+    if (!delta) {
+      return {
+        playerId: p.id,
+        playerName: p.name,
+        cardName: p.cardName,
+        overallRating: p.overallRating,
+        primaryPosition: p.primaryPosition,
+        imageUrl: p.imageUrl,
+        matches: null,
+        goals: null,
+        assists: null,
+        goalContributions: null,
+        goalsPerMatch: null,
+        assistsPerMatch: null,
+        isUnavailable: true,
+      };
+    }
+
+    const gpm = delta.matches > 0 ? Number((delta.goals / delta.matches).toFixed(2)) : null;
+    const apm = delta.matches > 0 ? Number((delta.assists / delta.matches).toFixed(2)) : null;
+
+    return {
+      playerId: p.id,
+      playerName: p.name,
+      cardName: p.cardName,
+      overallRating: p.overallRating,
+      primaryPosition: p.primaryPosition,
+      imageUrl: p.imageUrl,
+      matches: delta.matches,
+      goals: delta.goals,
+      assists: delta.assists,
+      goalContributions: delta.contributions,
+      goalsPerMatch: gpm,
+      assistsPerMatch: apm,
+      isUnavailable: false,
+    };
+  });
+
+  return {
+    window,
+    hasData: true,
+    players: rankedTopList,
+    allPlayerRows,
+    totalMatches,
+    totalGoals,
+    totalAssists,
+    totalGoalContributions,
+  };
+}
+
+/**
+ * Computes Top Performers for the Previous Month period.
+ * Derives statistics exclusively from confirmed progress snapshots recorded in that calendar month.
+ * If no snapshots exist for the previous month, returns an empty array.
+ * NEVER falls back to all-time totals as previous-month totals.
+ */
+export function getPreviousMonthTopPerformers(
+  referenceDate: Date = new Date(),
+  limit: number = 5
+): TopPerformerItem[] {
+  const stats = getPreviousMonthStats(referenceDate);
+  return stats.players.slice(0, limit);
 }
 
 /**
